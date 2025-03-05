@@ -1,11 +1,12 @@
 import React from "react";
 import Home from "./pages/Home.jsx";
+import SignUp from "./components/SignUp.jsx";
 
 
 function App() {
   return (
     <div>
-      <Home />
+      <SignUp />
     </div>
   );
 }
