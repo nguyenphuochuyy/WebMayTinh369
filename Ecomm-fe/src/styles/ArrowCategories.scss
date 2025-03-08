@@ -1,0 +1,25 @@
+.arrow-categories {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+}
+
+.arrow {
+  width: 20px; 
+  height: auto;
+  cursor: pointer; 
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+.left-arrowCategories {
+  margin-right: 5px; 
+}
+
+.right-arrowCategories {
+  margin-left: 5px; 
+}

@@ -1,0 +1,38 @@
+.countdown-timer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-left: -700px;
+}
+
+.time-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 60px;
+}
+
+.time-label {
+  font-size: 14px;
+  color: gray;
+  margin-bottom: 5px; // Đẩy nhãn lên trên
+}
+
+.time-value {
+  font-size: 28px;
+  font-weight: bold;
+  color: black;
+}
+
+.separator {
+  font-size: 28px;
+  font-weight: bold;
+  color: red;
+  margin: 0 5px;
+  align-self: center;
+  position: relative;
+  top: 15px; // Điều chỉnh giá trị này để đẩy dấu ":" xuống
+}
+

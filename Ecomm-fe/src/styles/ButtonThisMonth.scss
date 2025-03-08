@@ -1,0 +1,23 @@
+.button-thisMonth {
+  display: flex;
+  justify-content: center; 
+}
+
+.buttonThis {
+  padding: 5px 10px; /* Thêm khoảng cách trong nút */
+  background-color: #DB4444;
+  color: #fff; 
+  font-size: 16px; 
+  font-weight: bold; 
+  cursor: pointer;
+  width: 130px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease, color 0.3s ease; /* Thêm hiệu ứng chuyển màu nền và chữ */
+}
+
+.buttonThis:hover {
+  background-color: #DB4444; 
+  color: black; 
+}
