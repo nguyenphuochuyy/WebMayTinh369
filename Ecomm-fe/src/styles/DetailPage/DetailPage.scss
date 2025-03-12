@@ -1,3 +1,10 @@
+.home-container {
+  width: 100%;
+  margin: 0 auto; 
+  padding: 0;
+  overflow-x: hidden; 
+}
+
 .page-title {
   display: flex;
   justify-content: flex-start;
@@ -16,7 +23,4 @@
   color: #007bff;
 }
 
-.footer-detail {
-  margin-left: -20px;
-}
 

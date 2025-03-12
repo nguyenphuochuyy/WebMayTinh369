@@ -1,0 +1,65 @@
+.home-container {
+  width: 100%;
+  margin: 0 auto; 
+  padding: 0;
+  overflow-x: hidden; 
+}
+
+.navbar {
+  width: 100%;
+  padding: 0 20px; 
+  box-sizing: border-box; 
+}
+
+
+.contact-title {
+  display: flex;
+  justify-content: flex-start;
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 20px;
+  margin-left: 50px;
+  gap: 10px;
+}
+
+.contact-title a {
+  text-decoration: none;
+  color: #333;
+}
+
+.contact-title a:hover {
+  color: #007bff;
+}
+
+.contact-content {
+  display: flex;
+  justify-content: space-around;  /* Để phân chia không gian đều cho 3 cột */
+  gap: 30px; /* Khoảng cách giữa các cột */
+  margin-top: 30px;
+  width: 95%;
+}
+
+.contact-left,
+.contact-right {
+  width: 30%; /* Chiếm 30% chiều rộng cho mỗi phần */
+}
+
+.contact-title {
+  display: flex;
+  justify-content: flex-start;
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 20px;
+  margin-left: 50px;
+  gap: 10px;
+}
+
+.contact-title a {
+  text-decoration: none;
+  color: #333;
+}
+
+.contact-title a:hover {
+  color: #007bff;
+}
+
