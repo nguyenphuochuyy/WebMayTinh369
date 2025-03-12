@@ -1,0 +1,51 @@
+.account-page {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+}
+
+.profile-container {
+  width: 70%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+}
+
+.profile-container .form-section {
+  width: 48%;
+}
+
+.profile-container .form-section input {
+  width: 92%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  background-color: white;
+  color: black;
+  margin-top: 10px;
+}
+
+.profile-container .form-section label {
+  font-weight: bold;
+}
+
+.profile-container .action-buttons {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+  width: 220px;
+}
+
+.profile-container .action-buttons button {
+  padding: 10px 20px;
+  background-color: #ff5b5b;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.profile-container .action-buttons button:hover {
+  background-color: #c00;
+}
