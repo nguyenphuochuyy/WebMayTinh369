@@ -1,12 +1,13 @@
 import React from "react";
 import Home from "./pages/Home.jsx";
-import SignUp from "./components/SignUp.jsx";
-
+import SignUp from "./components/HomeComponents/SignUp.jsx";
+import CartPage from "./pages/CartPage.jsx";
+import DetailPage from "./pages/DetailPage.jsx";
 
 function App() {
   return (
     <div>
-      <SignUp />
+      <Home />
     </div>
   );
 }

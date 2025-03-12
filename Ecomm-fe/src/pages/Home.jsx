@@ -1,19 +1,21 @@
 import React from "react";
-import Navbar from "../components/Navbar";
-import Sidebar from "../components/Sidebar";
-import Banner from "../components/Banner";
-import FlashSalesTitle from "../components/FlashSalesTitle";
-import CountdownTimer from "../components/CountdownTimer";
-import "../styles/Home.scss";
-import Arrow from "../components/Arrow";
-import FlashSalesProduct from "../components/FlashSalesProduct";
+
+import Navbar from "../components/HomeComponents/Navbar";
+import Sidebar from "../components/HomeComponents/Sidebar";
+import Banner from "../components/HomeComponents/Banner";
+import FlashSalesTitle from "../components/HomeComponents/FlashSalesTitle";
+import CountdownTimer from "../components/HomeComponents/CountdownTimer";
+import "../styles/HomeStyles/Home.scss";
+import Arrow from "../components/HomeComponents/Arrow";
+import FlashSalesProduct from "../components/HomeComponents/FlashSalesProduct";
+
 import PS4 from "../images/PS4.png";
 import Banphim from "../images/Banphim.png";
 import Manhinh from "../images/Manhinh.png";
 import Ghe from "../images/Ghe.png";
-import ButtonShow from "../components/ButtonShow";
-import CategoriesTitle from "../components/CategoriesTitle";
-import ArrowCategories from "../components/ArrowCategories";
+import ButtonShow from "../components/HomeComponents/ButtonShow";
+import CategoriesTitle from "../components/HomeComponents/CategoriesTitle";
+import ArrowCategories from "../components/HomeComponents/ArrowCategories";
 
 import Iphone from "../images/smartphone.png";  // Hình ảnh iPhone
 import Computers from "../images/dashboard.png";  // Hình ảnh Computer
@@ -22,19 +24,19 @@ import Camera from "../images/camera.png";  // Hình ảnh Camera
 import Headphones from "../images/headphones.png";  // Hình ảnh Headphones
 import Gaming from "../images/console.png";  // Hình ảnh Gaming
 
-import ThisMonthTitle from "../components/ThisMonthTitle";
-import ButtonThisMonth from "../components/ButtonThisMonth";
+import ThisMonthTitle from "../components/HomeComponents/ThisMonthTitle";
+import ButtonThisMonth from "../components/HomeComponents/ButtonThisMonth";
 
-import ThisMonthProduct from "../components/ThisMonthProduct";
+import ThisMonthProduct from "../components/HomeComponents/ThisMonthProduct";
 import Hoodie from "../images/hoodie.png";
 import Bag from "../images/bag.png";
 import CPU from "../images/cpu.png";
 import BookShelf from "../images/bookshelf.png";
-import OurProductsTitle from "../components/OurProductsTitle";
+import OurProductsTitle from "../components/HomeComponents/OurProductsTitle";
 
-import Banner2 from "../components/Banner2";
-import ArrowOurProductsTitle from "../components/ArrowOurProductsTitle";
-import OurProducts from "../components/OurProducts";
+import Banner2 from "../components/HomeComponents/Banner2";
+import ArrowOurProductsTitle from "../components/HomeComponents/ArrowOurProductsTitle";
+import OurProducts from "../components/HomeComponents/OurProducts";
 
 import Dog from "../images/dog.png";
 import Cannon from "../images/canon.png";
@@ -46,17 +48,17 @@ import Shoe from "../images/shoe.png";
 import PS5 from "../images/ps5.png";
 import jacket from "../images/jacket.png";
 
-import ButtonOurproducts from "../components/ButtonOurproducts";
-import Featured from "../components/Featured";
+import ButtonOurproducts from "../components/HomeComponents/ButtonOurproducts";
+import Featured from "../components/HomeComponents/Featured";
 
 import PS5_2 from "../images/PS5(2).png";
 import Girl from "../images/girl.png";
 import Speaker from "../images/speaker.png";
 import Perfume from "../images/perfume.png";
-import FeaturedProduct from "../components/FeaturedProduct";
+import FeaturedProduct from "../components/HomeComponents/FeaturedProduct";
 
-import FeaturedService from "../components/FeaturedService";
-import Footer from "../components/Footer ";
+import FeaturedService from "../components/HomeComponents/FeaturedService";
+import Footer from "../components/HomeComponents/Footer";
 
 const Home = () => {
   const targetTime = new Date().getTime() + 3 * 24 * 60 * 60 * 1000; // 3 ngày từ bây giờ
@@ -352,9 +354,8 @@ const featuredProducts = [
         <FeaturedService />
       </div>
 
-      {/* Footer */}
-      <div className="footer-container">
-        <Footer />
+      <div className="footer-home">
+          <Footer />
       </div>
 
     </div>
@@ -362,7 +363,6 @@ const featuredProducts = [
 };
 
 export default Home;
-
 
 
 

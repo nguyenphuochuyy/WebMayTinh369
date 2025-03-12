@@ -1,0 +1,142 @@
+.checkout-container {
+  padding: 20px;
+  display: flex;
+  justify-content: center; /* Căn giữa phần tử checkout */
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.form-container {
+  display: flex;
+  justify-content: center;  /* Căn giữa form */
+  align-items: center;
+  gap: 20px;
+  width: 100%; /* Đảm bảo phần tử chiếm toàn bộ chiều ngang */
+  max-width: 1200px; /* Giới hạn chiều rộng của form */
+  flex-wrap: wrap;
+}
+
+.checkout-form {
+  width: 100%; /* Phần form chiếm 100% chiều rộng */
+  max-width: 600px; /* Giới hạn chiều rộng */
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.form-group input {
+  width: 100%; /* Đảm bảo input chiếm toàn bộ chiều rộng của form-group */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: white;
+  color: black;
+}
+
+.order-summary {
+  width: 100%;
+  max-width: 400px;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 5px;
+  margin-top: 20px;
+}
+
+.order-summary h3 {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.order-details {
+  margin-top: 10px;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.order-item span {
+  font-size: 16px;
+}
+
+.order-item.total span {
+  font-weight: bold;
+}
+
+.payment-options {
+  margin-top: 20px;
+}
+
+.payment-options h4 {
+  font-size: 18px;
+}
+
+.payment-options label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.coupon {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.coupon input {
+  width: 80%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: white;
+  color: black;
+}
+
+.coupon button {
+  padding: 10px 10px;
+  background-color: #ff5b5b;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.checkout-button {
+  width: 100%;
+  padding: 15px;
+  background-color: #ff5b5b;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.checkout-button:hover {
+  background-color: #c00;
+}
+
+@media screen and (max-width: 768px) {
+  .form-container {
+    flex-direction: column; /* Nếu màn hình nhỏ thì các phần tử sẽ xếp chồng lên nhau */
+    width: 100%;
+  }
+
+  .checkout-form, .order-summary {
+    width: 100%; /* Các phần tử chiếm toàn bộ chiều rộng */
+    margin-bottom: 20px; /* Thêm khoảng cách giữa các phần tử */
+  }
+}
