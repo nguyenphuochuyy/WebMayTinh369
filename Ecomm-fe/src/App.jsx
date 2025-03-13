@@ -10,7 +10,7 @@ import ErrorPage from "./pages/ErrorPage.jsx";
 function App() {
   return (
     <div>
-      <ErrorPage />
+      <CartPage />
     </div>
   );
 }
