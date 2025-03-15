@@ -246,7 +246,7 @@ const featuredProducts = [
 
       <div className="flash-sales-container">
         <FlashSalesTitle />
-        <CountdownTimer targetTime={targetTime} />
+        {/* <CountdownTimer targetTime={targetTime} /> */}
         <Arrow />
       </div>
 
