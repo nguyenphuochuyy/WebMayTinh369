@@ -1,0 +1,40 @@
+.account-sidebar {
+  width: 25%;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+
+.account-sidebar ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.account-sidebar ul li {
+  margin-bottom: 10px;
+}
+
+.account-sidebar ul li a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+}
+
+.account-sidebar ul li a:hover {
+  color: black;
+}
+
+.account-sidebar ul li ul {
+  padding-left: 20px;
+  display: block; 
+}
+
+.account-sidebar ul li ul li {
+  margin-bottom: 5px;
+}
+
+.account-sidebar ul li ul li a {
+  text-decoration: none;
+  color: gray; 
+  font-weight: normal;
+}
