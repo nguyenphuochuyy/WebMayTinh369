@@ -1,0 +1,29 @@
+.account-title {
+  display: flex;
+  justify-content: space-between;
+  width: 90%;
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 20px;
+  margin-left: 50px;
+}
+
+.account-title a {
+  text-decoration: none;
+  color: #333;
+}
+
+.account-title a:hover {
+  color: #007bff;
+}
+
+
+.account-title-2a {
+    color: red;
+    margin-left: 5px;
+}
+
+.account-footer{
+  margin-left: -20px;
+  margin-right: -20px;
+}
