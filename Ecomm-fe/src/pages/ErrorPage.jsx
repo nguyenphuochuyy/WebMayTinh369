@@ -1,12 +1,11 @@
 import React from "react";
-import Navbar from "../components/ErrorPage/Navbar";
+import Navbar from "../components/layout/Navbar";
 import "../styles/ErrorPage/ErrorPage.scss";
-import Footer from "../components/HomeComponents/Footer";
+import Footer from "../components/layout/Footer";
 
 const ErrorPage = () => {
   return (
     <div className="home-container">
-        <Navbar />
         <div className="error-content">
           <div className="error-message">
             <h1>404 Not Found</h1>

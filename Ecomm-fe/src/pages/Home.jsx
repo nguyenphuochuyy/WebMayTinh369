@@ -1,6 +1,6 @@
 import React from "react";
 
-import Navbar from "../components/HomeComponents/Navbar";
+import Navbar from "../components/layout/Navbar";
 import Sidebar from "../components/HomeComponents/Sidebar";
 import Banner from "../components/HomeComponents/Banner";
 import FlashSalesTitle from "../components/HomeComponents/FlashSalesTitle";
@@ -58,7 +58,7 @@ import Perfume from "../images/perfume.png";
 import FeaturedProduct from "../components/HomeComponents/FeaturedProduct";
 
 import FeaturedService from "../components/HomeComponents/FeaturedService";
-import Footer from "../components/HomeComponents/Footer";
+import Footer from "../components/layout/Footer";
 
 const Home = () => {
   const targetTime = new Date().getTime() + 3 * 24 * 60 * 60 * 1000; // 3 ngày từ bây giờ
@@ -238,7 +238,7 @@ const featuredProducts = [
 
   return (
     <div className="home-container">
-      <Navbar />
+
       <div className="content">
         <Sidebar />
         <Banner />

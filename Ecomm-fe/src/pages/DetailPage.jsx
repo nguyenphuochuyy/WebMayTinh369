@@ -1,13 +1,12 @@
 import React from "react";
-import NavbarDetail from "../components/DetailPage/NavbarDetail";
 import "../styles/DetailPage/DetailPage.scss"
 import Checkout from "../components/DetailPage/Checkout";
-import Footer from "../components/DetailPage/Footer";
+import Footer from "../components/layout/Footer";
 
 const DetailPage = () => {
   return (
     <div className="home-container">
-          <NavbarDetail />
+
           <div className="page-title">
               <a href="#">Home / </a>
               <a href="#">Cart / </a>

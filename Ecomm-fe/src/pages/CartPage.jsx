@@ -1,15 +1,14 @@
 import React from "react";
-import Navbar from "../components/CartPage/Navbar";
+import Navbar from "../components/layout/Navbar";
 import CartItems from "../components/CartPage/CartItems";
 import CartSummary from "../components/CartPage/CartSummary";
 import CartSales from "../components/CartPage/CartSales";
 import "../styles/CartPage/CartPage.scss";
-import Footer from "../components/CartPage/Footer";
+import Footer from "../components/layout/Footer";
 
 const CartPage = () => {
   return (
     <div className="home-container">
-      <Navbar />
       <div className="cart-title">
           <a href="#">Home /</a>
           <a href="#">Cart</a>
