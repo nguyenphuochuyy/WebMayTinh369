@@ -1,5 +1,5 @@
 import React from "react";
-import "../../styles/ErrorPage/Footer.scss";
+import "../../styles/LayoutStyle/Footer.scss";
 
 import QRCode from "../../images/QRCode.png";
 import GGPlay from "../../images/google-play.png";
@@ -7,7 +7,7 @@ import AppStore from "../../images/app-store.png";
 
 const Footer = () => {
   return (
-    <div className="footer-container">
+    <footer className="footer-container">
       <div className="footer-content">
 
         {/* Đăng ký */}
@@ -71,7 +71,7 @@ const Footer = () => {
       <div className="footer-bottom">
         <p>© Copyright Rimel 2022. All rights reserved.</p>
       </div>
-    </div>
+    </footer>
   );
 };
 
