@@ -64,11 +64,19 @@ const Navbar = () => {
             key: "welcome",
             children: [
               {
-                label: <span onClick={()=>navigate("/accountPage")}>Thông tin cá nhân</span>,
+                label: <span onClick={() => navigate("/accountPage")}>Thông tin cá nhân</span>,
                 key: "info",
               },
+              ...(user.role === "ADMIN"
+                ? [
+                    {
+                      label: <span onClick={() => navigate("/admin")}>Trang quản lý</span>,
+                      key: "admin",  // Admin-specific page link
+                    },
+                  ]
+                : []),
               {
-                label: <span onClick={()=>handleLogout()}> Đăng xuất</span>,
+                label: <span onClick={() => handleLogout()}>Đăng xuất</span>,
                 key: "logout",
               },
             ],
@@ -76,6 +84,7 @@ const Navbar = () => {
         ]
       : []),
   ];
+  
 
   return (
     <div className="navbar-container">

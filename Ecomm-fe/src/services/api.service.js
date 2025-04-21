@@ -25,7 +25,7 @@ const logoutAPI = () => {
 };
 
 const getAccountAPI = () => {
-  const URL_BACKEND = "/auth/account";
+  const URL_BACKEND = "/users/account";
   return axios.get(URL_BACKEND);
 };
 
