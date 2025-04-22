@@ -1,10 +1,12 @@
 import React from "react";
 import "../../styles/HomeStyles/ButtonShow.scss";
 
-const ButtonShow = () => {
+const ButtonShow = ({ onClick }) => {
   return (
     <div className="button-show">
-      <button className="button">Toàn bộ sản phẩm</button>
+      <button className="button" onClick={onClick}>
+        View all products
+      </button>
     </div>
   );
 };
