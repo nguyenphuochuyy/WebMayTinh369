@@ -1,10 +1,12 @@
 import React from "react";
 import "../../styles/HomeStyles/ButtonThisMonth.scss";
 
-const ButtonThisMonth = () => {
+const ButtonThisMonth = ({ onClick }) => {
   return (
     <div className="button-thisMonth">
-      <button className="buttonThis">View All</button>
+      <button className="button" onClick={onClick}>
+      View all products
+      </button>
     </div>
   );
 };
