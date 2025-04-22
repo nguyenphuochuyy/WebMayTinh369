@@ -3,18 +3,23 @@ import "../../styles/SignUp_styles/NavbarStyle.scss";
 import heartIcon from "../../images/heart.png";  
 import searchIcon from "../../images/search-interface-symbol.png";
 import cartIcon from "../../images/shopping-cart.png";
+import { Link , useNavigate } from "react-router-dom";
 
 
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const toHome = ()=>{
+    navigate("/");
+  }
   return (
     <div className="navbar-container">
-      <h1 className="logo">369</h1>
-        <ul className="nav-links">
-          <li><a href="#">Trang chủ</a></li>
-          <li><a href="#">Liên hệ</a></li>
-          <li><a href="#">Giới thiệu</a></li>
-          <li><a href="#">Đăng kí</a></li>
+      <h1 className="logo" onClick={toHome}>369</h1>
+      <ul className="nav-links">
+          <li><Link to= "/"></Link></li>
+          <li><Link to="/about">Liên hệ</Link></li>
+          <li><Link to="/introduce">Giới thiệu</Link></li>
+          <li><Link to="/register">Đăng kí</Link></li>
         </ul>
         
       <div className="search-container">

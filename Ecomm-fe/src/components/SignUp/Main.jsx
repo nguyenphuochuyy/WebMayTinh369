@@ -1,5 +1,6 @@
 import React from "react";
 import "../../styles/SignUp_styles/SignupForm.scss";
+import { Link } from "react-router-dom";
 
 function SignupForm() {
   return (
@@ -41,7 +42,7 @@ function SignupForm() {
 
         <div className="login-link">
           <p>
-            Đã có tài khoản? <a href="#">Đăng nhập</a>
+            Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
           </p>
         </div>
       </div>
