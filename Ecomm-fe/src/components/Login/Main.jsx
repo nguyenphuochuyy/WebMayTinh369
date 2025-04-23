@@ -1,47 +1,114 @@
-import React from "react";
+import React, { useContext } from "react";
 import "../../styles/Login_styles/LoginForm.scss";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Button, Form, Input, notification } from "antd";
+import { AuthContext } from "../context/auth.context";
+import { loginAPI } from "../../services/api.service";
 
 function LoginForm() {
+  const navigate = useNavigate();
+  const [form] = Form.useForm();
+  const { setUser } = useContext(AuthContext);
+  const [note, contextHolder] = notification.useNotification();
+
+  const onFinish = async (values) => {
+    console.log("Đăng nhập với thông tin: ", values);
+
+    const { username, password } = values;
+    const res = await loginAPI(username, password);
+
+    if (res.data) {
+      note.info({
+        message: `Notification`,
+        description: "Đăng nhập thành công",
+        type: "success",
+      });
+
+      // Lưu token và thông tin user vào localStorage và context
+      localStorage.setItem("access_token", res.data.tokens.accessToken);
+      setUser(res.data.user);
+
+      // Chuyển hướng đến trang dựa trên role
+      if (res.data.user.role === 'ADMIN') {
+        setTimeout(() => {
+          navigate("/admin");  // Navigate to admin panel if the role is ADMIN
+        }, 1000);
+      } else {
+        setTimeout(() => {
+          navigate("/");  // Navigate to home if the role is USER
+        }, 1000);
+      }
+    } else {
+      note.info({
+        message: `Notification`,
+        description: JSON.stringify(res.message),
+        type: "error",
+      });
+    }
+  };
+
   return (
-    <div className="login-container">
-      <div className="login-image">
-        <img
-          src="https://cdn.pixabay.com/photo/2016/11/29/05/45/astronomy-1867616_960_720.jpg"
-          alt="login"
-        />
-      </div>
-      <div className="login-form">
-        <h2>Đăng nhập</h2>
-        <p>Vui lòng nhập thông tin</p>
+    <>
+      {contextHolder}
+      <div className="login-container">
+        <div className="login-image">
+          <img
+            src="https://cdn.pixabay.com/photo/2016/11/29/05/45/astronomy-1867616_960_720.jpg"
+            alt="login"
+          />
+        </div>
+        <div className="login-form">
+          <h2>Đăng nhập</h2>
+          <p>Vui lòng nhập thông tin</p>
 
-        <form>
-          <div className="form-group">
-            <label>Tên đăng nhập hoặc email</label>
-            <input type="text" placeholder="Nhập tên đăng nhập hoặc email" />
+          <Form name="login" onFinish={onFinish} layout="vertical">
+            <Form.Item
+              label="Tên đăng nhập hoặc email"
+              name="username" // Tên trường để gửi dữ liệu
+              rules={[
+                {
+                  required: true,
+                  message: "Vui lòng nhập tên đăng nhập hoặc email!",
+                },
+              ]}
+            >
+              <Input placeholder="Nhập tên đăng nhập hoặc email" />
+            </Form.Item>
+
+            <Form.Item
+              label="Mật khẩu"
+              name="password"
+              rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
+            >
+              <Input.Password placeholder="Nhập mật khẩu" />
+            </Form.Item>
+
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                className="btn-submit"
+                block
+              >
+                Đăng nhập
+              </Button>
+            </Form.Item>
+
+            <div className="google-login">
+              <Button className="google-btn" block onClick={() => form.submit()}>
+                Đăng nhập bằng Google
+              </Button>
+            </div>
+          </Form>
+
+          <div className="signup-link">
+            <p>
+              Chưa có tài khoản? <Link to="/signup">Đăng ký</Link>
+            </p>
           </div>
-
-          <div className="form-group">
-            <label>Mật khẩu</label>
-            <input type="password" placeholder="Nhập mật khẩu" />
-          </div>
-
-          <button type="submit" className="btn-submit">
-            Đăng nhập
-          </button>
-
-          <div className="google-login">
-            <button className="google-btn">Đăng nhập bằng Google</button>
-          </div>
-        </form>
-
-        <div className="signup-link">
-          <p>
-            Chưa có tài khoản? <Link to="/register">Đăng ký</Link>
-          </p>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

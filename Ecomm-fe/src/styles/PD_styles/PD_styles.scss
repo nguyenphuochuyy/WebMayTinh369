@@ -1,0 +1,205 @@
+.product-detail-page {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+
+  .product-detail {
+    display: flex;
+    gap: 2rem;
+    margin: 3rem auto 0;
+  }
+
+  .image-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    img {
+      width: 80px;
+      height: 80px;
+      cursor: pointer;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      transition: transform 0.2s;
+    }
+
+    img:hover {
+      transform: scale(1.05);
+    }
+  }
+
+  .main-image img {
+    width: 400px;
+    height: 400px;
+    border-radius: 10px;
+    object-fit: contain;
+  }
+
+  .product-info {
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    .rating-stock {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    .price {
+      color: #d32f2f;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      .colours {
+        display: flex;
+        gap: 0.5rem;
+
+        .color-option {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          border: 1px solid #ccc;
+          cursor: pointer;
+
+          &.red {
+            background-color: red;
+          }
+          &.black {
+            background-color: black;
+          }
+        }
+      }
+
+      .sizes {
+        display: flex;
+        gap: 0.5rem;
+
+        .size-btn {
+          padding: 0.3rem 0.6rem;
+          border: 1px solid #ddd;
+          cursor: pointer;
+          transition: background-color 0.2s;
+
+          &:hover {
+            background-color: #f0f0f0;
+          }
+        }
+      }
+    }
+
+    .quantity-control {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      button {
+        background-color: #ddd;
+        border: none;
+        padding: 0.4rem 0.6rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+
+        &:hover {
+          background-color: #ccc;
+        }
+      }
+    }
+
+    .buy-now {
+      margin-top: 1rem;
+      padding: 0.8rem 1.2rem;
+      background-color: #d32f2f;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+
+      &:hover {
+        background-color: #a82727;
+      }
+    }
+  }
+
+  .related-items {
+    h2 {
+      margin-bottom: 10px;
+    }
+  
+    .related-products {
+      display: flex;
+      gap: 16px; /* Khoảng cách giữa các sản phẩm */
+      overflow-x: auto; /* Cuộn ngang nếu quá nhiều sản phẩm */
+      padding-bottom: 10px;
+      justify-content: center;
+  
+      .related-product {
+        flex-shrink: 0;
+        width: 240px; /* Độ rộng cố định cho mỗi sản phẩm */
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+        padding: 10px;
+  
+        .image-wrapper {
+          position: relative;
+          img {
+            width: 100%;
+            border-radius: 8px;
+          }
+  
+          .discount-tag {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #ff4d4f;
+            color: white;
+            padding: 2px 5px;
+            font-size: 12px;
+            border-radius: 4px;
+          }
+        }
+  
+        .product-details {
+          margin-top: 8px;
+  
+          .product-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+          }
+  
+          .product-price {
+            .current-price {
+              color: #ff4d4f;
+              font-weight: bold;
+            }
+  
+            .original-price {
+              margin-left: 5px;
+              text-decoration: line-through;
+              color: gray;
+              font-size: 14px;
+            }
+          }
+  
+          .product-rating {
+            margin-top: 5px;
+            color: #facc15; /* Màu vàng cho ngôi sao */
+            font-size: 14px;
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,8 +1,32 @@
 import React from "react";
 import "../../styles/SignUp_styles/SignupForm.scss";
-import { Link } from "react-router-dom";
+import { Button, Form, Input, notification } from "antd";
+import { Link, useNavigate } from "react-router-dom";
+import { signupAPI } from "../../services/api.service";
 
 function SignupForm() {
+
+  const [form] = Form.useForm();
+  let navigate = useNavigate();
+
+  const onFinish = async (values) => {
+    console.log('Form values: ', values);
+    const { username, email, password } = values;
+    const res = await signupAPI(username, email, password);
+    if(res.data){
+      notification.success({
+        message: 'Đăng ký thành công!',
+        description: 'Bạn đã đăng ký tài khoản thành công.',
+      });
+      navigate("/login");
+    } else {
+      notification.error({
+        message: 'Đăng ký thất bại!',
+        description: JSON.stringify(res.message),
+      })
+    }
+  };
+
   return (
     <div className="signup-container">
       <div className="sign-image">
@@ -14,31 +38,52 @@ function SignupForm() {
       <div className="signup-form">
         <h2>Tạo tài khoản</h2>
         <p>Vui lòng nhập thông tin</p>
+        
+        <Form
+          form={form}
+          name="signup"
+          onFinish={onFinish}
+          layout="vertical"
+        >
+          <Form.Item
+            label="Tên đăng nhập"
+            name="username"
+            rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập!' }]}
+          >
+            <Input placeholder="Nhập tên đăng nhập" />
+          </Form.Item>
 
-        <form>
-          <div className="form-group">
-            <label>Tên đăng nhập</label>
-            <input type="text" placeholder="Nhập tên đăng nhập" />
-          </div>
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[
+              { required: true, message: 'Vui lòng nhập email!' },
+              { type: 'email', message: 'Email không hợp lệ!' },
+            ]}
+          >
+            <Input placeholder="Nhập email" />
+          </Form.Item>
 
-          <div className="form-group">
-            <label>Số điện thoại hoặc email</label>
-            <input type="text" placeholder="Nhập số điện thoại hoặc email" />
-          </div>
+          <Form.Item
+            label="Mật khẩu"
+            name="password"
+            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+          >
+            <Input.Password placeholder="Nhập mật khẩu" />
+          </Form.Item>
 
-          <div className="form-group">
-            <label>Mật khẩu</label>
-            <input type="password" placeholder="Nhập mật khẩu" />
-          </div>
-
-          <button type="submit" className="btn-submit">
-            Tạo tài khoản
-          </button>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" className="btn-submit">
+              Tạo tài khoản
+            </Button>
+          </Form.Item>
 
           <div className="google-login">
-            <button className="google-btn">Đăng nhập bằng Google</button>
+            <Button className="google-btn" style={{ width: '100%' }}>
+              Đăng nhập bằng Google
+            </Button>
           </div>
-        </form>
+        </Form>
 
         <div className="login-link">
           <p>
