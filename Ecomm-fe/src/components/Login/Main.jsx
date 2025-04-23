@@ -27,7 +27,7 @@ function LoginForm() {
       // Lưu token và thông tin user vào localStorage và context
       localStorage.setItem("access_token", res.data.tokens.accessToken);
       setUser(res.data.user);
-
+      console.log("User info: ", res);
       // Chuyển hướng đến trang dựa trên role
       if (res.data.user.role === 'ADMIN') {
         setTimeout(() => {

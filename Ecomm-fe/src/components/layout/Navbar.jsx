@@ -8,21 +8,17 @@ import { Link, useNavigate } from "react-router-dom";
 import { Menu } from "antd";
 import { logoutAPI } from "../../services/api.service";
 
-const Navbar = () => {
+const Navbar = ({ onSearch }) => { // Nhận prop onSearch
   const { user, setUser } = useContext(AuthContext);
   let navigate = useNavigate();
-  // const [current, setCurrent] = useState("home");
-  // const onClick = (e) => {
-  //   console.log("click ", e);
-  //   setCurrent(e.key);
-  // };
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleLogout = async () => {
     const res = await logoutAPI();
     console.log("res", res);
     localStorage.removeItem("access_token");
     navigate("/login");
-    
+
     setUser({
       avatar: "",
       email: "",
@@ -32,8 +28,14 @@ const Navbar = () => {
       role: "",
       username: "",
     });
+  };
 
+  const handleSearchInputChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
 
+  const handleSearchSubmit = () => {
+    onSearch(searchTerm); // Gọi callback prop để truyền từ khóa lên Home
   };
 
   const items = [
@@ -71,7 +73,7 @@ const Navbar = () => {
                 ? [
                     {
                       label: <span onClick={() => navigate("/admin")}>Trang quản lý</span>,
-                      key: "admin",  // Admin-specific page link
+                      key: "admin", // Admin-specific page link
                     },
                   ]
                 : []),
@@ -84,7 +86,6 @@ const Navbar = () => {
         ]
       : []),
   ];
-  
 
   return (
     <div className="navbar-container">
@@ -95,15 +96,23 @@ const Navbar = () => {
         mode="horizontal"
         items={items}
         theme="light"
-        // onClick={onClick}
-        // selectedKeys={[current]}
       />
 
       {/* Tìm kiếm + icon bên phải */}
       <div style={{ display: "flex", alignItems: "center" }}>
         <div className="search-container">
-          <input type="text" placeholder="Nhập từ khóa để tìm" />
-          <button className="search-button">
+          <input
+            type="text"
+            placeholder="Nhập từ khóa để tìm"
+            value={searchTerm}
+            onChange={handleSearchInputChange}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                handleSearchSubmit();
+              }
+            }}
+          />
+          <button className="search-button" onClick={handleSearchSubmit}>
             <img
               src={searchIcon}
               width="20"
