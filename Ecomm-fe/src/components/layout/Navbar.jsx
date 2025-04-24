@@ -48,7 +48,7 @@ const Navbar = ({ onSearch }) => { // Nhận prop onSearch
       key: "contact",
     },
     {
-      label: <Link to="#">Giới thiệu</Link>,
+      label: <Link to="/about">Giới thiệu</Link>,
       key: "about",
     },
     ...(!user.id
@@ -89,7 +89,9 @@ const Navbar = ({ onSearch }) => { // Nhận prop onSearch
 
   return (
     <div className="navbar-container">
-      <h1 className="logo">369</h1>
+      <h1 className="logo">
+         <a href="/" style={{textDecoration : 'none' , color : 'black'}}>369</a>
+        </h1>
 
       {/* Menu chính giữa */}
       <Menu

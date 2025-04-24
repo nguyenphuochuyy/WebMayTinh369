@@ -1,22 +1,106 @@
-import React from "react";
-import { Form, Input, Button, Select, message } from "antd";
+import React, { use, useEffect, useState } from "react";
+import { Form, Input, Button, Select, message, Spin, Table, Space } from "antd";
 import { useNavigate } from "react-router-dom";
-
+import { PlusOutlined, DeleteOutlined, EditOutlined, LoadingOutlined } from "@ant-design/icons";
 const { Option } = Select;
 
 const User = () => {
+  // sate quản lý loading danh sách người dùng
+  const [loading, setLoading] = useState(false);
+  // sate quản lý danh sách người dùng
+  const [users, setUsers] = useState([]);
   const navigate = useNavigate();
 
   const onFinish = (values) => {
-    console.log("Received values:", values);
+    console.log("Nhận values:", values);
 
 
-    message.success("User created successfully!");
+    message.success("Tạo người dùng thành công!");
     navigate("/admin/users");
   };
+  const columns = [
+    {
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+    },
+    {
+      title: "Username",
+      dataIndex: "username",
+      key: "username",
+    },
+    {
+      title: "Role",
+      dataIndex: "role",
+      key: "role",
+    },
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+    },
+    {
+      title: "Phone",
+      dataIndex: "phone",
+      key: "phone",
+    },
+    {
+      title: "Address",
+      dataIndex: "address",
+      key: "address",
+    },
+    {
+      title: "Action",
+      key: "action",
+      render: (_, record) => (
+        <Space size="middle">
+          <Button icon={<EditOutlined />} onClick={() => handleEdit(record)}>
+            Edit
+          </Button>
+          <Button icon={<DeleteOutlined />} danger onClick={() => handleDelete(record.id)}>
+            Delete
+          </Button>
+        </Space>
+      ),
+    },
+  
+  
+  ]
+ // hàm gọi api lấy danh sách người dùng
+ useEffect(() => {
+    const fetchUsers = async () => {
+      setLoading(true);
+      try {
+        // Giả lập gọi API để lấy danh sách người dùng
+        const response = await fetch("http://localhost:8080/users/", {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        });
+        if(!response.ok) {
+          throw new Error("Lỗi khi lấy danh sách người dùng");
+        }
+        const data = await response.json();
+        setUsers(data.data);
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách người dùng:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchUsers();
+ },[])
   return (
-    <div style={{ maxWidth: 600, margin: "0 auto", padding: "20px" }}>
+    <div>
+    {/* form tạo người dùng */}
+      <div style={{ maxWidth: 600, margin: "0 auto", padding: "20px" }}>
       <h2>Create User</h2>
       <Form
         name="create_user"
@@ -70,7 +154,19 @@ const User = () => {
           </Button>
         </Form.Item>
       </Form>
+      </div>
+     
+
+      <div style={{ marginTop: "40px" }}>
+        {/* Bảng danh sách người dùng */}
+        <h2>User List</h2>
+        {loading ? (
+          <Spin tip="Loading users..." />
+        ) :   (<Table columns={columns} dataSource={users} rowKey="id" /> )   
+        }
+      </div>
     </div>
+    
   );
 };
 

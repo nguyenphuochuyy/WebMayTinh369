@@ -9,8 +9,8 @@ const ContactPage = () => {
   return (
     <div className="home-container">
         <div className="contact-title">
-            <a href="#">Home / </a>
-            <a href="#">Contact</a>
+            <a href="/">Home / </a>
+            <a href="/contactPage">Contact</a>
         </div>
 
         <div className="contact-content">
