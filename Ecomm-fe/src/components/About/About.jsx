@@ -7,6 +7,7 @@ import Main from "../../components/About/Main.jsx";
 function About() {
   return (
     <div>
+      <Navbar />
       <Main />
       <Footer />
     </div>

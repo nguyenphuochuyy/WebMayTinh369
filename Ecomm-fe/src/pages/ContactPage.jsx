@@ -8,6 +8,7 @@ import Footer from "../components/layout/Footer";
 const ContactPage = () => {
   return (
     <div className="home-container">
+        <Navbar />
         <div className="contact-title">
             <a href="#">Home / </a>
             <a href="#">Contact</a>

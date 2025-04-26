@@ -1,34 +1,42 @@
-import React from "react";
+import React, { useContext } from "react";
+import { Link } from "react-router-dom";
+import { Breadcrumb, Layout, Divider } from "antd";
+import { HomeOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 import Navbar from "../components/layout/Navbar";
 import CartItems from "../components/CartPage/CartItems";
-import CartSummary from "../components/CartPage/CartSummary";
-import CartSales from "../components/CartPage/CartSales";
-import "../styles/CartPage/CartPage.scss";
 import Footer from "../components/layout/Footer";
+import "../styles/CartPage/CartPage.scss";
+
+const { Content } = Layout;
 
 const CartPage = () => {
   return (
-    <div className="home-container">
-      <div className="cart-title">
-          <a href="#">Home /</a>
-          <a href="#">Cart</a>
-      </div>
-      <div className="cart-container">
-        <CartItems />
-        <CartSummary />
-      </div>
+    <Layout className="cart-page-layout">
+      <Navbar />
       
-      <div className="cart-containerSales">
-        <CartSales />
-      </div>
-
-      <div className="footer-cartPage">
-        <Footer/>
-      </div>
-    </div>
-    
+      <Content className="cart-page-content">
+        <div className="cart-page-container">
+          {/* Breadcrumb Navigation */}
+          <Breadcrumb className="cart-breadcrumb" items={[
+            { title: <Link to="/"><HomeOutlined /> Trang chủ</Link> },
+            // { title: <ShoppingCartOutlined /> Giỏ hàng }
+            { title: <Link to="/cartPage"><ShoppingCartOutlined /> Giỏ hàng</Link> },
+          ]} />
+          
+          <Divider />
+          
+          {/* Cart Content */}
+          <div className="cart-content">
+            <CartItems />
+          </div>
+          
+        </div>
+      </Content>
+      
+      <Footer className="cart-page-footer" />
+      
+    </Layout>
   );
 };
 
 export default CartPage;
-

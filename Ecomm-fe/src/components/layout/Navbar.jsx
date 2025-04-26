@@ -1,146 +1,266 @@
 import React, { useContext, useState } from "react";
-import "../../styles/LayoutStyle/NavbarStyle.scss";
-import heartIcon from "../../images/heart.png";
-import searchIcon from "../../images/search-interface-symbol.png";
-import cartIcon from "../../images/shopping-cart.png";
+import { 
+  Layout, 
+  Menu, 
+  Input, 
+  Badge, 
+  Avatar, 
+  Dropdown, 
+  Space, 
+  Typography, 
+  Button, 
+  theme 
+} from "antd";
+import { 
+  HomeOutlined, 
+  ContactsOutlined, 
+  InfoCircleOutlined, 
+  LoginOutlined,
+  UserOutlined, 
+  HeartOutlined, 
+  ShoppingCartOutlined, 
+  SearchOutlined,
+  LogoutOutlined,
+  SettingOutlined,
+  AppstoreOutlined
+} from "@ant-design/icons";
 import { AuthContext } from "../context/auth.context";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu } from "antd";
 import { logoutAPI } from "../../services/api.service";
 
-const Navbar = ({ onSearch }) => { // Nhận prop onSearch
+const { Header } = Layout;
+const { Search } = Input;
+const { Title } = Typography;
+const { useToken } = theme;
+
+const Navbar = ({ onSearch }) => {
+  const { token } = useToken();
   const { user, setUser } = useContext(AuthContext);
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleLogout = async () => {
-    const res = await logoutAPI();
-    console.log("res", res);
-    localStorage.removeItem("access_token");
-    navigate("/login");
+    try {
+      await logoutAPI();
+      localStorage.removeItem("access_token");
+      navigate("/login");
 
-    setUser({
-      avatar: "",
-      email: "",
-      fullName: "",
-      id: "",
-      phone: "",
-      role: "",
-      username: "",
-    });
+      setUser({
+        avatar: "",
+        email: "",
+        fullName: "",
+        id: "",
+        phone: "",
+        role: "",
+        username: "",
+        sum: 0,
+        cartDetails: [],
+        refresh: false,
+      });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
-  const handleSearchInputChange = (event) => {
-    setSearchTerm(event.target.value);
+  const handleSearchInputChange = (value) => {
+    setSearchTerm(value);
   };
 
   const handleSearchSubmit = () => {
-    onSearch(searchTerm); // Gọi callback prop để truyền từ khóa lên Home
+    if (searchTerm.trim()) {
+      onSearch(searchTerm);
+    }
   };
 
-  const items = [
+  const goToCartPage = () => {
+    navigate("/cartPage");
+  };
+
+  // User menu items
+  const userMenuProps = {
+    items: [
+      {
+        key: "profile",
+        icon: <UserOutlined />,
+        label: "Thông tin cá nhân",
+        onClick: () => navigate("/accountPage"),
+      },
+      ...(user.role === "ADMIN" ? [
+        {
+          key: "admin",
+          icon: <SettingOutlined />,
+          label: "Trang quản lý",
+          onClick: () => navigate("/admin"),
+        },
+      ] : []),
+      {
+        type: "divider",
+      },
+      {
+        key: "logout",
+        icon: <LogoutOutlined />,
+        label: "Đăng xuất",
+        onClick: handleLogout,
+      },
+    ],
+  };
+
+  // Main menu items
+  const mainMenuItems = [
     {
-      label: <Link to="/">Trang chủ</Link>,
       key: "home",
+      icon: <HomeOutlined />,
+      label: <Link to="/">Trang chủ</Link>,
     },
     {
-      label: <Link to="/contactPage">Liên hệ</Link>,
       key: "contact",
+      icon: <ContactsOutlined />,
+      label: <Link to="/contactPage">Liên hệ</Link>,
     },
     {
-      label: <Link to="#">Giới thiệu</Link>,
       key: "about",
+      icon: <InfoCircleOutlined />,
+      label: <Link to="/about">Giới thiệu</Link>,
     },
-    ...(!user.id
-      ? [
-          {
-            label: <Link to="/login">Đăng nhập</Link>,
-            key: "login",
-          },
-        ]
-      : []),
-    ...(user.id
-      ? [
-          {
-            label: `Welcome, ${user.fullName || user.username}`,
-            key: "welcome",
-            children: [
-              {
-                label: <span onClick={() => navigate("/accountPage")}>Thông tin cá nhân</span>,
-                key: "info",
-              },
-              ...(user.role === "ADMIN"
-                ? [
-                    {
-                      label: <span onClick={() => navigate("/admin")}>Trang quản lý</span>,
-                      key: "admin", // Admin-specific page link
-                    },
-                  ]
-                : []),
-              {
-                label: <span onClick={() => handleLogout()}>Đăng xuất</span>,
-                key: "logout",
-              },
-            ],
-          },
-        ]
-      : []),
   ];
 
-  return (
-    <div className="navbar-container">
-      <h1 className="logo">369</h1>
+  const navbarStyle = {
+    header: {
+      background: token.colorBgContainer,
+      boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+      padding: "0 24px",
+      position: "sticky",
+      top: 0,
+      zIndex: 100,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      height: 64,
+    },
+    logo: {
+      display: "flex",
+      alignItems: "center",
+    },
+    logoText: {
+      margin: 0,
+      color: token.colorPrimary,
+      fontWeight: "bold",
+      fontSize: "24px",
+    },
+    searchSection: {
+      display: "flex",
+      alignItems: "center",
+    },
+    actionButtons: {
+      display: "flex",
+      alignItems: "center",
+      gap: "16px",
+    },
+    userSection: {
+      display: "flex",
+      alignItems: "center",
+      cursor: "pointer",
+    },
+    username: {
+      maxWidth: 120,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+      marginLeft: 8,
+    },
+    mainMenu: {
+      flex: 1,
+      display: "flex",
+      justifyContent: "center",
+      border: "none",
+    },
+    iconButton: {
+      fontSize: "20px",
+    },
+    mobileMenuButton: {
+      display: "none",
+      "@media (max-width: 768px)": {
+        display: "block",
+      },
+    },
+    desktopMenu: {
+      "@media (max-width: 768px)": {
+        display: "none",
+      },
+    },
+  };
 
-      {/* Menu chính giữa */}
-      <Menu
-        mode="horizontal"
-        items={items}
-        theme="light"
+  return (
+    <Header style={navbarStyle.header}>
+      {/* Logo */}
+      <div style={navbarStyle.logo}>
+        <Link to="/" style={{ textDecoration: "none" }}>
+          <Title level={3} style={navbarStyle.logoText}>369</Title>
+        </Link>
+      </div>
+
+      {/* Main Navigation Menu */}
+      <Menu 
+        mode="horizontal" 
+        items={mainMenuItems} 
+        style={navbarStyle.mainMenu}
       />
 
-      {/* Tìm kiếm + icon bên phải */}
-      <div style={{ display: "flex", alignItems: "center" }}>
-        <div className="search-container">
-          <input
-            type="text"
-            placeholder="Nhập từ khóa để tìm"
-            value={searchTerm}
-            onChange={handleSearchInputChange}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                handleSearchSubmit();
-              }
-            }}
-          />
-          <button className="search-button" onClick={handleSearchSubmit}>
-            <img
-              src={searchIcon}
-              width="20"
-              height="20"
-              alt="Search"
-              className="search-icon"
-            />
-          </button>
-        </div>
+      {/* Search & Action Icons */}
+      <div style={navbarStyle.searchSection}>
+        <Search
+          placeholder="Tìm kiếm sản phẩm"
+          value={searchTerm}
+          onChange={(e) => handleSearchInputChange(e.target.value)}
+          onSearch={handleSearchSubmit}
+          style={{ width: 250, marginRight: 16 }}
+        />
 
-        <div className="icons">
-          <img
-            src={heartIcon}
-            width="20"
-            height="20"
-            alt="Search"
-            className="search-icons"
-          />
-          <img
-            src={cartIcon}
-            width="20"
-            height="20"
-            alt="Cart"
-            className="search-icons"
-          />
+        <div style={navbarStyle.actionButtons}>
+          {/* Wishlist Icon */}
+          <Badge count={0} size="small">
+            <Button 
+              type="text" 
+              icon={<HeartOutlined style={navbarStyle.iconButton} />} 
+              aria-label="Wishlist"
+            />
+          </Badge>
+
+          {/* Cart Icon */}
+          <Badge count={user.sum || 0} size="small" overflowCount={99}>
+            <Button 
+              type="text" 
+              icon={<ShoppingCartOutlined style={navbarStyle.iconButton} />} 
+              onClick={goToCartPage}
+              aria-label="Cart"
+            />
+          </Badge>
+
+          {/* User Account / Login Button */}
+          {user.id ? (
+            <Dropdown menu={userMenuProps} placement="bottomRight">
+              <div style={navbarStyle.userSection}>
+                <Avatar 
+                  src={user.avatar} 
+                  icon={!user.avatar && <UserOutlined />} 
+                  size="default"
+                  style={{ backgroundColor: user.avatar ? undefined : token.colorPrimary }}
+                />
+                <span style={navbarStyle.username}>{user.fullName || user.username}</span>
+              </div>
+            </Dropdown>
+          ) : (
+            <Button 
+              type="primary" 
+              icon={<LoginOutlined />} 
+              onClick={() => navigate("/login")}
+            >
+              Đăng nhập
+            </Button>
+          )}
         </div>
       </div>
-    </div>
+    </Header>
   );
 };
 

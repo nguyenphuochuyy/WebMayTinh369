@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import Navbar from "../components/layout/Navbar";
 import Sidebar from "../components/HomeComponents/Sidebar";
 import Banner from "../components/HomeComponents/Banner";
@@ -22,6 +22,9 @@ import Featured from "../components/HomeComponents/Featured";
 import FeaturedProduct from "../components/HomeComponents/FeaturedProduct";
 import FeaturedService from "../components/HomeComponents/FeaturedService";
 import Footer from "../components/layout/Footer";
+import { addProductToCart, getCartAPI } from "../services/api.service";
+import { notification } from "antd";
+import { AuthContext } from "../components/context/auth.context";
 
 const Home = () => {
   const [flashSalesProducts, setFlashSalesProducts] = useState([]);
@@ -36,18 +39,69 @@ const Home = () => {
   const [error, setError] = useState(null);
   const [currentSearchTerm, setCurrentSearchTerm] = useState("");
   const categoryProductsSection = useRef(null);
+  const [note, contextHolder] = notification.useNotification();
+  const { user, setUser } = useContext(AuthContext);
 
   const API_URL = "http://localhost:8082/api";
   const targetTime = new Date().getTime() + 3 * 24 * 60 * 60 * 1000;
 
   const categoryImages = {
-    "Điện thoại": "https://up-load-file-tranquocanh.s3.ap-southeast-2.amazonaws.com/iphone.jpg",
-    "Laptop": "https://up-load-file-tranquocanh.s3.ap-southeast-2.amazonaws.com/laptop.jpg",
-    "Linh kiện PC": "https://up-load-file-tranquocanh.s3.ap-southeast-2.amazonaws.com/cpui9.jpg",
-    "Màn hình": "https://up-load-file-tranquocanh.s3.ap-southeast-2.amazonaws.com/manhinh.jpg",
-    "Chuột & Bàn phím": "https://up-load-file-tranquocanh.s3.ap-southeast-2.amazonaws.com/banphim.jpg",
-    "Thiết bị lưu trữ": "https://up-load-file-tranquocanh.s3.ap-southeast-2.amazonaws.com/ssd.jpg",
-    "Phụ kiện khác": "https://up-load-file-tranquocanh.s3.ap-southeast-2.amazonaws.com/webcam.jpg",
+    "Điện thoại":
+      "https://up-load-file-tranquocanh.s3.ap-southeast-2.amazonaws.com/iphone.jpg",
+    Laptop:
+      "https://up-load-file-tranquocanh.s3.ap-southeast-2.amazonaws.com/laptop.jpg",
+    "Linh kiện PC":
+      "https://up-load-file-tranquocanh.s3.ap-southeast-2.amazonaws.com/cpui9.jpg",
+    "Màn hình":
+      "https://up-load-file-tranquocanh.s3.ap-southeast-2.amazonaws.com/manhinh.jpg",
+    "Chuột & Bàn phím":
+      "https://up-load-file-tranquocanh.s3.ap-southeast-2.amazonaws.com/banphim.jpg",
+    "Thiết bị lưu trữ":
+      "https://up-load-file-tranquocanh.s3.ap-southeast-2.amazonaws.com/ssd.jpg",
+    "Phụ kiện khác":
+      "https://up-load-file-tranquocanh.s3.ap-southeast-2.amazonaws.com/webcam.jpg",
+  };
+
+  // const [cart, setCart] = useState({
+  //   sum : user.sum,
+  //   cartDetails: user.cartDetails,
+  // });
+
+  // const getCartInfo = async () => {
+  //   const res = await getCartAPI();
+  //   console.log("res cart", res);
+  //   if (res.data) {
+  //     setCart(res.data);
+  //     console.log("cart", res.data);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   getCartInfo();
+  // }, [cart.sum]);
+
+  const handleAddToCart = async (productId, quantity) => {
+    try {
+      const res = await addProductToCart(productId, quantity);
+      if (res) {
+        // getCartInfo(); // Cập nhật giỏ hàng sau khi thêm sản phẩm
+        setUser((prevUser) => ({
+          ...prevUser,
+          refresh: !prevUser.refresh,
+        }));
+        note.info({
+          message: `Notification`,
+          description: "Thêm giỏ hàng thành công",
+          type: "success",
+        });
+      }
+    } catch (error) {
+      note.info({
+        message: `Notification`,
+        description: JSON.stringify(error),
+        type: "error",
+      });
+    }
   };
 
   useEffect(() => {
@@ -57,12 +111,12 @@ const Home = () => {
         const productsResponse = await fetch(`${API_URL}/products`);
         const allProducts = await productsResponse.json();
 
-        const flashSales = allProducts.slice(0, 4).map(product => ({
+        const flashSales = allProducts.slice(0, 4).map((product) => ({
           id: product.id,
           image: product.image,
           name: product.name,
           price: product.price,
-          discount: product.discount || 0
+          discount: product.discount || 0,
         }));
         setFlashSalesProducts(flashSales);
 
@@ -70,29 +124,29 @@ const Home = () => {
         const categoriesData = await categoriesResponse.json();
         setCategories(categoriesData);
 
-        const thisMonth = allProducts.slice(4, 8).map(product => ({
+        const thisMonth = allProducts.slice(4, 8).map((product) => ({
           id: product.id,
           image: product.image,
           name: product.name,
           price: product.price,
-          discount: product.discount || 0
+          discount: product.discount || 0,
         }));
         setThisMonthProducts(thisMonth);
 
-        const ourProds = allProducts.slice(8, 17).map(product => ({
+        const ourProds = allProducts.slice(8, 17).map((product) => ({
           id: product.id,
           image: product.image,
           name: product.name,
           price: product.price,
-          discount: product.discount || 0
+          discount: product.discount || 0,
         }));
         setOurProducts(ourProds);
 
-        const featured = allProducts.slice(0, 4).map(product => ({
+        const featured = allProducts.slice(0, 4).map((product) => ({
           id: product.id,
           image: product.image,
           name: product.name,
-          description: product.description || "No description available"
+          description: product.description || "No description available",
         }));
         setFeaturedProducts(featured);
       } catch (err) {
@@ -156,7 +210,9 @@ const Home = () => {
 
     // Nếu từ khóa không trống, thực hiện tìm kiếm như bình thường
     try {
-      const response = await fetch(`${API_URL}/products/search?keyword=${keyword}`);
+      const response = await fetch(
+        `${API_URL}/products/search?keyword=${keyword}`
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -180,15 +236,26 @@ const Home = () => {
 
   return (
     <div className="home-container">
-      <Navbar onSearch={handleSearch} /> {/* Render Navbar ở đây và truyền hàm handleSearch */}
+      <Navbar 
+        onSearch={handleSearch} 
+        // cart ={cart}
+        // setCart={setCart}
+        />
+      {/* Render Navbar ở đây và truyền hàm handleSearch */}
       <div className="content">
         <Sidebar onCategorySelect={handleCategorySelect} />
         <Banner />
       </div>
-
-      {searchLoading && <div style={{ padding: '20px', textAlign: 'center' }}>Đang tìm kiếm...</div>}
+      {searchLoading && (
+        <div style={{ padding: "20px", textAlign: "center" }}>
+          Đang tìm kiếm...
+        </div>
+      )}
       {searchResults.length > 0 ? (
-        <div className="selected-category-products" style={{ marginTop: '20px' }}>
+        <div
+          className="selected-category-products"
+          style={{ marginTop: "20px" }}
+        >
           <h2>Kết quả tìm kiếm</h2>
           <div className="product-list">
             {searchResults.map((product) => (
@@ -207,8 +274,16 @@ const Home = () => {
           </div>
         </div>
       ) : (
-        !searchLoading && currentSearchTerm && (
-          <p style={{ color: '#777', fontSize: '1.1em', textAlign: 'center', padding: '20px' }}>
+        !searchLoading &&
+        currentSearchTerm && (
+          <p
+            style={{
+              color: "#777",
+              fontSize: "1.1em",
+              textAlign: "center",
+              padding: "20px",
+            }}
+          >
             Không tìm thấy sản phẩm nào phù hợp với từ khóa {currentSearchTerm}.
           </p>
         )
@@ -232,6 +307,14 @@ const Home = () => {
                   <p className="product-price">
                     {product.price.toLocaleString()} VND
                   </p>
+                </div>
+                <div className="add-to-cart-button-container">
+                  <button
+                    className="add-to-cart-button"
+                    onClick={() => handleAddToCart(product.id, 1)}
+                  >
+                    Mua
+                  </button>
                 </div>
               </div>
             ))}
@@ -270,7 +353,10 @@ const Home = () => {
           {categories.map((category) => (
             <div key={category.id} className="category-item">
               <img
-                src={categoryImages[category.name] || "https://via.placeholder.com/50"}
+                src={
+                  categoryImages[category.name] ||
+                  "https://via.placeholder.com/50"
+                }
                 alt={category.name}
                 className="category-image"
               />
@@ -319,7 +405,8 @@ const Home = () => {
       </div>
 
       <div className="footer-buttonOurProducts">
-        <ButtonOurproducts onClick={handleShowAllProducts} /> {/* Thêm onClick */}
+        <ButtonOurproducts onClick={handleShowAllProducts} />{" "}
+        {/* Thêm onClick */}
       </div>
 
       <div className="featured-container">
@@ -340,7 +427,7 @@ const Home = () => {
       <div className="featured-service-container">
         <FeaturedService />
       </div>
-
+      
       <div className="footer-home">
         <Footer />
       </div>

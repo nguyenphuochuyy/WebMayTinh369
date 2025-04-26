@@ -16,6 +16,7 @@ import { AuthWrapper } from "./components/context/auth.context.jsx";
 import Admin from "./Admin.jsx";
 import Product from "./pages/adminPage/Product.jsx";
 import User from "./pages/adminPage/User.jsx";
+import About from "./components/About/About.jsx";
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
         path: "/detailPage",
         element: <DetailPage />,
       },
+      {
+        path: "/about",
+        element: <About />,
+      }
     ],
   },
   {
