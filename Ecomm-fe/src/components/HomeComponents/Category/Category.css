@@ -1,0 +1,118 @@
+.categories-container {
+    padding: 30px 20px;
+    background-color: #fff;
+  }
+  
+  .categories-header {
+    margin-bottom: 20px;
+  }
+  
+  .categories-title {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+  }
+  
+  .red-bar {
+    width: 20px;
+    height: 40px;
+    background-color: #db4444;
+    margin-right: 12px;
+    border-radius: 4px;
+  }
+  
+  .categories-title span {
+    font-size: 18px;
+    font-weight: 600;
+    color: #db4444;
+  }
+  
+  .categories-header h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
+  }
+  
+  .category-slide {
+    padding: 0 10px;
+  }
+  
+  .category-slide .ant-card {
+    border: 1px solid #dfd9d9;
+    border-radius: 8px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .category-slide .ant-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .category-slide .ant-card.highlighted {
+    background-color: #db4444;
+    border-color: #db4444;
+  }
+  
+  .category-slide .ant-card.highlighted .category-content p,
+  .category-slide .ant-card.highlighted .category-content .category-icon {
+    color: #fff;
+  }
+  
+  .category-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100px;
+  }
+  
+  .category-icon {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #333;
+  }
+  
+  .category-content p {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  /* Style for carousel arrows */
+  .ant-carousel .slick-prev,
+  .ant-carousel .slick-next {
+    background: #fff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    color: #000;
+    z-index: 1;
+    transition: background-color 0.3s ease;
+  }
+  
+  .ant-carousel .slick-prev:hover,
+  .ant-carousel .slick-next:hover {
+    background-color: #db4444;
+    color: #fff;
+  }
+  
+  .ant-carousel .slick-prev {
+    left: -50px;
+  }
+  
+  .ant-carousel .slick-next {
+    right: -50px;
+  }
+  
+  .ant-carousel .slick-prev:before,
+  .ant-carousel .slick-next:before {
+    color: #000;
+    font-size: 20px;
+  }
+  
+  .ant-carousel .slick-prev:hover:before,
+  .ant-carousel .slick-next:hover:before {
+    color: #fff;
+  }

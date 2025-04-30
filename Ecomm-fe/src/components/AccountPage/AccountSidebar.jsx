@@ -11,10 +11,9 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   SettingOutlined,
-  LogoutOutlined
+  LogoutOutlined,
 } from "@ant-design/icons";
 
-const { SubMenu } = Menu;
 const { Title, Text } = Typography;
 
 const AccountSidebar = ({ user }) => {
@@ -26,23 +25,23 @@ const AccountSidebar = ({ user }) => {
     const path = location.pathname;
     if (path.includes("/account/profile")) return "profile";
     if (path.includes("/account/addresses")) return "addresses";
+    if (path.includes("/account/myOrder")) return "myOrder";
     if (path.includes("/account/payment")) return "payment";
     if (path.includes("/account/orders/completed")) return "completed-orders";
     if (path.includes("/account/orders/cancelled")) return "cancelled-orders";
-    if (path.includes("/account/orders")) return "orders";
+
     if (path.includes("/account/wishlist")) return "wishlist";
     return "profile"; // Default
   };
 
   return (
     <div className="account-sidebar">
-      <Card 
-        className="user-card" 
-        bordered={false}
+      <Card
+        className="user-card"
+        variant="bordered" // Updated to use 'variant' instead of 'bordered'
       >
-        
         <Divider className="divider" />
-        
+
         <Menu
           mode="inline"
           selectedKeys={[getSelectedKey()]}
@@ -50,48 +49,62 @@ const AccountSidebar = ({ user }) => {
           className="account-menu"
           inlineCollapsed={collapsed}
           inlineIndent={16}
-        >
-          <SubMenu 
-            key="account" 
-            icon={<SettingOutlined />} 
-            title="Quản lý tài khoản"
-          >
-            <Menu.Item key="profile" icon={<UserOutlined />}>
-              <Link to="/account/profile">Thông tin cá nhân</Link>
-            </Menu.Item>
-            <Menu.Item key="addresses" icon={<EnvironmentOutlined />}>
-              <Link to="/account/addresses">Địa chỉ giao hàng</Link>
-            </Menu.Item>
-            <Menu.Item key="payment" icon={<CreditCardOutlined />}>
-              <Link to="/account/payment">Phương thức thanh toán</Link>
-            </Menu.Item>
-          </SubMenu>
-
-          <SubMenu 
-            key="orders" 
-            icon={<ShoppingOutlined />} 
-            title="Đơn hàng"
-          >
-            <Menu.Item key="all-orders">
-              <Link to="/account/orders">Tất cả đơn hàng</Link>
-            </Menu.Item>
-            <Menu.Item key="completed-orders" icon={<CheckCircleOutlined />}>
-              <Link to="/account/orders/completed">Đã hoàn thành</Link>
-            </Menu.Item>
-            <Menu.Item key="cancelled-orders" icon={<CloseCircleOutlined />}>
-              <Link to="/account/orders/cancelled">Đã hủy</Link>
-            </Menu.Item>
-          </SubMenu>
-
-          <Menu.Item key="wishlist" icon={<HeartOutlined />}>
-            <Link to="/account/wishlist">Sản phẩm yêu thích</Link>
-          </Menu.Item>
-          
-          <Divider className="menu-divider" />
-          
-        </Menu>
+          items={[
+            {
+              key: "account",
+              icon: <SettingOutlined />,
+              label: "Quản lý tài khoản", // Changed 'title' to 'label'
+              children: [
+                {
+                  key: "profile",
+                  icon: <UserOutlined />,
+                  label: <Link to="/account/profile">Thông tin cá nhân</Link>,
+                },
+                {
+                  key: "addresses",
+                  icon: <EnvironmentOutlined />,
+                  label: <Link to="/account/addresses">Địa chỉ giao hàng</Link>,
+                },
+                // {
+                //   key: "payment",
+                //   icon: <CreditCardOutlined />,
+                //   label: (
+                //     <Link to="/account/payment">Phương thức thanh toán</Link>
+                //   ),
+                // },
+              ],
+            },
+            {
+              key: "orders",
+              icon: <ShoppingOutlined />,
+              label: "Đơn hàng", // Use 'label' instead of 'title'
+              children: [
+                {
+                  key: "all-orders",
+                  label: <Link to="/account/myOrder">Tất cả đơn hàng</Link>,
+                },
+                {
+                  key: "completed-orders",
+                  icon: <CheckCircleOutlined />,
+                  label: (
+                    <Link to="/account/orders/completed">Đã hoàn thành</Link>
+                  ),
+                },
+                {
+                  key: "cancelled-orders",
+                  icon: <CloseCircleOutlined />,
+                  label: <Link to="/account/orders/cancelled">Đã hủy</Link>,
+                },
+              ],
+            },
+            {
+              key: "wishlist",
+              icon: <HeartOutlined />,
+              label: <Link to="/account/wishlist">Sản phẩm yêu thích</Link>,
+            },
+          ]}
+        />
       </Card>
-      
     </div>
   );
 };

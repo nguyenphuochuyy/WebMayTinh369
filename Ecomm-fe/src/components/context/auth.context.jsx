@@ -10,6 +10,7 @@ export const AuthContext = createContext({
   role: "",
   sum: 0,
   cartDetails: [],
+  addresses: [],
   refresh: false
 });
 
@@ -23,6 +24,7 @@ export const AuthWrapper = (props) => {
     role: "",
     sum: 0,
     cartDetails: [],
+    addresses: [],
     refresh: false
   });
 

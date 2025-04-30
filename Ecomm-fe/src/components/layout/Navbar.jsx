@@ -43,6 +43,7 @@ const Navbar = ({ onSearch }) => {
     try {
       await logoutAPI();
       localStorage.removeItem("access_token");
+      localStorage.removeItem("role");
       navigate("/login");
 
       setUser({
@@ -83,7 +84,7 @@ const Navbar = ({ onSearch }) => {
         key: "profile",
         icon: <UserOutlined />,
         label: "Thông tin cá nhân",
-        onClick: () => navigate("/accountPage"),
+        onClick: () => navigate("/account/profile"),
       },
       ...(user.role === "ADMIN" ? [
         {
@@ -241,10 +242,10 @@ const Navbar = ({ onSearch }) => {
             <Dropdown menu={userMenuProps} placement="bottomRight">
               <div style={navbarStyle.userSection}>
                 <Avatar 
-                  src={user.avatar} 
-                  icon={!user.avatar && <UserOutlined />} 
+                  src={user?.avatar || null} // Prevent empty string for src
+                  icon={!user?.avatar && <UserOutlined />} 
                   size="default"
-                  style={{ backgroundColor: user.avatar ? undefined : token.colorPrimary }}
+                  style={{ backgroundColor: user?.avatar ? undefined : token.colorPrimary }}
                 />
                 <span style={navbarStyle.username}>{user.fullName || user.username}</span>
               </div>

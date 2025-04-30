@@ -12,7 +12,8 @@ import {
   message, 
   Upload, 
   Space,
-  Skeleton
+  Skeleton,
+  List
 } from "antd";
 import { 
   UserOutlined, 
@@ -23,20 +24,26 @@ import {
   UploadOutlined,
   PhoneOutlined,
   HomeOutlined,
-  GlobalOutlined
+  GlobalOutlined,
+  PlusOutlined,
+  DeleteOutlined
 } from "@ant-design/icons";
 import AccountSidebar from "../../components/AccountPage/AccountSidebar";
 import { AuthContext } from "../context/auth.context";
 import "../../styles/AccountPage/Profile.scss"
+import { useNavigate } from "react-router-dom";
+
 
 const { Title, Text } = Typography;
 
 const Profile = () => {
+  const navigate = useNavigate();
   const [form] = Form.useForm();
   const { user, setUser } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar || null);
+  const [addresses, setAddresses] = useState(user?.addresses || [{ city: "", street: "" }]);
 
   useEffect(() => {
     if (user) {
@@ -44,10 +51,9 @@ const Profile = () => {
         username: user.username,
         email: user.email,
         phone: user.phone || "",
-        address: user.address || "",
-        website: user.website || ""
       });
       setAvatarUrl(user.avatar);
+      setAddresses(user.addresses && user.addresses.length > 0 ? user.addresses : [{ city: "", street: "" }]);
     }
   }, [user, form]);
 
@@ -60,20 +66,25 @@ const Profile = () => {
       username: user.username,
       email: user.email,
       phone: user.phone || "",
-      address: user.address || "",
-      website: user.website || ""
     });
+    setAddresses(user.addresses && user.addresses.length > 0 ? user.addresses : [{ city: "", street: "" }]);
     setEditing(false);
   };
 
   const handleFinish = (values) => {
     setLoading(true);
     
+    // Create a copy of values to avoid mutating the parameter
+    const updatedValues = { ...values };
+    
+    // Add addresses array to updatedValues
+    updatedValues.addresses = addresses.filter(addr => addr.city || addr.street);
+    
     // Simulate API call
     setTimeout(() => {
       setUser((prevUser) => ({
         ...prevUser,
-        ...values,
+        ...updatedValues,
         avatar: avatarUrl
       }));
       
@@ -92,6 +103,25 @@ const Profile = () => {
       message.success(`${info.file.name} đã được tải lên thành công`);
     } else if (info.file.status === 'error') {
       message.error(`${info.file.name} tải lên thất bại.`);
+    }
+  };
+
+  // Handle changes to address fields
+  const handleAddressChange = (index, field, value) => {
+    const newAddresses = [...addresses];
+    newAddresses[index] = { ...newAddresses[index], [field]: value };
+    setAddresses(newAddresses);
+  };
+
+
+  // Remove an address
+  const removeAddress = (index) => {
+    if (addresses.length > 1) {
+      const newAddresses = [...addresses];
+      newAddresses.splice(index, 1);
+      setAddresses(newAddresses);
+    } else {
+      message.info("Cần giữ lại ít nhất một địa chỉ");
     }
   };
 
@@ -174,17 +204,18 @@ const Profile = () => {
                     </div>
                   )}
                   
-                  {user.address && (
+                  {user.addresses && user.addresses.length > 0 && (
                     <div className="info-item">
-                      <HomeOutlined /> {user.address}
+                      <HomeOutlined /> {user.addresses[0].city && user.addresses[0].street ? 
+                        `${user.addresses[0].street}, ${user.addresses[0].city}` : 
+                        (user.addresses[0].street || user.addresses[0].city || "Chưa cập nhật địa chỉ")}
+                      {user.addresses.length > 1 && (
+                        <Text type="secondary"> (+{user.addresses.length - 1} địa chỉ khác)</Text>
+                      )}
                     </div>
                   )}
                   
-                  {user.website && (
-                    <div className="info-item">
-                      <GlobalOutlined /> {user.website}
-                    </div>
-                  )}
+    
                 </div>
               )}
             </Col>
@@ -200,8 +231,7 @@ const Profile = () => {
                     username: user.username,
                     email: user.email,
                     phone: user.phone || "",
-                    address: user.address || "",
-                    website: user.website || ""
+
                   }}
                 >
                   <Row gutter={16}>
@@ -213,6 +243,7 @@ const Profile = () => {
                       >
                         <Input 
                           prefix={<UserOutlined />} 
+                          readOnly
                           placeholder="Tên người dùng"
                         />
                       </Form.Item>
@@ -230,7 +261,7 @@ const Profile = () => {
                         <Input 
                           prefix={<MailOutlined />} 
                           placeholder="Email"
-                          disabled  // Usually email is not easily changed
+                          readOnly 
                         />
                       </Form.Item>
                     </Col>
@@ -249,28 +280,61 @@ const Profile = () => {
                       </Form.Item>
                     </Col>
                     
-                    <Col xs={24} md={12}>
-                      <Form.Item
-                        label="Website"
-                        name="website"
-                      >
-                        <Input 
-                          prefix={<GlobalOutlined />} 
-                          placeholder="Website"
-                        />
-                      </Form.Item>
-                    </Col>
+                  
                   </Row>
                   
-                  <Form.Item
-                    label="Địa chỉ"
-                    name="address"
-                  >
-                    <Input.TextArea 
-                      placeholder="Địa chỉ của bạn"
-                      autoSize={{ minRows: 2, maxRows: 4 }}
-                    />
-                  </Form.Item>
+                  <Divider orientation="left">
+                    Địa chỉ
+                    <Button 
+                      type="link" 
+                      icon={<PlusOutlined />} 
+                      onClick={() => navigate("/account/addresses")}
+                      style={{ marginLeft: 8 }}
+                    >
+                      Quản lý địa chỉ
+                    </Button>
+                  </Divider>
+                  
+                  {addresses.map((address, index) => (
+                    <div key={index} className="address-item">
+                      {index > 0 && <Divider dashed />}
+                      <Row gutter={16} align="middle">
+
+                         
+                      <Col xs={24} md={11}>
+                          <Form.Item label="Đường/Số nhà">
+                            <Input 
+                              value={address.street} 
+                              readOnly
+                              onChange={e => handleAddressChange(index, 'street', e.target.value)}
+                              placeholder="Đường/Số nhà "
+                            />
+                          </Form.Item>
+                        </Col>
+
+                        <Col xs={24} md={11}>
+                          <Form.Item label="Thành phố ">
+                            <Input 
+                              value={address.city} 
+                              readOnly
+                              onChange={e => handleAddressChange(index, 'city', e.target.value)}
+                              placeholder="Thành phố "
+                            />
+                          </Form.Item>
+                        </Col>
+                       
+                        
+                        <Col xs={24} md={2} style={{ textAlign: 'center' }}>
+                          {/* <Button 
+                            danger 
+                            icon={<DeleteOutlined />} 
+                            onClick={() => removeAddress(index)}
+                            disabled={addresses.length <= 1}
+                          /> */}
+                        </Col>
+                      </Row>
+                    </div>
+                  ))}
                   
                   <Divider />
                   
@@ -328,24 +392,38 @@ const Profile = () => {
                         size="small"
                         title="Địa chỉ"
                       >
-                        <div className="detail-item">
-                          <Text strong>{user.address || "Chưa cập nhật địa chỉ"}</Text>
-                        </div>
+                        {user.addresses && user.addresses.length > 0 ? (
+                          <List
+                            dataSource={user.addresses}
+                            renderItem={(address, index) => (
+                              <List.Item className="address-list-item">
+                                <div className="address-content">
+                                  <Text strong>{`Địa chỉ ${index + 1}:`}</Text>
+                                  <ul className="address-details">
+                                  <li>
+                                      <Text type="secondary">Đường/Số nhà: </Text>
+                                      <Text>{address.street || "Chưa cập nhật"}</Text>
+                                    </li>
+
+                                    <li>
+                                      <Text type="secondary">Thành phố: </Text>
+                                      <Text>{address.city || "Chưa cập nhật"}</Text>
+                                    </li>
+                                   
+                                  </ul>
+                                </div>
+                              </List.Item>
+                            )}
+                          />
+                        ) : (
+                          <div className="detail-item">
+                            <Text>Chưa cập nhật địa chỉ</Text>
+                          </div>
+                        )}
                       </Card>
                     </Col>
                     
-                    <Col span={24}>
-                      <Card
-                        className="info-card"
-                        size="small"
-                        title="Thông tin khác"
-                      >
-                        <div className="detail-item">
-                          <Text type="secondary">Website:</Text>
-                          <Text strong>{user.website || "Chưa cập nhật"}</Text>
-                        </div>
-                      </Card>
-                    </Col>
+
                   </Row>
                 </div>
               )}

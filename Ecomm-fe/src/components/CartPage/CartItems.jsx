@@ -1,71 +1,93 @@
 import React, { useContext, useEffect, useState } from "react";
-import { 
-  Table, 
-  InputNumber, 
-  Button, 
-  Card, 
-  Typography, 
-  Divider, 
-  Space, 
-  Popconfirm, 
-  message, 
-  Empty 
+import {
+  Table,
+  InputNumber,
+  Button,
+  Card,
+  Typography,
+  Divider,
+  Space,
+  Popconfirm,
+  message,
+  Empty,
+  Checkbox,
+  notification,
+  Modal,
 } from "antd";
-import { 
-  DeleteOutlined, 
-  HomeOutlined, 
-  ShoppingCartOutlined, 
-  SyncOutlined, 
-  CreditCardOutlined 
+import {
+  DeleteOutlined,
+  HomeOutlined,
+  ShoppingCartOutlined,
+  SyncOutlined,
+  CreditCardOutlined,
 } from "@ant-design/icons";
 import { removeProductFromCart } from "../../services/api.service";
 import { AuthContext } from "../context/auth.context";
 import "../../styles/CartPage/CartItems.scss";
+import { useNavigate } from "react-router-dom";
 
 const { Title, Text } = Typography;
 
 const CartItems = () => {
   const { user, setUser } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [totalAmount, setTotalAmount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [cartItems, setCartItems] = useState([]);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const [note, contextHolder] = notification.useNotification();
 
   useEffect(() => {
     if (user && user.cartDetails) {
-      setCartItems(user.cartDetails.map(item => ({
+      const items = user.cartDetails.map((item) => ({
         ...item,
         key: item.id || item.productId, // Ensure each item has a unique key
-        totalPrice: item.price * item.quantity
-      })));
-      
+        totalPrice: item.price * item.quantity,
+      }));
+
+      setCartItems(items);
+
       const total = calculateTotalAmount(user.cartDetails);
       setTotalAmount(total);
     }
   }, [user]);
 
-  const calculateTotalAmount = (cartItems) => {
-    return cartItems.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0
+  // Effect để theo dõi và tính lại tổng tiền dựa trên các mục đã chọn
+  useEffect(() => {
+    const selectedItemsData = cartItems.filter((item) =>
+      selectedItems.includes(item.key)
     );
+
+    const total = calculateTotalAmount(selectedItemsData);
+    setTotalAmount(total);
+  }, [selectedItems, cartItems]);
+
+  const calculateTotalAmount = (items) => {
+    return items.reduce((total, item) => total + item.price * item.quantity, 0);
   };
 
   const handleQuantityChange = (record, newQuantity) => {
     if (newQuantity < 1) return;
 
-    const updatedCartItems = cartItems.map(item => {
+    const updatedCartItems = cartItems.map((item) => {
       if (item.key === record.key) {
         return {
           ...item,
           quantity: newQuantity,
-          totalPrice: item.price * newQuantity
+          totalPrice: item.price * newQuantity,
         };
       }
       return item;
     });
 
     setCartItems(updatedCartItems);
-    const newTotal = calculateTotalAmount(updatedCartItems);
+
+    // Cập nhật tổng tiền dựa trên các mục đã chọn
+    const selectedItemsData = updatedCartItems.filter((item) =>
+      selectedItems.includes(item.key)
+    );
+    const newTotal = calculateTotalAmount(selectedItemsData);
     setTotalAmount(newTotal);
   };
 
@@ -77,20 +99,27 @@ const CartItems = () => {
     try {
       setLoading(true);
       const res = await removeProductFromCart(cartDetailId);
-      
+
       if (res) {
-        const updatedItems = cartItems.filter(item => item.id !== cartDetailId);
+        const updatedItems = cartItems.filter(
+          (item) => item.id !== cartDetailId
+        );
         setCartItems(updatedItems);
-        
-        const newTotal = calculateTotalAmount(updatedItems);
-        setTotalAmount(newTotal);
-        
+
+        // Xóa mục đã chọn nếu nó đã bị xóa khỏi giỏ hàng
+        setSelectedItems((prev) =>
+          prev.filter((key) => {
+            const item = updatedItems.find((item) => item.key === key);
+            return item !== undefined;
+          })
+        );
+
         setUser((prevUser) => ({
           ...prevUser,
           refresh: !prevUser.refresh,
-          cartDetails: updatedItems
+          cartDetails: updatedItems,
         }));
-        
+
         message.success("Sản phẩm đã được xóa khỏi giỏ hàng!");
       }
     } catch (error) {
@@ -100,7 +129,82 @@ const CartItems = () => {
     }
   };
 
+  const handleSelectItem = (key) => {
+    setSelectedItems((prev) => {
+      if (prev.includes(key)) {
+        const newSelected = prev.filter((k) => k !== key);
+        // Cập nhật trạng thái selectAll khi người dùng bỏ chọn một mục
+        if (newSelected.length === 0) {
+          setSelectAll(false);
+        }
+        return newSelected;
+      } else {
+        const newSelected = [...prev, key];
+        // Cập nhật trạng thái selectAll nếu tất cả các mục đều được chọn
+        if (newSelected.length === cartItems.length) {
+          setSelectAll(true);
+        }
+        return newSelected;
+      }
+    });
+  };
+
+  const handleSelectAll = (e) => {
+    setSelectAll(e.target.checked);
+    if (e.target.checked) {
+      setSelectedItems(cartItems.map((item) => item.key));
+    } else {
+      setSelectedItems([]);
+    }
+  };
+
+  const handleCheckout = () => {
+    if (selectedItems.length === 0) {
+      message.warning("Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
+      return;
+    }
+  
+    if (!user.phone || user.phone.trim() === "" || !user.addresses || user.addresses.length === 0) {
+      note.warning({
+        message: "Thiếu thông tin cá nhân",
+        description: (
+          <div>
+            <p>Vui lòng cập nhật số điện thoại và địa chỉ trước khi thanh toán.</p>
+            <Button
+              type="primary"
+              size="small"
+              onClick={() => navigate("/account/profile")}
+              style={{ marginTop: 8 }}
+            >
+              Cập nhật ngay
+            </Button>
+          </div>
+        ),
+        duration: 0,
+      });
+      return;
+    }
+  
+    const itemsToCheckout = cartItems.filter(item =>
+      selectedItems.includes(item.key)
+    );
+  
+    navigate("/checkout", { state: { cartItems: itemsToCheckout } });
+  };
+
+
   const columns = [
+    {
+      title: <Checkbox checked={selectAll} onChange={handleSelectAll} />,
+      key: "selection",
+      width: 50,
+      render: (_, record) => (
+        <Checkbox
+          checked={selectedItems.includes(record.key)}
+          onChange={() => handleSelectItem(record.key)}
+        />
+      ),
+    },
     {
       title: "STT",
       key: "index",
@@ -137,7 +241,7 @@ const CartItems = () => {
       title: "Tổng tiền",
       key: "totalPrice",
       align: "right",
-      render: (record) => 
+      render: (record) =>
         `${(record.price * record.quantity).toLocaleString()} VND`,
     },
     {
@@ -153,10 +257,10 @@ const CartItems = () => {
           cancelText="Không"
           okButtonProps={{ danger: true }}
         >
-          <Button 
-            type="text" 
-            danger 
-            icon={<DeleteOutlined />} 
+          <Button
+            type="text"
+            danger
+            icon={<DeleteOutlined />}
             loading={loading}
           />
         </Popconfirm>
@@ -171,10 +275,10 @@ const CartItems = () => {
           image={Empty.PRESENTED_IMAGE_SIMPLE}
           description="Giỏ hàng của bạn đang trống"
         >
-          <Button 
-            type="primary" 
-            icon={<ShoppingCartOutlined />} 
-            onClick={() => window.location.href = "/"}
+          <Button
+            type="primary"
+            icon={<ShoppingCartOutlined />}
+            onClick={() => (window.location.href = "/")}
           >
             Tiếp tục mua sắm
           </Button>
@@ -185,10 +289,11 @@ const CartItems = () => {
 
   return (
     <div className="cart-container">
+       {contextHolder}
       <Title level={2}>
         <ShoppingCartOutlined /> Giỏ hàng của bạn
       </Title>
-      
+
       <Card variant="outlined" className="cart-table-container">
         <Table
           columns={columns}
@@ -196,22 +301,22 @@ const CartItems = () => {
           pagination={false}
           rowKey="key"
           loading={loading}
-          scroll={{ x: 'max-content' }}
+          scroll={{ x: "max-content" }}
         />
-        
+
         <div className="cart-actions">
           <Space>
-            <Button 
-              icon={<HomeOutlined />} 
-              onClick={() => window.location.href = "/"}
+            <Button
+              icon={<HomeOutlined />}
+              onClick={() => (window.location.href = "/")}
             >
               Tiếp tục mua sắm
             </Button>
-            
-            <Button 
-              type="primary" 
+
+            <Button
+              type="primary"
               ghost
-              icon={<SyncOutlined />} 
+              icon={<SyncOutlined />}
               onClick={handleUpdateCart}
             >
               Cập nhật giỏ hàng
@@ -219,38 +324,46 @@ const CartItems = () => {
           </Space>
         </div>
       </Card>
-      
-      <Card 
-        title="Tổng đơn hàng" 
-        variant="outlined" 
+
+      <Card
+        title="Tổng đơn hàng"
+        variant="outlined"
         className="cart-summary-container"
       >
+        <div className="summary-item">
+          <Text>Số sản phẩm đã chọn:</Text>
+          <Text>{selectedItems.length}</Text>
+        </div>
+
         <div className="summary-item">
           <Text>Tạm tính:</Text>
           <Text>{totalAmount.toLocaleString()} VND</Text>
         </div>
-        
+
         <div className="summary-item">
           <Text>Phí vận chuyển:</Text>
           <Text type="success">Miễn phí</Text>
         </div>
-        
-        <Divider style={{ margin: '12px 0' }} />
-        
+
+        <Divider style={{ margin: "12px 0" }} />
+
         <div className="summary-item total">
           <Title level={4}>Tổng cộng:</Title>
-          <Title level={4} type="danger">{totalAmount.toLocaleString()} VND</Title>
+          <Title level={4} type="danger">
+            {totalAmount.toLocaleString()} VND
+          </Title>
         </div>
-        
-        <Button 
-          type="primary" 
-          size="large" 
-          block 
+
+        <Button
+          type="primary"
+          size="large"
+          block
           icon={<CreditCardOutlined />}
           className="checkout-button"
-          onClick={() => window.location.href = "/checkout"}
+          onClick={handleCheckout}
+          disabled={selectedItems.length === 0}
         >
-          Thanh toán
+          Thanh toán ({selectedItems.length} sản phẩm)
         </Button>
       </Card>
     </div>

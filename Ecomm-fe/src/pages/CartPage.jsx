@@ -12,7 +12,6 @@ const { Content } = Layout;
 const CartPage = () => {
   return (
     <Layout className="cart-page-layout">
-      <Navbar />
       
       <Content className="cart-page-content">
         <div className="cart-page-container">
@@ -33,7 +32,6 @@ const CartPage = () => {
         </div>
       </Content>
       
-      <Footer className="cart-page-footer" />
       
     </Layout>
   );

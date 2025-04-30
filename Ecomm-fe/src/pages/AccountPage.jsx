@@ -1,50 +1,55 @@
 import React, { useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Layout, Breadcrumb, Typography, Row, Col, Card, Skeleton } from "antd";
 import { 
   HomeOutlined, 
   UserOutlined, 
-  SmileOutlined 
+  EnvironmentOutlined,
+  ShoppingCartOutlined
 } from "@ant-design/icons";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import Profile from "../components/AccountPage/Profile";
+import Addresses from "../components/AccountPage/Addresses";
 import { AuthContext } from "../components/context/auth.context";
+import MyOrder from "../components/AccountPage/MyOrder";
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
 const AccountPage = () => {
   const { user } = useContext(AuthContext);
+  const location = useLocation(); // To determine the current path
+
+  const isProfilePage = location.pathname === "/account/profile"; // Determines if we're on the Profile page
+  const isAddressesPage = location.pathname === "/account/addresses"; // Determines if we're on the Addresses page
+  const isMyOrderPage = location.pathname === "/account/myOrder"; // Determines if we're on the My Order page
 
   return (
     <Layout className="account-page-layout">
-      <Navbar />
       
       <Content className="account-page-content">
         <div className="account-page-container">
           {/* Breadcrumb Navigation */}
-          <Breadcrumb className="account-breadcrumb">
-            <Breadcrumb.Item>
-              <Link to="/">
-                <HomeOutlined /> Trang chủ
-              </Link>
-            </Breadcrumb.Item>
-            <Breadcrumb.Item>
-              <Link to="/accountPage">
-                <UserOutlined /> Tài khoản
-              </Link>
-            </Breadcrumb.Item>
-          </Breadcrumb>
+          <Breadcrumb className="account-breadcrumb" items={[
+            { title: <Link to="/"><HomeOutlined /> Trang chủ</Link> },
+            { title: <Link to="/account/profile"><UserOutlined /> Tài khoản</Link> },
+            isAddressesPage && {
+              title: <Link to="/account/addresses"><EnvironmentOutlined /> Địa chỉ</Link>
+            },
+            isMyOrderPage && {
+              title: <Link to="/account/myOrder"><ShoppingCartOutlined /> Đơn hàng</Link>
+            }
+          ]} />
           
           {/* Welcome Section */}
-          <Card 
+          <Card
             className="welcome-section"
-            bordered={false}
+            variant="bordered"
           >
             <Row gutter={16} align="middle">
               <Col>
-                <SmileOutlined className="welcome-icon" />
+                <UserOutlined className="welcome-icon" />
               </Col>
               <Col>
                 <Title level={3} className="welcome-text">
@@ -57,14 +62,15 @@ const AccountPage = () => {
             </Row>
           </Card>
           
-          {/* Profile Section */}
-          <div className="profile-section">
-            <Profile />
+          {/* Profile or Addresses Section */}
+          <div className="section">
+            {isProfilePage && <Profile />}
+            {isAddressesPage && <Addresses />}
+            {isMyOrderPage && <MyOrder />}
           </div>
         </div>
       </Content>
       
-      <Footer className="account-page-footer" />
       
       <style>{`
         .account-page-layout {
@@ -114,9 +120,8 @@ const AccountPage = () => {
           color: rgba(0, 0, 0, 0.45);
         }
         
-        .profile-section {
-          border-radius: 8px;
-          overflow: hidden;
+        .section {
+          margin-top: 24px;
         }
         
         .account-page-footer {
