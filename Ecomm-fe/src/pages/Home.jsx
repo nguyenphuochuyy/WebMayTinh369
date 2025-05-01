@@ -788,7 +788,7 @@ const Home = () => {
   //     {/* <Footer /> */}
   //   </Layout>
   // );
-  // Hàm giảm giá (ví dụ: từ 100 xuống 80)
+
   const categories = [
     { key: "1", label: "Pc Gaming" },
     { key: "2", label: "Pc văn phòng" },
