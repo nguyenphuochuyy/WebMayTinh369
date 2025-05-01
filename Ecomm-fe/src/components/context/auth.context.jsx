@@ -8,21 +8,29 @@ export const AuthContext = createContext({
   id: "",
   phone: "",
   role: "",
+  sum: 0,
+  cartDetails: [],
+  addresses: [],
+  refresh: false
 });
 
 export const AuthWrapper = (props) => {
-    const [user, setUser] = useState({
-        avatar: "",
-        email: "",
-        fullName: "",
-        id: "",
-        phone: "",
-        role: "",
-    });
+  const [user, setUser] = useState({
+    avatar: "",
+    email: "",
+    fullName: "",
+    id: "",
+    phone: "",
+    role: "",
+    sum: 0,
+    cartDetails: [],
+    addresses: [],
+    refresh: false
+  });
 
-    return (
-        <AuthContext.Provider value={{ user, setUser }}>
-            {props.children}
-        </AuthContext.Provider>
-    )
-}
+  return (
+    <AuthContext.Provider value={{ user, setUser }}>
+      {props.children}
+    </AuthContext.Provider>
+  );
+};

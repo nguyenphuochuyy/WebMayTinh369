@@ -1,359 +1,453 @@
-import React, { useState, useEffect } from "react";
-import { Form, Input, Button, Upload, message, InputNumber, Table, Space, Select } from "antd";
-import { PlusOutlined, DeleteOutlined, EditOutlined, LoadingOutlined } from "@ant-design/icons";
-import axios from "axios";
+import React, { useState } from 'react';
+import { 
+  Layout, 
+  Typography, 
+  Table, 
+  Tag, 
+  Space, 
+  Button, 
+  Input, 
+  Modal, 
+  Form, 
+  InputNumber, 
+  Select, 
+  Upload, 
+  Popconfirm, 
+  message,
+  Tooltip
+} from 'antd';
+import { 
+  SearchOutlined, 
+  PlusOutlined, 
+  EditOutlined, 
+  DeleteOutlined,
+  EyeOutlined,
+  UploadOutlined
+} from '@ant-design/icons';
 
-const API_URL = "http://localhost:8082/api"; // Đảm bảo URL này đúng với backend của bạn
+const { Content } = Layout;
+const { Title } = Typography;
+const { Option } = Select;
+const { TextArea } = Input;
 
-const Product = () => {
-  const [form] = Form.useForm();
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState([]);
+const Products = () => {
+  const [searchText, setSearchText] = useState('');
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [imageUrl, setImageUrl] = useState(null);
-  const [uploadLoading, setUploadLoading] = useState(false);
+  const [viewingProduct, setViewingProduct] = useState(null);
+  const [form] = Form.useForm();
+  
+  // Dữ liệu giả lập cho danh sách sản phẩm
+  const [products, setProducts] = useState([
+    {
+      key: '1',
+      id: 'P001',
+      name: 'Laptop Dell XPS 13',
+      category: 'Electronics',
+      price: 1200,
+      stock: 23,
+      status: 'In Stock',
+      description: 'Dell XPS 13 9310 Laptop: 13.4-inch FHD+ Display, Intel Core i7-1185G7, 16GB RAM, 512GB SSD, Iris Xe Graphics, Windows 10 Pro',
+      image: 'laptop.jpg',
+    },
+    {
+      key: '2',
+      id: 'P002',
+      name: 'Samsung Galaxy S23',
+      category: 'Electronics',
+      price: 999,
+      stock: 45,
+      status: 'In Stock',
+      description: 'Samsung Galaxy S23 with 6.1-inch Dynamic AMOLED 2X, 8GB RAM, 256GB storage, 50MP camera',
+      image: 'phone.jpg',
+    },
+    {
+      key: '3',
+      id: 'P003',
+      name: 'Nike Air Max 270',
+      category: 'Footwear',
+      price: 150,
+      stock: 0,
+      status: 'Out of Stock',
+      description: 'Nike Air Max 270 Men\'s shoe with large Air unit and comfortable fit',
+      image: 'shoes.jpg',
+    },
+    {
+      key: '4',
+      id: 'P004',
+      name: 'Ceramic Coffee Mug',
+      category: 'Home',
+      price: 12.99,
+      stock: 120,
+      status: 'In Stock',
+      description: 'Premium 12oz ceramic coffee mug, microwave and dishwasher safe',
+      image: 'mug.jpg',
+    },
+    {
+      key: '5',
+      id: 'P005',
+      name: 'Cotton T-Shirt',
+      category: 'Clothing',
+      price: 19.99,
+      stock: 78,
+      status: 'In Stock',
+      description: '100% organic cotton t-shirt, available in multiple colors',
+      image: 'tshirt.jpg',
+    },
+  ]);
 
-  useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-  }, []);
+  const categories = ['Electronics', 'Footwear', 'Home', 'Clothing', 'Books', 'Toys', 'Sports'];
 
-  useEffect(() => {
-    if (editingProduct) {
-      form.setFieldsValue({
-        name: editingProduct.name,
-        price: editingProduct.price,
-        description: editingProduct.description,
-        quantity: editingProduct.quantity,
-        factory: editingProduct.factory,
-        categoryId: editingProduct.category?.id,
-      });
-      setImageUrl(editingProduct.image);
+  const showModal = (product = null) => {
+    setEditingProduct(product);
+    if (product) {
+      form.setFieldsValue(product);
     } else {
       form.resetFields();
-      setImageUrl(null);
     }
-  }, [editingProduct, form]);
-
-  const fetchProducts = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(`${API_URL}/products`);
-      setProducts(response.data);
-    } catch (error) {
-      message.error("Failed to fetch products.");
-      console.error("Error fetching products:", error);
-    } finally {
-      setLoading(false);
-    }
+    setIsModalVisible(true);
   };
 
-  const fetchCategories = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/categories`);
-      setCategories(response.data);
-    } catch (error) {
-      message.error("Failed to fetch categories.");
-      console.error("Error fetching categories:", error);
-    }
+  const showViewModal = (product) => {
+    setViewingProduct(product);
+    setIsViewModalVisible(true);
   };
 
-  const handleUploadChange = (info) => {
-    if (info.file.status === "uploading") {
-      setUploadLoading(true);
-      return;
-    }
-    if (info.file.status === "done") {
-      setImageUrl(info.file.response);
-      setUploadLoading(false);
-    } else if (info.file.status === "error") {
-      message.error("Failed to upload image.");
-      setUploadLoading(false);
-    }
-  };
-
-  const onFinish = async (values) => {
-    try {
-      setLoading(true);
-      const formData = new FormData();
-
-      const productData = {
-        name: values.name,
-        price: values.price,
-        description: values.description,
-        quantity: values.quantity,
-        factory: values.factory,
-        category: {
-          id: values.categoryId
-        }
-      };
-
-      formData.append("product", new Blob([JSON.stringify(productData)], { type: 'application/json' }));
-
-      const imageFileList = values.image;
-      if (imageFileList && imageFileList.length > 0) {
-        const imageFile = imageFileList[0]?.originFileObj;
-        if (imageFile) {
-          formData.append("image", imageFile);
-        }
-      }
-
-      const apiCall = editingProduct
-        ? axios.put(`${API_URL}/products/${editingProduct.id}`, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          })
-        : axios.post(`${API_URL}/products`, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          });
-
-      const response = await apiCall;
-
-      if (response.status === (editingProduct ? 200 : 201)) {
-        message.success(`Product ${editingProduct ? 'updated' : 'created'} successfully!`);
-        form.resetFields();
-        setImageUrl(null);
-        setEditingProduct(null);
-        fetchProducts();
-      } else {
-        message.error(`Failed to ${editingProduct ? 'update' : 'create'} product. Status: ${response.status}`);
-        console.error("Backend Response:", response.data);
-      }
-
-    } catch (error) {
-      message.error(`Failed to ${editingProduct ? 'update' : 'create'} product.`);
-      console.error("Error:", error);
-      if (error.response) {
-        console.error("Backend Response Data:", error.response.data);
-        console.error("Backend Response Status:", error.response.status);
-        console.error("Backend Response Headers:", error.response.headers);
-      } else if (error.request) {
-        console.error("Request Error:", error.request);
-      } else {
-        console.error("Axios Error:", error.message);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEdit = (record) => {
-    setEditingProduct(record);
-  };
-
-  const handleCancelEdit = () => {
+  const handleCancel = () => {
+    setIsModalVisible(false);
     setEditingProduct(null);
     form.resetFields();
-    setImageUrl(null);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      try {
-        await axios.delete(`${API_URL}/products/${id}`);
-        message.success("Product deleted successfully!");
-        fetchProducts();
-      } catch (error) {
-        message.error("Failed to delete product.");
-        console.error("Error deleting product:", error);
-      }
-    }
+  const handleViewCancel = () => {
+    setIsViewModalVisible(false);
+    setViewingProduct(null);
   };
+
+  const handleOk = () => {
+    form.validateFields().then((values) => {
+      if (editingProduct) {
+        // Cập nhật sản phẩm hiện có
+        setProducts(prev => 
+          prev.map(product => 
+            product.id === editingProduct.id ? 
+            { 
+              ...product, 
+              ...values, 
+              status: values.stock > 0 ? 'In Stock' : 'Out of Stock'
+            } : product
+          )
+        );
+        message.success('Sản phẩm đã được cập nhật!');
+      } else {
+        // Thêm sản phẩm mới
+        const newProduct = {
+          key: Date.now().toString(),
+          id: `P00${products.length + 1}`,
+          ...values,
+          status: values.stock > 0 ? 'In Stock' : 'Out of Stock',
+          image: 'default.jpg', // Sử dụng ảnh mặc định
+        };
+        setProducts(prev => [...prev, newProduct]);
+        message.success('Sản phẩm mới đã được thêm!');
+      }
+      setIsModalVisible(false);
+      setEditingProduct(null);
+      form.resetFields();
+    });
+  };
+
+  const handleDelete = (id) => {
+    setProducts(prev => prev.filter(product => product.id !== id));
+    message.success('Sản phẩm đã được xóa!');
+  };
+
+  // Lọc sản phẩm dựa trên từ khóa tìm kiếm
+  const filteredProducts = products.filter(product => 
+    product.name.toLowerCase().includes(searchText.toLowerCase()) ||
+    product.category.toLowerCase().includes(searchText.toLowerCase()) ||
+    product.id.toLowerCase().includes(searchText.toLowerCase())
+  );
 
   const columns = [
     {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+      width: '8%',
     },
     {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-    },
-    {
-      title: "Price",
-      dataIndex: "price",
-      key: "price",
-      render: (price) => price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }),
-    },
-    {
-      title: "Image",
-      dataIndex: "image",
-      key: "image",
-      render: (image) => (
-        <img src={image} alt="product" style={{ width: 50, height: 50, objectFit: 'cover' }} />
+      title: 'Tên sản phẩm',
+      dataIndex: 'name',
+      key: 'name',
+      sorter: (a, b) => a.name.localeCompare(b.name),
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (name) => (
+        <Tooltip placement="topLeft" title={name}>
+          {name}
+        </Tooltip>
       ),
     },
     {
-      title: "Description",
-      dataIndex: "description",
-      key: "description",
+      title: 'Danh mục',
+      dataIndex: 'category',
+      key: 'category',
+      filters: categories.map(category => ({ text: category, value: category })),
+      onFilter: (value, record) => record.category === value,
+      width: '15%',
     },
     {
-      title: "Quantity",
-      dataIndex: "quantity",
-      key: "quantity",
+      title: 'Giá',
+      dataIndex: 'price',
+      key: 'price',
+      sorter: (a, b) => a.price - b.price,
+      render: (price) => `$${price.toFixed(2)}`,
+      width: '10%',
     },
     {
-      title: "Factory",
-      dataIndex: "factory",
-      key: "factory",
+      title: 'Tồn kho',
+      dataIndex: 'stock',
+      key: 'stock',
+      sorter: (a, b) => a.stock - b.stock,
+      width: '10%',
     },
     {
-      title: "Action",
-      key: "action",
+      title: 'Trạng thái',
+      dataIndex: 'status',
+      key: 'status',
+      filters: [
+        { text: 'In Stock', value: 'In Stock' },
+        { text: 'Out of Stock', value: 'Out of Stock' },
+        { text: 'Discontinued', value: 'Discontinued' },
+      ],
+      onFilter: (value, record) => record.status === value,
+      render: (status) => {
+        let color = '';
+        if (status === 'In Stock') color = 'green';
+        else if (status === 'Out of Stock') color = 'red';
+        else if (status === 'Discontinued') color = 'gray';
+        
+        return <Tag color={color}>{status}</Tag>;
+      },
+      width: '15%',
+    },
+    {
+      title: 'Hành động',
+      key: 'action',
       render: (_, record) => (
-        <Space size="middle">
-          <Button icon={<EditOutlined />} onClick={() => handleEdit(record)}>
-            Edit
+        <Space size="small">
+          <Button 
+            type="default" 
+            size="small" 
+            icon={<EyeOutlined />} 
+            onClick={() => showViewModal(record)}
+          >
+            Xem
           </Button>
-          <Button icon={<DeleteOutlined />} danger onClick={() => handleDelete(record.id)}>
-            Delete
+          <Button 
+            type="primary" 
+            size="small" 
+            icon={<EditOutlined />} 
+            onClick={() => showModal(record)}
+          >
+            Sửa
           </Button>
+          <Popconfirm
+            title="Bạn có chắc muốn xóa sản phẩm này?"
+            onConfirm={() => handleDelete(record.id)}
+            okText="Có"
+            cancelText="Không"
+          >
+            <Button 
+              type="primary" 
+              danger 
+              size="small" 
+              icon={<DeleteOutlined />}
+            >
+              Xóa
+            </Button>
+          </Popconfirm>
         </Space>
       ),
     },
   ];
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>{editingProduct ? "Edit Product" : "Create Product"}</h2>
-      <div style={{ maxWidth: 600, margin: "0 auto", marginBottom: "30px", border: "1px solid #d9d9d9", padding: "20px", borderRadius: "5px" }}>
-        <Form
-          form={form}
-          name="product_form"
-          onFinish={onFinish}
-          layout="vertical"
-          initialValues={{
-            quantity: 1,
-          }}
-        >
-          <Form.Item
-            label="Product Name"
-            name="name"
-            rules={[{ required: true, message: "Please input product name!" }]}
-          >
-            <Input placeholder="Enter product name" />
-          </Form.Item>
-
-          <Form.Item
-            label="Price"
-            name="price"
-            rules={[{ required: true, message: "Please input price!" }]}
-          >
-            <InputNumber
-              min={0}
-              style={{ width: "100%" }}
-              placeholder="Enter product price"
-              formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-              parser={(value) => value.replace(/,*/g, '')}
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="Product Image"
-            name="image"
-            valuePropName="fileList"
-            getValueFromEvent={(e) => {
-              if (Array.isArray(e)) {
-                return e;
-              }
-              return e && e.fileList;
-            }}
-          >
-            <Upload
-              name="image"
-              listType="picture-card"
-              showUploadList={true}
-              onChange={handleUploadChange}
-              loading={uploadLoading}
-              initialFileList={imageUrl ? [{ uid: '-1', name: 'image', status: 'done', url: imageUrl }] : []}
-            >
-              {imageUrl ? (
-                <img src={imageUrl} alt="product" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              ) : (
-                <div>
-                  {uploadLoading ? <LoadingOutlined /> : <PlusOutlined />}
-                  <div style={{ marginTop: 8 }}>Upload</div>
-                </div>
-              )}
-            </Upload>
-          </Form.Item>
-
-          <Form.Item
-            label="Description"
-            name="description"
-            rules={[{ required: true, message: "Please input product description!" }]}
-          >
-            <Input.TextArea
-              rows={4}
-              placeholder="Enter product description"
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="Quantity"
-            name="quantity"
-            rules={[{ required: true, message: "Please input product quantity!" }]}
-          >
-            <InputNumber
-              min={0}
-              style={{ width: "100%" }}
-              placeholder="Enter product quantity"
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="Factory"
-            name="factory"
-            rules={[{ required: true, message: "Please input product factory!" }]}
-          >
-            <Input placeholder="Enter product factory" />
-          </Form.Item>
-
-          <Form.Item
-            label="Category"
-            name="categoryId"
-            rules={[{ required: true, message: "Please select a category!" }]}
-          >
-            <Select
-              placeholder="Select a category"
-              loading={!categories || categories.length === 0}
-            >
-              {categories && categories.map(category => (
-                <Select.Option key={category.id} value={category.id}>
-                  {category.name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-
-          <Form.Item>
-            <Button type="primary" htmlType="submit" block>
-              {editingProduct ? "Update Product" : "Create Product"}
-            </Button>
-            {editingProduct && (
-              <Button style={{ marginTop: 10 }} onClick={handleCancelEdit} block>
-                Cancel Edit
+    <Layout style={{ marginLeft: 200, minHeight: '100vh' }}>
+      <Content style={{ margin: '24px 16px 0', overflow: 'initial' }}>
+        <div style={{ padding: 24, background: '#fff', minHeight: '100%' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+            <Title level={2}>Quản lý sản phẩm</Title>
+            <div>
+              <Input
+                placeholder="Tìm kiếm sản phẩm..."
+                prefix={<SearchOutlined />}
+                style={{ width: 250, marginRight: 16 }}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
+              <Button 
+                type="primary" 
+                icon={<PlusOutlined />} 
+                onClick={() => showModal()}
+              >
+                Thêm sản phẩm
               </Button>
-            )}
-          </Form.Item>
-        </Form>
-      </div>
+            </div>
+          </div>
+          
+          <Table
+            columns={columns}
+            dataSource={filteredProducts}
+            pagination={{ pageSize: 10 }}
+            bordered
+          />
 
-      <h2>Product List</h2>
-      {loading ? (
-        <LoadingOutlined />
-      ) : (
-        <Table columns={columns} dataSource={products} rowKey="id" />
-      )}
-    </div>
+          {/* Modal thêm/sửa sản phẩm */}
+          <Modal
+            title={editingProduct ? "Chỉnh sửa sản phẩm" : "Thêm sản phẩm mới"}
+            visible={isModalVisible}
+            onOk={handleOk}
+            onCancel={handleCancel}
+            okText={editingProduct ? "Cập nhật" : "Thêm"}
+            cancelText="Hủy"
+            width={600}
+          >
+            <Form
+              form={form}
+              layout="vertical"
+              name="product_form"
+            >
+              <Form.Item
+                name="name"
+                label="Tên sản phẩm"
+                rules={[{ required: true, message: 'Vui lòng nhập tên sản phẩm!' }]}
+              >
+                <Input placeholder="Nhập tên sản phẩm" />
+              </Form.Item>
+              
+              <Form.Item
+                name="category"
+                label="Danh mục"
+                rules={[{ required: true, message: 'Vui lòng chọn danh mục!' }]}
+              >
+                <Select placeholder="Chọn danh mục">
+                  {categories.map(category => (
+                    <Option key={category} value={category}>{category}</Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              
+              <Form.Item
+                name="price"
+                label="Giá"
+                rules={[{ required: true, message: 'Vui lòng nhập giá sản phẩm!' }]}
+              >
+                <InputNumber 
+                  min={0} 
+                  step={0.01} 
+                  placeholder="0.00" 
+                  prefix="$"
+                  style={{ width: '100%' }}
+                />
+              </Form.Item>
+              
+              <Form.Item
+                name="stock"
+                label="Tồn kho"
+                rules={[{ required: true, message: 'Vui lòng nhập số lượng tồn kho!' }]}
+              >
+                <InputNumber 
+                  min={0} 
+                  placeholder="0" 
+                  style={{ width: '100%' }}
+                />
+              </Form.Item>
+              
+              <Form.Item
+                name="description"
+                label="Mô tả"
+              >
+                <TextArea 
+                  rows={4} 
+                  placeholder="Nhập mô tả sản phẩm"
+                />
+              </Form.Item>
+              
+              <Form.Item
+                name="image"
+                label="Hình ảnh"
+              >
+                <Upload 
+                  maxCount={1}
+                  listType="picture"
+                  beforeUpload={() => false}
+                >
+                  <Button icon={<UploadOutlined />}>Tải lên</Button>
+                </Upload>
+              </Form.Item>
+            </Form>
+          </Modal>
+
+          {/* Modal xem chi tiết sản phẩm */}
+          <Modal
+            title="Chi tiết sản phẩm"
+            visible={isViewModalVisible}
+            onCancel={handleViewCancel}
+            footer={[
+              <Button key="back" onClick={handleViewCancel}>
+                Đóng
+              </Button>,
+              <Button 
+                key="edit" 
+                type="primary"
+                onClick={() => {
+                  handleViewCancel();
+                  showModal(viewingProduct);
+                }}
+              >
+                Chỉnh sửa
+              </Button>,
+            ]}
+            width={600}
+          >
+            {viewingProduct && (
+              <div style={{ padding: '0 20px' }}>
+                <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                  <img 
+                    src={`/api/placeholder/200/200?text=${viewingProduct.name}`} 
+                    alt={viewingProduct.name} 
+                    style={{ maxWidth: '200px' }} 
+                  />
+                </div>
+                
+                <p><strong>ID:</strong> {viewingProduct.id}</p>
+                <p><strong>Tên sản phẩm:</strong> {viewingProduct.name}</p>
+                <p><strong>Danh mục:</strong> {viewingProduct.category}</p>
+                <p><strong>Giá:</strong> ${viewingProduct.price.toFixed(2)}</p>
+                <p><strong>Tồn kho:</strong> {viewingProduct.stock}</p>
+                <p><strong>Trạng thái:</strong> 
+                  <Tag 
+                    color={
+                      viewingProduct.status === 'In Stock' ? 'green' : 
+                      viewingProduct.status === 'Out of Stock' ? 'red' : 'gray'
+                    }
+                    style={{ marginLeft: 8 }}
+                  >
+                    {viewingProduct.status}
+                  </Tag>
+                </p>
+                <p><strong>Mô tả:</strong> {viewingProduct.description}</p>
+              </div>
+            )}
+          </Modal>
+        </div>
+      </Content>
+    </Layout>
   );
 };
 
-export default Product;
+export default Products;

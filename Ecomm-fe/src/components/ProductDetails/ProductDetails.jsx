@@ -7,9 +7,7 @@ import Main from "../../components/ProductDetails/Main.jsx";
 function ProductDetails() {
   return (
     <div>
-      <Navbar />
       <Main />
-      <Footer />
     </div>
   );
 }

@@ -9,7 +9,6 @@ function LogIn() {
   return (
     <div>
       <Main />
-      <Footer />
     </div>
   );
 }

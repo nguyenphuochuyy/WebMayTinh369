@@ -16,6 +16,7 @@ function LoginForm() {
 
     const { username, password } = values;
     const res = await loginAPI(username, password);
+    console.log("Response: ", res);
 
     if (res.data) {
       note.info({
@@ -26,6 +27,7 @@ function LoginForm() {
 
       // Lưu token và thông tin user vào localStorage và context
       localStorage.setItem("access_token", res.data.tokens.accessToken);
+      localStorage.setItem("role", res.data.user.role);
       setUser(res.data.user);
       console.log("User info: ", res);
       // Chuyển hướng đến trang dựa trên role
