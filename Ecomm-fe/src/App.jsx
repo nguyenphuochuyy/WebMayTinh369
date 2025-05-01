@@ -9,6 +9,7 @@ import Footer from "./components/layout/Footer.jsx";
 import { Outlet } from "react-router-dom";
 import { Layout } from "antd";
 import "../src/styles/Reset_CSS/style.css";
+import ScrollToTop from "./components/ScrollToTop/index.jsx";
 function App() {
   const { user, setUser } = useContext(AuthContext);
 
@@ -46,11 +47,14 @@ function App() {
 
   return (
     <div>
+    
       <Layout>
         <Navbar />
         <Outlet />
         <Footer />
       </Layout>
+   
+     
     </div>
   );
 }

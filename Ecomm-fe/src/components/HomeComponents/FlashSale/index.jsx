@@ -3,6 +3,7 @@ import { Card, Button, Rate, Carousel } from 'antd';
 import { EyeOutlined, HeartOutlined } from '@ant-design/icons';
 import './FlashSale.css';
 import { Link, Links, Navigate, useNavigate } from 'react-router-dom';
+import ScrollToTop from '../../ScrollToTop';
 
 const FlashSales = () => {
   const navigate = useNavigate();
@@ -86,7 +87,7 @@ const FlashSales = () => {
   const handleClick = (productId) => {
     // Redirect to the detail page with the product ID
     navigate(`/detailPage/${productId}`);
-    
+     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   return (
     <div className="flash-sales-container">

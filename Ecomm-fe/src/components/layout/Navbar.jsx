@@ -119,11 +119,13 @@ const Navbar = ({ onSearch }) => {
       label: <Link to="/contactPage">Liên hệ</Link>,
     },
     {
+      label: <Link to="/about">Giới thiệu</Link>,
       key: "about",
       icon: <InfoCircleOutlined />,
-      label: <Link to="/about">Giới thiệu</Link>,
+ 
     },
   ];
+
 
   const navbarStyle = {
     header: {
@@ -190,6 +192,7 @@ const Navbar = ({ onSearch }) => {
       },
     },
   };
+
 
   return (
     <Header style={navbarStyle.header}>
