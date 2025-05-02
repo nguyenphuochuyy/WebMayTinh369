@@ -50,7 +50,7 @@ function App() {
     
       <Layout>
         <Navbar />
-        <Outlet />
+        <Outlet  />
         <Footer />
       </Layout>
    
