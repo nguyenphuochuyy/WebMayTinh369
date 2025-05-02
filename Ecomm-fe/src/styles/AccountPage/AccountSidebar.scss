@@ -1,40 +1,72 @@
 .account-sidebar {
-  width: 25%;
-  padding: 20px;
-  background-color: #f9f9f9;
+  width: 260px;
+  min-width: 260px;
+  height: fit-content;
+}
+
+.user-card {
   border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
 }
 
-.account-sidebar ul {
-  list-style-type: none;
-  padding: 0;
+.user-info {
+  display: flex;
+  align-items: center;
+  padding: 4px 0 12px;
 }
 
-.account-sidebar ul li {
-  margin-bottom: 10px;
+.user-avatar {
+  background-color: #1890ff;
+  flex-shrink: 0;
 }
 
-.account-sidebar ul li a {
-  text-decoration: none;
-  color: #333;
-  font-weight: bold;
+.user-details {
+  margin-left: 12px;
+  overflow: hidden;
 }
 
-.account-sidebar ul li a:hover {
-  color: black;
+.user-name {
+  margin-bottom: 0 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.account-sidebar ul li ul {
-  padding-left: 20px;
-  display: block; 
+.user-email {
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
 }
 
-.account-sidebar ul li ul li {
-  margin-bottom: 5px;
+.divider {
+  margin: 12px 0;
 }
 
-.account-sidebar ul li ul li a {
-  text-decoration: none;
-  color: gray; 
-  font-weight: normal;
+.account-menu {
+  border-right: none;
+}
+
+.menu-divider {
+  margin: 12px 0;
+}
+
+.logout-item {
+  color: #ff4d4f;
+}
+
+.logout-item:hover {
+  color: #ff7875;
+}
+
+@media (max-width: 768px) {
+  .account-sidebar {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  .user-info {
+    justify-content: center;
+  }
 }

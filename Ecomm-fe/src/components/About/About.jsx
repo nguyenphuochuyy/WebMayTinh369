@@ -8,7 +8,6 @@ function About() {
   return (
     <div>
       <Main />
-      <Footer />
     </div>
   );
 }

@@ -23,7 +23,6 @@ const ContactPage = () => {
             </div>
         </div>
         <div className="contact-footer">
-            <Footer />
         </div>
     </div>
   );

@@ -1,49 +1,99 @@
 import React, { useState, useEffect } from "react";
-import { Form, Input, Button, Upload, message, InputNumber, Table, Space, Select } from "antd";
-import { PlusOutlined, DeleteOutlined, EditOutlined, LoadingOutlined } from "@ant-design/icons";
+import {
+  Layout,
+  Typography,
+  Table,
+  Tag,
+  Space,
+  Button,
+  Input,
+  Modal,
+  Form,
+  InputNumber,
+  Select,
+  Upload,
+  Popconfirm,
+  message,
+  Tooltip,
+} from "antd";
+import {
+  SearchOutlined,
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  EyeOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import axios from "axios";
 
-const API_URL = "http://localhost:8082/api"; // Đảm bảo URL này đúng với backend của bạn
+const { Content } = Layout;
+const { Title } = Typography;
+const { Option } = Select;
+const { TextArea } = Input;
 
-const Product = () => {
-  const [form] = Form.useForm();
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState([]);
+const formatVND = (price) => {
+  return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(price);
+};
+
+const getStockStatus = (quantity) => {
+  if (quantity === 0) return { text: "Hết hàng", color: "red" };
+  if (quantity > 0 && quantity <= 10) return { text: "Sắp hết hàng", color: "orange" };
+  return { text: "Còn hàng", color: "green" };
+};
+
+const Products = () => {
+  const [searchText, setSearchText] = useState("");
+  const [isProductModalVisible, setIsProductModalVisible] = useState(false);
+  const [isViewProductModalVisible, setIsViewProductModalVisible] = useState(false);
+  const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [imageUrl, setImageUrl] = useState(null);
-  const [uploadLoading, setUploadLoading] = useState(false);
+  const [viewingProduct, setViewingProduct] = useState(null);
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [showCategoryForm, setShowCategoryForm] = useState(false); // Trạng thái để hiển thị form
+  const [productForm] = Form.useForm();
+  const [categoryForm] = Form.useForm();
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [productFileList, setProductFileList] = useState([]);
+  const [categoryFileList, setCategoryFileList] = useState([]);
+
+  const API_URL = "http://localhost:8082/api";
 
   useEffect(() => {
-    fetchProducts();
-    fetchCategories();
+    fetchCategoriesAndProducts();
   }, []);
 
-  useEffect(() => {
-    if (editingProduct) {
-      form.setFieldsValue({
-        name: editingProduct.name,
-        price: editingProduct.price,
-        description: editingProduct.description,
-        quantity: editingProduct.quantity,
-        factory: editingProduct.factory,
-        categoryId: editingProduct.category?.id,
-      });
-      setImageUrl(editingProduct.image);
-    } else {
-      form.resetFields();
-      setImageUrl(null);
-    }
-  }, [editingProduct, form]);
-
-  const fetchProducts = async () => {
-    setLoading(true);
+  // Lấy danh mục và sản phẩm theo danh mục
+  const fetchCategoriesAndProducts = async () => {
     try {
-      const response = await axios.get(`${API_URL}/products`);
-      setProducts(response.data);
+      setLoading(true);
+      // Lấy danh sách danh mục
+      const categoriesResponse = await axios.get(`${API_URL}/categories`);
+      const categoriesData = categoriesResponse.data;
+      setCategories(categoriesData);
+
+      // Lấy sản phẩm theo từng danh mục
+      const allProducts = [];
+      for (const category of categoriesData) {
+        const productsResponse = await axios.get(`${API_URL}/products/category/${category.id}`);
+        const productsData = productsResponse.data.map((product) => ({
+          key: product.id,
+          id: product.id,
+          name: product.name,
+          category: category, // Gán thông tin danh mục vào sản phẩm
+          price: product.price,
+          quantity: product.quantity || 0,
+          description: product.description || "",
+          image: product.image || "",
+          factory: product.factory || "",
+        }));
+        allProducts.push(...productsData);
+      }
+
+      setProducts(allProducts);
     } catch (error) {
-      message.error("Failed to fetch products.");
-      console.error("Error fetching products:", error);
+      message.error("Lỗi khi tải dữ liệu: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -54,306 +104,564 @@ const Product = () => {
       const response = await axios.get(`${API_URL}/categories`);
       setCategories(response.data);
     } catch (error) {
-      message.error("Failed to fetch categories.");
-      console.error("Error fetching categories:", error);
+      message.error("Lỗi khi tải danh sách danh mục: " + error.message);
     }
   };
 
-  const handleUploadChange = (info) => {
-    if (info.file.status === "uploading") {
-      setUploadLoading(true);
-      return;
+  const showProductModal = (product = null) => {
+    setEditingProduct(product);
+    setProductFileList(product && product.image ? [{ uid: "-1", name: "image", status: "done", url: product.image }] : []);
+    if (product) {
+      productForm.setFieldsValue({
+        name: product.name,
+        category: product.category?.id || null,
+        price: product.price,
+        quantity: product.quantity,
+        description: product.description,
+        factory: product.factory,
+      });
+    } else {
+      productForm.resetFields();
     }
-    if (info.file.status === "done") {
-      setImageUrl(info.file.response);
-      setUploadLoading(false);
-    } else if (info.file.status === "error") {
-      message.error("Failed to upload image.");
-      setUploadLoading(false);
-    }
+    setIsProductModalVisible(true);
   };
 
-  const onFinish = async (values) => {
+  const showViewProductModal = (product) => {
+    setViewingProduct(product);
+    setIsViewProductModalVisible(true);
+  };
+
+  const showCategoryModal = (category = null) => {
+    setEditingCategory(category);
+    setCategoryFileList(category && category.image ? [{ uid: "-1", name: "image", status: "done", url: category.image }] : []);
+    if (category) {
+      categoryForm.setFieldsValue({
+        name: category.name,
+        description: category.description,
+      });
+      setShowCategoryForm(true); // Hiển thị form khi chỉnh sửa
+    } else {
+      categoryForm.resetFields();
+      setShowCategoryForm(false); // Ẩn form khi chỉ mở modal
+    }
+    setIsCategoryModalVisible(true);
+  };
+
+  const handleAddCategory = () => {
+    setEditingCategory(null); // Đảm bảo không ở chế độ chỉnh sửa
+    categoryForm.resetFields();
+    setCategoryFileList([]);
+    setShowCategoryForm(true); // Hiển thị form khi thêm mới
+  };
+
+  const handleProductCancel = () => {
+    setIsProductModalVisible(false);
+    setEditingProduct(null);
+    setProductFileList([]);
+    productForm.resetFields();
+  };
+
+  const handleViewProductCancel = () => {
+    setIsViewProductModalVisible(false);
+    setViewingProduct(null);
+  };
+
+  const handleCategoryCancel = () => {
+    setIsCategoryModalVisible(false);
+    setEditingCategory(null);
+    setShowCategoryForm(false); // Ẩn form khi đóng modal
+    setCategoryFileList([]);
+    categoryForm.resetFields();
+  };
+
+  const handleProductOk = async () => {
     try {
-      setLoading(true);
+      const values = await productForm.validateFields();
       const formData = new FormData();
-
       const productData = {
         name: values.name,
+        category: values.category ? { id: values.category } : null,
         price: values.price,
-        description: values.description,
         quantity: values.quantity,
+        description: values.description,
         factory: values.factory,
-        category: {
-          id: values.categoryId
-        }
       };
 
-      formData.append("product", new Blob([JSON.stringify(productData)], { type: 'application/json' }));
-
-      const imageFileList = values.image;
-      if (imageFileList && imageFileList.length > 0) {
-        const imageFile = imageFileList[0]?.originFileObj;
-        if (imageFile) {
-          formData.append("image", imageFile);
-        }
+      // Nếu không có ảnh mới, giữ nguyên ảnh cũ
+      if (productFileList.length > 0 && productFileList[0].originFileObj) {
+        formData.append("image", productFileList[0].originFileObj);
+      } else if (editingProduct && editingProduct.image) {
+        productData.image = editingProduct.image; // Gửi ảnh cũ nếu không có ảnh mới
       }
 
-      const apiCall = editingProduct
-        ? axios.put(`${API_URL}/products/${editingProduct.id}`, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          })
-        : axios.post(`${API_URL}/products`, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          });
+      formData.append("product", new Blob([JSON.stringify(productData)], { type: "application/json" }));
 
-      const response = await apiCall;
-
-      if (response.status === (editingProduct ? 200 : 201)) {
-        message.success(`Product ${editingProduct ? 'updated' : 'created'} successfully!`);
-        form.resetFields();
-        setImageUrl(null);
-        setEditingProduct(null);
-        fetchProducts();
+      if (editingProduct) {
+        await axios.put(`${API_URL}/products/${editingProduct.id}`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        message.success("Sản phẩm đã được cập nhật!");
       } else {
-        message.error(`Failed to ${editingProduct ? 'update' : 'create'} product. Status: ${response.status}`);
-        console.error("Backend Response:", response.data);
+        const response = await axios.post(`${API_URL}/products`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        productData.id = response.data.id;
+        productData.key = response.data.id;
+        setProducts([...products, productData]);
+        message.success("Sản phẩm mới đã được thêm!");
       }
-
+      handleProductCancel();
+      fetchCategoriesAndProducts();
     } catch (error) {
-      message.error(`Failed to ${editingProduct ? 'update' : 'create'} product.`);
-      console.error("Error:", error);
-      if (error.response) {
-        console.error("Backend Response Data:", error.response.data);
-        console.error("Backend Response Status:", error.response.status);
-        console.error("Backend Response Headers:", error.response.headers);
-      } else if (error.request) {
-        console.error("Request Error:", error.request);
+      message.error("Lỗi khi lưu sản phẩm: " + error.message);
+    }
+  };
+
+  const handleCategoryOk = async () => {
+    try {
+      const values = await categoryForm.validateFields();
+      const formData = new FormData();
+      const categoryData = {
+        name: values.name,
+        description: values.description,
+      };
+
+      // Nếu không có ảnh mới, giữ nguyên ảnh cũ
+      if (categoryFileList.length > 0 && categoryFileList[0].originFileObj) {
+        formData.append("image", categoryFileList[0].originFileObj);
+      } else if (editingCategory && editingCategory.image) {
+        categoryData.image = editingCategory.image; // Gửi ảnh cũ nếu không có ảnh mới
+      }
+
+      formData.append("category", new Blob([JSON.stringify(categoryData)], { type: "application/json" }));
+
+      if (editingCategory) {
+        await axios.put(`${API_URL}/categories/${editingCategory.id}`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        message.success("Danh mục đã được cập nhật!");
       } else {
-        console.error("Axios Error:", error.message);
+        const response = await axios.post(`${API_URL}/categories`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        categoryData.id = response.data.id;
+        setCategories([...categories, categoryData]);
+        message.success("Danh mục mới đã được thêm!");
       }
-    } finally {
-      setLoading(false);
+      setShowCategoryForm(false); // Ẩn form sau khi thêm/sửa
+      fetchCategoriesAndProducts();
+    } catch (error) {
+      message.error("Lỗi khi lưu danh mục: " + error.message);
     }
   };
 
-  const handleEdit = (record) => {
-    setEditingProduct(record);
-  };
-
-  const handleCancelEdit = () => {
-    setEditingProduct(null);
-    form.resetFields();
-    setImageUrl(null);
-  };
-
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      try {
-        await axios.delete(`${API_URL}/products/${id}`);
-        message.success("Product deleted successfully!");
-        fetchProducts();
-      } catch (error) {
-        message.error("Failed to delete product.");
-        console.error("Error deleting product:", error);
-      }
+  const handleDeleteProduct = async (id) => {
+    try {
+      await axios.delete(`${API_URL}/products/${id}`);
+      setProducts(products.filter((product) => product.id !== id));
+      message.success("Sản phẩm đã được xóa!");
+    } catch (error) {
+      message.error("Lỗi khi xóa sản phẩm: " + error.message);
     }
   };
 
-  const columns = [
+  const handleDeleteCategory = async (id) => {
+    try {
+      await axios.delete(`${API_URL}/categories/${id}`);
+      setCategories(categories.filter((category) => category.id !== id));
+      setProducts(products.map((product) => (product.category?.id === id ? { ...product, category: null } : product)));
+      message.success("Danh mục đã được xóa!");
+    } catch (error) {
+      message.error("Lỗi khi xóa danh mục: " + error.message);
+    }
+  };
+
+  const handleEditCategory = (category) => {
+    showCategoryModal(category);
+  };
+
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(searchText.toLowerCase()) ||
+    (product.category && product.category.name && product.category.name.toLowerCase().includes(searchText.toLowerCase())) ||
+    product.id.toString().includes(searchText)
+  );
+
+  const productColumns = [
     {
       title: "ID",
       dataIndex: "id",
       key: "id",
+      width: "8%",
     },
     {
-      title: "Name",
+      title: "Tên sản phẩm",
       dataIndex: "name",
       key: "name",
+      sorter: (a, b) => a.name.localeCompare(b.name),
+      ellipsis: { showTitle: false },
+      render: (name) => <Tooltip placement="topLeft" title={name}>{name}</Tooltip>,
     },
     {
-      title: "Price",
+      title: "Danh mục",
+      dataIndex: "category",
+      key: "category",
+      render: (category) => (category && category.name ? category.name : "Chưa phân loại"),
+      filters: categories.map((cat) => ({ text: cat.name, value: cat.id })),
+      onFilter: (value, record) => record.category && record.category.id === value,
+      width: "15%",
+    },
+    {
+      title: "Giá",
       dataIndex: "price",
       key: "price",
-      render: (price) => price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }),
+      sorter: (a, b) => a.price - b.price,
+      render: (price) => formatVND(price),
+      width: "10%",
     },
     {
-      title: "Image",
-      dataIndex: "image",
-      key: "image",
-      render: (image) => (
-        <img src={image} alt="product" style={{ width: 50, height: 50, objectFit: 'cover' }} />
-      ),
-    },
-    {
-      title: "Description",
-      dataIndex: "description",
-      key: "description",
-    },
-    {
-      title: "Quantity",
+      title: "Tồn kho",
       dataIndex: "quantity",
-      key: "quantity",
+      key: "stock",
+      sorter: (a, b) => a.quantity - b.quantity,
+      render: (quantity) => quantity || 0,
+      width: "10%",
     },
     {
-      title: "Factory",
-      dataIndex: "factory",
-      key: "factory",
+      title: "Trạng thái",
+      dataIndex: "quantity",
+      key: "status",
+      render: (quantity) => {
+        const { text, color } = getStockStatus(quantity);
+        return <Tag color={color}>{text}</Tag>;
+      },
+      width: "15%",
     },
     {
-      title: "Action",
+      title: "Hành động",
       key: "action",
       render: (_, record) => (
-        <Space size="middle">
-          <Button icon={<EditOutlined />} onClick={() => handleEdit(record)}>
-            Edit
+        <Space size="small">
+          <Button
+            type="default"
+            size="small"
+            icon={<EyeOutlined />}
+            onClick={() => showViewProductModal(record)}
+          >
+            Xem
           </Button>
-          <Button icon={<DeleteOutlined />} danger onClick={() => handleDelete(record.id)}>
-            Delete
+          <Button
+            type="primary"
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => showProductModal(record)}
+          >
+            Sửa
           </Button>
+          <Popconfirm
+            title="Bạn có chắc muốn xóa sản phẩm này?"
+            onConfirm={() => handleDeleteProduct(record.id)}
+            okText="Có"
+            cancelText="Không"
+          >
+            <Button type="primary" danger size="small" icon={<DeleteOutlined />}>
+              Xóa
+            </Button>
+          </Popconfirm>
         </Space>
       ),
     },
   ];
 
-  return (
-    <div style={{ padding: "20px" }}>
-      <h2>{editingProduct ? "Edit Product" : "Create Product"}</h2>
-      <div style={{ maxWidth: 600, margin: "0 auto", marginBottom: "30px", border: "1px solid #d9d9d9", padding: "20px", borderRadius: "5px" }}>
-        <Form
-          form={form}
-          name="product_form"
-          onFinish={onFinish}
-          layout="vertical"
-          initialValues={{
-            quantity: 1,
-          }}
-        >
-          <Form.Item
-            label="Product Name"
-            name="name"
-            rules={[{ required: true, message: "Please input product name!" }]}
+  const categoryColumns = [
+    {
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+      width: "10%",
+    },
+    {
+      title: "Tên danh mục",
+      dataIndex: "name",
+      key: "name",
+      ellipsis: { showTitle: false },
+      render: (name) => <Tooltip placement="topLeft" title={name}>{name}</Tooltip>,
+    },
+    {
+      title: "Mô tả",
+      dataIndex: "description",
+      key: "description",
+      ellipsis: { showTitle: false },
+      render: (description) => <Tooltip placement="topLeft" title={description}>{description}</Tooltip>,
+    },
+    {
+      title: "Hành động",
+      key: "action",
+      render: (_, record) => (
+        <Space size="small">
+          <Button
+            type="primary"
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => handleEditCategory(record)}
           >
-            <Input placeholder="Enter product name" />
-          </Form.Item>
-
-          <Form.Item
-            label="Price"
-            name="price"
-            rules={[{ required: true, message: "Please input price!" }]}
+            Sửa
+          </Button>
+          <Popconfirm
+            title="Bạn có chắc muốn xóa danh mục này?"
+            onConfirm={() => handleDeleteCategory(record.id)}
+            okText="Có"
+            cancelText="Không"
           >
-            <InputNumber
-              min={0}
-              style={{ width: "100%" }}
-              placeholder="Enter product price"
-              formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-              parser={(value) => value.replace(/,*/g, '')}
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="Product Image"
-            name="image"
-            valuePropName="fileList"
-            getValueFromEvent={(e) => {
-              if (Array.isArray(e)) {
-                return e;
-              }
-              return e && e.fileList;
-            }}
-          >
-            <Upload
-              name="image"
-              listType="picture-card"
-              showUploadList={true}
-              onChange={handleUploadChange}
-              loading={uploadLoading}
-              initialFileList={imageUrl ? [{ uid: '-1', name: 'image', status: 'done', url: imageUrl }] : []}
-            >
-              {imageUrl ? (
-                <img src={imageUrl} alt="product" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              ) : (
-                <div>
-                  {uploadLoading ? <LoadingOutlined /> : <PlusOutlined />}
-                  <div style={{ marginTop: 8 }}>Upload</div>
-                </div>
-              )}
-            </Upload>
-          </Form.Item>
-
-          <Form.Item
-            label="Description"
-            name="description"
-            rules={[{ required: true, message: "Please input product description!" }]}
-          >
-            <Input.TextArea
-              rows={4}
-              placeholder="Enter product description"
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="Quantity"
-            name="quantity"
-            rules={[{ required: true, message: "Please input product quantity!" }]}
-          >
-            <InputNumber
-              min={0}
-              style={{ width: "100%" }}
-              placeholder="Enter product quantity"
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="Factory"
-            name="factory"
-            rules={[{ required: true, message: "Please input product factory!" }]}
-          >
-            <Input placeholder="Enter product factory" />
-          </Form.Item>
-
-          <Form.Item
-            label="Category"
-            name="categoryId"
-            rules={[{ required: true, message: "Please select a category!" }]}
-          >
-            <Select
-              placeholder="Select a category"
-              loading={!categories || categories.length === 0}
-            >
-              {categories && categories.map(category => (
-                <Select.Option key={category.id} value={category.id}>
-                  {category.name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-
-          <Form.Item>
-            <Button type="primary" htmlType="submit" block>
-              {editingProduct ? "Update Product" : "Create Product"}
+            <Button type="primary" danger size="small" icon={<DeleteOutlined />}>
+              Xóa
             </Button>
-            {editingProduct && (
-              <Button style={{ marginTop: 10 }} onClick={handleCancelEdit} block>
-                Cancel Edit
-              </Button>
-            )}
-          </Form.Item>
-        </Form>
-      </div>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
 
-      <h2>Product List</h2>
-      {loading ? (
-        <LoadingOutlined />
-      ) : (
-        <Table columns={columns} dataSource={products} rowKey="id" />
-      )}
-    </div>
+  const handleProductUploadChange = ({ fileList }) => {
+    setProductFileList(fileList.slice(-1));
+  };
+
+  const handleCategoryUploadChange = ({ fileList }) => {
+    setCategoryFileList(fileList.slice(-1));
+  };
+
+  return (
+    <Layout style={{ marginLeft: 200, minHeight: "100vh" }}>
+      <Content style={{ margin: "24px 16px 0", overflow: "initial" }}>
+        <div style={{ padding: 24, background: "#fff", minHeight: "100%" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+            <Title level={2}>Quản lý sản phẩm</Title>
+            <div>
+              <Input
+                placeholder="Tìm kiếm sản phẩm..."
+                prefix={<SearchOutlined />}
+                style={{ width: 250, marginRight: 16 }}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => showProductModal()}
+                style={{ marginRight: 8 }}
+              >
+                Thêm sản phẩm
+              </Button>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => showCategoryModal()}
+              >
+                Quản lý danh mục
+              </Button>
+            </div>
+          </div>
+
+          <Table
+            columns={productColumns}
+            dataSource={filteredProducts}
+            pagination={{ pageSize: 10 }}
+            loading={loading}
+            bordered
+          />
+
+          {/* Modal quản lý sản phẩm */}
+          <Modal
+            title={editingProduct ? "Chỉnh sửa sản phẩm" : "Thêm sản phẩm mới"}
+            visible={isProductModalVisible}
+            onOk={handleProductOk}
+            onCancel={handleProductCancel}
+            okText={editingProduct ? "Cập nhật" : "Thêm"}
+            cancelText="Hủy"
+            width={600}
+          >
+            <Form form={productForm} layout="vertical" name="product_form">
+              <Form.Item
+                name="name"
+                label="Tên sản phẩm"
+                rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm!" }]}
+              >
+                <Input placeholder="Nhập tên sản phẩm" />
+              </Form.Item>
+
+              <Form.Item
+                name="category"
+                label="Danh mục"
+                rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
+              >
+                <Select placeholder="Chọn danh mục">
+                  {categories.map((category) => (
+                    <Option key={category.id} value={category.id}>
+                      {category.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+
+              <Form.Item
+                name="price"
+                label="Giá (VND)"
+                rules={[{ required: true, message: "Vui lòng nhập giá sản phẩm!" }]}
+              >
+                <InputNumber
+                  min={0}
+                  step={1000}
+                  placeholder="0"
+                  style={{ width: "100%" }}
+                  formatter={(value) => formatVND(value).replace("₫", "")}
+                  parser={(value) => value.replace(/[^0-9]/g, "")}
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="quantity"
+                label="Tồn kho"
+                rules={[{ required: true, message: "Vui lòng nhập số lượng tồn kho!" }]}
+              >
+                <InputNumber min={0} placeholder="0" style={{ width: "100%" }} />
+              </Form.Item>
+
+              <Form.Item name="description" label="Mô tả">
+                <TextArea rows={4} placeholder="Nhập mô tả sản phẩm" />
+              </Form.Item>
+
+              <Form.Item name="factory" label="Hãng sản xuất">
+                <Input placeholder="Nhập hãng sản xuất" />
+              </Form.Item>
+
+              <Form.Item name="image" label="Hình ảnh">
+                <Upload
+                  beforeUpload={() => false}
+                  onChange={handleProductUploadChange}
+                  fileList={productFileList}
+                  maxCount={1}
+                  listType="picture"
+                >
+                  <Button icon={<UploadOutlined />}>Tải lên ảnh</Button>
+                </Upload>
+              </Form.Item>
+            </Form>
+          </Modal>
+
+          {/* Modal xem chi tiết sản phẩm */}
+          <Modal
+            title="Chi tiết sản phẩm"
+            visible={isViewProductModalVisible}
+            onCancel={handleViewProductCancel}
+            footer={[
+              <Button key="back" onClick={handleViewProductCancel}>
+                Đóng
+              </Button>,
+              <Button
+                key="edit"
+                type="primary"
+                onClick={() => {
+                  handleViewProductCancel();
+                  showProductModal(viewingProduct);
+                }}
+              >
+                Chỉnh sửa
+              </Button>,
+            ]}
+            width={600}
+          >
+            {viewingProduct && (
+              <div style={{ padding: "0 20px" }}>
+                <div style={{ textAlign: "center", marginBottom: 20 }}>
+                  <img
+                    src={viewingProduct.image || `/api/placeholder/200/200?text=${viewingProduct.name}`}
+                    alt={viewingProduct.name}
+                    style={{ maxWidth: "200px" }}
+                  />
+                </div>
+                <p><strong>ID:</strong> {viewingProduct.id}</p>
+                <p><strong>Tên sản phẩm:</strong> {viewingProduct.name}</p>
+                <p><strong>Danh mục:</strong> {viewingProduct.category?.name || "Chưa phân loại"}</p>
+                <p><strong>Giá:</strong> {formatVND(viewingProduct.price)}</p>
+                <p><strong>Tồn kho:</strong> {viewingProduct.quantity}</p>
+                <p><strong>Trạng thái:</strong>
+                  <Tag
+                    color={getStockStatus(viewingProduct.quantity).color}
+                    style={{ marginLeft: 8 }}
+                  >
+                    {getStockStatus(viewingProduct.quantity).text}
+                  </Tag>
+                </p>
+                <p><strong>Hãng sản xuất:</strong> {viewingProduct.factory}</p>
+                <p><strong>Mô tả:</strong> {viewingProduct.description}</p>
+              </div>
+            )}
+          </Modal>
+
+          {/* Modal quản lý danh mục */}
+          <Modal
+            title="Quản lý danh mục"
+            visible={isCategoryModalVisible}
+            onCancel={handleCategoryCancel}
+            footer={[
+              <Button key="back" onClick={handleCategoryCancel}>
+                Đóng
+              </Button>,
+              <Button
+                key="add"
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={handleAddCategory}
+              >
+                Thêm danh mục
+              </Button>,
+            ]}
+            width={800}
+          >
+            <Table
+              columns={categoryColumns}
+              dataSource={categories}
+              pagination={{ pageSize: 5 }}
+              bordered
+              rowKey="id"
+            />
+            {showCategoryForm && (
+              <Form form={categoryForm} layout="vertical" name="category_form" style={{ marginTop: 16 }}>
+                <Form.Item
+                  name="name"
+                  label="Tên danh mục"
+                  rules={[{ required: true, message: "Vui lòng nhập tên danh mục!" }]}
+                >
+                  <Input placeholder="Nhập tên danh mục" />
+                </Form.Item>
+
+                <Form.Item name="description" label="Mô tả">
+                  <TextArea rows={4} placeholder="Nhập mô tả danh mục" />
+                </Form.Item>
+
+                <Form.Item name="image" label="Hình ảnh">
+                  <Upload
+                    beforeUpload={() => false}
+                    onChange={handleCategoryUploadChange}
+                    fileList={categoryFileList}
+                    maxCount={1}
+                    listType="picture"
+                  >
+                    <Button icon={<UploadOutlined />}>Tải lên ảnh</Button>
+                  </Upload>
+                </Form.Item>
+
+                <Form.Item>
+                  <Button type="primary" onClick={handleCategoryOk}>
+                    {editingCategory ? "Cập nhật" : "Thêm"}
+                  </Button>
+                </Form.Item>
+              </Form>
+            )}
+          </Modal>
+        </div>
+      </Content>
+    </Layout>
   );
 };
 
-export default Product;
+export default Products;

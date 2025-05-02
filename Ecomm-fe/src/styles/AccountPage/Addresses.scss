@@ -1,0 +1,70 @@
+/* Addresses.scss */
+.addresses-page {
+    display: flex;
+    gap: 24px;
+    
+    .addresses-content {
+      flex: 1;
+      
+      .addresses-card {
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+        
+        .ant-card-head-title {
+          padding: 16px 0;
+        }
+        
+        .address-list-item {
+          padding: 16px;
+          border-radius: 6px;
+          margin-bottom: 12px;
+          background-color: #fafafa;
+          
+          &:hover {
+            background-color: #f0f0f0;
+          }
+          
+          .address-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: #e6f7ff;
+            border-radius: 50%;
+            font-size: 20px;
+            color: #1890ff;
+          }
+          
+          .address-details {
+            margin-top: 8px;
+          }
+        }
+        
+        .ant-empty {
+          margin: 40px 0;
+        }
+      }
+    }
+  }
+  
+  /* AddressForm.scss */
+  .address-form-page {
+    display: flex;
+    gap: 24px;
+    
+    .address-form-content {
+      flex: 1;
+      
+      .address-form-card {
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+        
+        .ant-card-head-title {
+          padding: 16px 0;
+        }
+        
+        .ant-form {
+          padding: 16px 0;
+        }
+      }
+    }
+  }

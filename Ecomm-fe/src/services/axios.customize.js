@@ -2,7 +2,6 @@ import axios from "axios";
 
 // Set config defaults when creating the instance
 const instance = axios.create({
-  baseURL: "http://localhost:8080", // Địa chỉ backend của bạn
   headers: {
     "Content-Type": "application/json", // Gửi dữ liệu dưới dạng JSON
     "Accept": "application/json", // Chấp nhận phản hồi dưới dạng JSON
