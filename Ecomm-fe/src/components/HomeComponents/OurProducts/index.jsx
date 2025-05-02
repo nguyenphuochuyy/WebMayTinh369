@@ -1,76 +1,60 @@
-import React from 'react';
-import { Card, Button, Rate, Row, Col } from 'antd';
-import { EyeOutlined, HeartOutlined } from '@ant-design/icons';
-import './OurProducts.css';
+import React, { useState, useEffect } from 'react';
+import { Card, Button, Rate, Row, Col, Spin } from 'antd';
+import './OurProducts.css'; // Đảm bảo file CSS này tồn tại
+
+const fetchAllProducts = async () => {
+  try {
+    const response = await fetch('http://localhost:8082/api/products');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching all products:', error);
+    throw error;
+  }
+};
+
+const formatVND = (price) => {
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+};
 
 const ExploreOurProducts = () => {
-  const products = [
-    {
-      image: 'https://www.tncstore.vn/media/product/9016-may-choi-game-sony-playstation-5-standard-edition-nhap-khau-japan-2.jpg',
-      name: 'Breed Dry Dog Food',
-      price: 100,
-      rating: 3,
-      reviews: 100,
-      availability: 'available',
-    },
-    {
-      image: 'https://logico.com.vn/images/products/2023/10/19/original/bo-may-choi-game-ps5-spider-man-2-le_1697685688.png',
-      name: 'CANON EOS DSLR Camera',
-      price: 360,
-      rating: 4,
-      reviews: 50,
-      availability: 'available',
-      showAddToCart: true,
-    },
-    {
-      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZ1_vxVMkR5x-6d_EN6gp9TihSTy0GPUmJUQ&s',
-      name: 'ASUS FHD Gaming Laptop',
-      price: 700,
-      rating: 5,
-      reviews: 65,
-      availability: 'available',
-    },
-    {
-      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZ1_vxVMkR5x-6d_EN6gp9TihSTy0GPUmJUQ&s',
-      name: 'Curology Product Set',
-      price: 500,
-      rating: 4,
-      reviews: 65,
-      availability: 'out-of-stock',
-    },
-    {
-      image: 'https://www.tncstore.vn/media/product/9016-may-choi-game-sony-playstation-5-standard-edition-nhap-khau-japan-2.jpg',
-      name: 'Kids Electric Car',
-      price: 960,
-      rating: 5,
-      reviews: 65,
-      availability: 'hot',
-    },
-    {
-      image: 'https://www.tncstore.vn/media/product/9016-may-choi-game-sony-playstation-5-standard-edition-nhap-khau-japan-2.jpg',
-      name: 'Jr. Zoom Soccer Cleats',
-      price: 1160,
-      rating: 4,
-      reviews: 65,
-      availability: 'available',
-    },
-    {
-      image: 'https://www.tncstore.vn/media/product/9016-may-choi-game-sony-playstation-5-standard-edition-nhap-khau-japan-2.jpg',
-      name: 'GP11 Shooter USB Gamepad',
-      price: 660,
-      rating: 4.5,
-      reviews: 65,
-      availability: 'hot',
-    },
-    {
-      image: 'https://www.tncstore.vn/media/product/9016-may-choi-game-sony-playstation-5-standard-edition-nhap-khau-japan-2.jpg',
-      name: 'Quilted Satin Jacket',
-      price: 660,
-      rating: 4.5,
-      reviews: 65,
-      availability: 'available',
-    },
-  ];
+  const [allProducts, setAllProducts] = useState([]);
+  const [visibleProducts, setVisibleProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showAll, setShowAll] = useState(false);
+  const initialVisibleCount = 8;
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await fetchAllProducts();
+        setAllProducts(data);
+        setVisibleProducts(data.slice(0, initialVisibleCount));
+      } catch (err) {
+        setError(err.message || 'Có lỗi xảy ra khi tải sản phẩm.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
+
+  const handleViewAll = () => {
+    setShowAll(true);
+    setVisibleProducts(allProducts);
+  };
+
+  const handleCollapse = () => {
+    setShowAll(false);
+    setVisibleProducts(allProducts.slice(0, initialVisibleCount));
+  };
 
   return (
     <div className="explore-products-container">
@@ -80,36 +64,48 @@ const ExploreOurProducts = () => {
           <span>Tất cả sản phẩm</span>
         </div>
       </div>
-      <Row gutter={[16, 16]} className="product-list">
-        {products.map((product, index) => (
-          <Col key={index} xs={24} sm={12} md={6}>
-            <Card
-              hoverable
-              cover={<img alt={product.name} src={product.image} />}
-            >
-              <h3>{product.name}</h3>
-              <div className="price">
-                <span className="current-price">${product.price}</span>
-              </div>
-              <div className="rating">
-                <Rate allowHalf defaultValue={product.rating} disabled />
-                <span className="reviews">({product.reviews})</span>
-              </div>
-          
-          
-                <Button type="primary" block className="add-to-cart">
-                  thêm vào giỏ hàng
-                </Button>
-         
-            </Card>
-          </Col>
-        ))}
-      </Row>
-      <div className="view-all">
-        <Button type="primary" danger>
-          Xem toàn bộ
-        </Button>
-      </div>
+      {loading ? (
+        <Spin size="large" style={{ display: 'block', textAlign: 'center', marginTop: 50 }} />
+      ) : error ? (
+        <div style={{ color: 'red', textAlign: 'center', marginTop: 50 }}>{error}</div>
+      ) : (
+        <>
+          <Row gutter={[16, 16]} className="product-list">
+            {visibleProducts.map((product) => (
+              <Col key={product.id} xs={24} sm={12} md={6}>
+                <Card
+                  hoverable
+                  cover={product.image && <img alt={product.name} src={product.image} />}
+                >
+                  <h3>{product.name}</h3>
+                  <div className="price">
+                    <span className="current-price">{formatVND(product.price)}</span>
+                  </div>
+                  <div className="rating">
+                    <Rate allowHalf defaultValue={product.rating || 0} disabled />
+                    {product.reviews && <span className="reviews">({product.reviews})</span>}
+                  </div>
+                  <Button type="primary" block className="add-to-cart">
+                    thêm vào giỏ hàng
+                  </Button>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+          <div className="view-all">
+            {!showAll && allProducts.length > initialVisibleCount && (
+              <Button type="primary" danger onClick={handleViewAll}>
+                Xem toàn bộ
+              </Button>
+            )}
+            {showAll && allProducts.length > initialVisibleCount && (
+              <Button onClick={handleCollapse}>
+                Thu gọn
+              </Button>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 };

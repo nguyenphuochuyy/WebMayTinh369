@@ -1,28 +1,26 @@
+// Navbar/index.js
 import React, { useContext, useState } from "react";
-import { 
-  Layout, 
-  Menu, 
-  Input, 
-  Badge, 
-  Avatar, 
-  Dropdown, 
-  Space, 
-  Typography, 
-  Button, 
-  theme 
+import {
+  Layout,
+  Menu,
+  Input,
+  Badge,
+  Avatar,
+  Dropdown,
+  Typography,
+  Button,
+  theme
 } from "antd";
-import { 
-  HomeOutlined, 
-  ContactsOutlined, 
-  InfoCircleOutlined, 
+import {
+  HomeOutlined,
+  ContactsOutlined,
+  InfoCircleOutlined,
   LoginOutlined,
-  UserOutlined, 
-  HeartOutlined, 
-  ShoppingCartOutlined, 
-  SearchOutlined,
+  UserOutlined,
+  HeartOutlined,
+  ShoppingCartOutlined,
   LogoutOutlined,
   SettingOutlined,
-  AppstoreOutlined
 } from "@ant-design/icons";
 import { AuthContext } from "../context/auth.context";
 import { Link, useNavigate } from "react-router-dom";
@@ -68,8 +66,8 @@ const Navbar = ({ onSearch }) => {
   };
 
   const handleSearchSubmit = () => {
-    if (searchTerm.trim()) {
-      onSearch(searchTerm);
+    if (onSearch) {
+      onSearch(searchTerm.trim()); // Gọi onSearch với searchTerm đã trim
     }
   };
 
@@ -201,9 +199,9 @@ const Navbar = ({ onSearch }) => {
       </div>
 
       {/* Main Navigation Menu */}
-      <Menu 
-        mode="horizontal" 
-        items={mainMenuItems} 
+      <Menu
+        mode="horizontal"
+        items={mainMenuItems}
         style={navbarStyle.mainMenu}
       />
 
@@ -220,18 +218,18 @@ const Navbar = ({ onSearch }) => {
         <div style={navbarStyle.actionButtons}>
           {/* Wishlist Icon */}
           <Badge count={0} size="small">
-            <Button 
-              type="text" 
-              icon={<HeartOutlined style={navbarStyle.iconButton} />} 
+            <Button
+              type="text"
+              icon={<HeartOutlined style={navbarStyle.iconButton} />}
               aria-label="Wishlist"
             />
           </Badge>
 
           {/* Cart Icon */}
           <Badge count={user.sum || 0} size="small" overflowCount={99}>
-            <Button 
-              type="text" 
-              icon={<ShoppingCartOutlined style={navbarStyle.iconButton} />} 
+            <Button
+              type="text"
+              icon={<ShoppingCartOutlined style={navbarStyle.iconButton} />}
               onClick={goToCartPage}
               aria-label="Cart"
             />
@@ -241,9 +239,9 @@ const Navbar = ({ onSearch }) => {
           {user.id ? (
             <Dropdown menu={userMenuProps} placement="bottomRight">
               <div style={navbarStyle.userSection}>
-                <Avatar 
+                <Avatar
                   src={user?.avatar || null} // Prevent empty string for src
-                  icon={!user?.avatar && <UserOutlined />} 
+                  icon={!user?.avatar && <UserOutlined />}
                   size="default"
                   style={{ backgroundColor: user?.avatar ? undefined : token.colorPrimary }}
                 />
@@ -251,9 +249,9 @@ const Navbar = ({ onSearch }) => {
               </div>
             </Dropdown>
           ) : (
-            <Button 
-              type="primary" 
-              icon={<LoginOutlined />} 
+            <Button
+              type="primary"
+              icon={<LoginOutlined />}
               onClick={() => navigate("/login")}
             >
               Đăng nhập
