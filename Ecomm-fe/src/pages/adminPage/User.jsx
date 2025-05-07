@@ -1,7 +1,11 @@
 import React, { use, useEffect, useState } from "react";
-import { Form, Input, Button, Select, message, Spin, Table, Space } from "antd";
+import { Form, Input, Button, Select, message, Spin, Table, Space, Layout, List } from "antd";
 import { useNavigate } from "react-router-dom";
-import {DeleteOutlined, EditOutlined, LoadingOutlined } from "@ant-design/icons";
+import {DeleteOutlined, EditOutlined, LoadingOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { getListUser } from "../../services/user.service";
+import { Content } from "antd/es/layout/layout";
+import Title from "antd/es/typography/Title";
+import { render } from "sass";
 const { Option } = Select;
 
 const User = () => {
@@ -13,8 +17,6 @@ const User = () => {
 
   const onFinish = (values) => {
     console.log("Nhận values:", values);
-
-
     message.success("Tạo người dùng thành công!");
     navigate("/admin/users");
   };
@@ -26,7 +28,7 @@ const User = () => {
   const handleDelete = async (userId) => {
     console.log("Xóa người dùng:", userId);
     try {
-      const response = await fetch(`http://localhost:8080/users/${userId}`, {
+      const response = await fetch(`http://localhost:8080/users/delete/${userId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -55,14 +57,14 @@ const User = () => {
       key: "username",
     },
     {
-      title: "Role",
+      title: "Vai trò",
       dataIndex: "role",
       key: "role",
     },
     {
-      title: "Name",
+      title: "Họ và tên",
       dataIndex: "name",
-      key: "name",
+      key: "name",    
     },
     {
       title: "Email",
@@ -70,25 +72,35 @@ const User = () => {
       key: "email",
     },
     {
-      title: "Phone",
+      title: "Số điện thoại",
       dataIndex: "phone",
       key: "phone",
     },
     {
-      title: "Address",
-      dataIndex: "address",
-      key: "address",
+      title: "Địa chỉ",
+      dataIndex: "addresses",
+      key: "address",   
+      render: (addresses) => (
+        <List
+          dataSource={addresses}
+          renderItem={(item) => (
+            <List.Item>
+              {item.street}, {item.city}
+            </List.Item>
+          )}
+        />
+      ),
     },
     {
       title: "Action",
       key: "action",
       render: (_, record) => (
-        <Space size="middle">
+        <Space size="small">
           <Button icon={<EditOutlined />} onClick={() => handleEdit(record)}>
-            Edit
+             Sửa
           </Button>
           <Button icon={<DeleteOutlined />} danger onClick={() => handleDelete(record.id)}>
-            Delete
+            Xóa
           </Button>
         </Space>
       ),
@@ -98,99 +110,52 @@ const User = () => {
   ]
  // hàm gọi api lấy danh sách người dùng
  useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true);
-      try {
-        // Giả lập gọi API để lấy danh sách người dùng
-        const response = await fetch("http://localhost:8080/users/", {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-        });
-        if(!response.ok) {
-          throw new Error("Lỗi khi lấy danh sách người dùng");
-        }
-        const data = await response.json();
-        setUsers(data.data);
-      } catch (error) {
-        console.error("Lỗi khi lấy danh sách người dùng:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUsers();
+   const fetchUsers = async () => {
+    const listUser = await getListUser();
+    if (listUser) {
+      setUsers(listUser.data);
+      setLoading(false);
+    } else {
+      message.error("Lỗi khi lấy danh sách người dùng", listUser.message);
+    }
+   }
+   fetchUsers();
+  
  },[])
   return (
-    <div>
-    {/* form tạo người dùng */}
-      <div style={{ maxWidth: 600, margin: "0 auto", padding: "20px" }}>
-      <h2>Create User</h2>
-      <Form
-        name="create_user"
-        onFinish={onFinish}
-        layout="vertical"
-        initialValues={{
-          role: "USER", 
-        }}
-      >
-        <Form.Item
-          label="Username"
-          name="username"
-          rules={[{ required: true, message: "Please input your username!" }]}
-        >
-          <Input placeholder="Enter username" />
-        </Form.Item>
+       <Layout style={{ marginLeft: 200, minHeight: "100vh" }}>
+       <div style={{ padding: 20 }}>
+       <Content style={{ margin: "24px 16px 0", overflow: "initial" }}>
+       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+            <Title level={2}>Quản lý người dùng</Title>
+            <div>
+              <Input
+                placeholder="Tìm kiếm người dùng"
+                prefix={<SearchOutlined />}
+                style={{ width: 250, marginRight: 16 }}
+                // value={searchText}
+                // onChange={(e) => setSearchText(e.target.value)}
+              />
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                // onClick={() => showProductModal()}
+                style={{ marginRight: 8 }}
+              >
+                Thêm người dùng
+              </Button>
+            </div>
+          </div>
+       </Content>
 
-        <Form.Item
-          label="Email"
-          name="email"
-          rules={[
-            { required: true, message: "Please input your email!" },
-            { type: "email", message: "Please input a valid email!" },
-          ]}
-        >
-          <Input placeholder="Enter email" />
-        </Form.Item>
-
-        <Form.Item
-          label="Password"
-          name="password"
-          rules={[{ required: true, message: "Please input your password!" }]}
-        >
-          <Input.Password placeholder="Enter password" />
-        </Form.Item>
-
-        <Form.Item
-          label="Role"
-          name="role"
-          rules={[{ required: true, message: "Please select a role!" }]}
-        >
-          <Select placeholder="Select a role">
-            <Option value="USER">USER</Option>
-            <Option value="ADMIN">ADMIN</Option>
-          </Select>
-        </Form.Item>
-
-        <Form.Item>
-          <Button type="primary" htmlType="submit" block>
-            Create User
-          </Button>
-        </Form.Item>
-      </Form>
-      </div>
-     
-
-      <div style={{ marginTop: "40px" }}>
-        {/* Bảng danh sách người dùng */}
-        <h2>User List</h2>
         {loading ? (
-          <Spin tip="Loading users..." />
-        ) :   (<Table columns={columns} dataSource={users} rowKey="id" /> )   
+          <Spin tip="Đang tải danh sách người dùng" />
+        ) : (<Table columns={columns} dataSource={users} rowKey="id" /> )   
         }
       </div>
-    </div>
+       </Layout>
+      
+
     
   );
 };
