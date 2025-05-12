@@ -46,12 +46,6 @@ const BestSellingProducts = () => {
           <span className="red-bar"></span>
           <span>Sản phẩm bán chạy</span>
         </div>
-        <div className="best-selling-actions">
-  
-          <Button type="primary" danger className="view-all-btn">
-            Xem tất cả
-          </Button>
-        </div>
       </div>
       <Row gutter={[16, 16]} className="product-list">
         {products.map((product, index) => (

@@ -50,8 +50,8 @@
   }
   
   .category-slide .ant-card.highlighted {
-    background-color: #db4444;
-    border-color: #db4444;
+    background-color: #35c759;
+    border-color: #2bac31;
   }
   
   .category-slide .ant-card.highlighted .category-content p,
@@ -111,7 +111,19 @@
     color: #000;
     font-size: 20px;
   }
-  
+  .ant-carousel .slick-next::after{
+    box-sizing: border-box;
+    top: 2.3431457505076203px;
+    inset-inline-start: 2.3431457505076203px;
+    display: inline-block;
+    width: 11.31370849898476px;
+    height: 11.31370849898476px;
+    border: 0 solid currentcolor;
+    border-inline-start-width: 2px;
+    border-block-start-width: 2px;
+    border-radius: 1px;
+    content: "";
+  }
   .ant-carousel .slick-prev:hover:before,
   .ant-carousel .slick-next:hover:before {
     color: #fff;

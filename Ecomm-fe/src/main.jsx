@@ -1,4 +1,4 @@
-import { StrictMode, useEffect, useState } from "react";
+import { StrictMode, useCallback, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
   createBrowserRouter,
@@ -25,11 +25,13 @@ import Profile from "./components/AccountPage/Profile.jsx";
 import OrderSuccess from "./pages/OrderSuccessPage.jsx";
 import MyOrder from "./components/AccountPage/MyOrder.jsx";
 import DashboardPage from "./pages/adminPage/DashboardPage.jsx";
-import AboutPage from "./components/About/Main.jsx";
+import { Spin } from "antd";
+import ProductListPage from "./pages/ProductListPage/index.jsx";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const [tokenChecked, setTokenChecked] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
+
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
@@ -44,7 +46,8 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   }, []);
 
   if (!tokenChecked) {
-    return <div>Loading...</div>; // hoặc spinner
+    return <Spin>
+    </Spin> // hoặc spinner
   }
 
   if (!isAuthorized) {
@@ -60,7 +63,8 @@ const Unauthorized = () => (
     <p>Bạn không có quyền truy cập vào trang này.</p>
   </div>
 );
-
+  // Callback để nhận handleSearch từ Home
+ 
 const router = createBrowserRouter([
   {
     path: "/",
@@ -81,9 +85,12 @@ const router = createBrowserRouter([
       },
       { path: "/contactPage", element: <ContactPage /> },
       { path: "/detailPage/:productId", element: <DetailPage /> },
-      { path: "/about", element: <AboutPage /> },
+      // { path: "/about", element: <AboutPage /> },
       { path: "/checkout", element: <Checkout /> },
       { path: "/orderSuccess", element: <OrderSuccess /> },
+      { path:"/vnpay-return" ,element : <OrderSuccess/> },
+      
+      {path : "/collection/:categoryId", element : <ProductListPage />},
     ],
   },
   {

@@ -1,0 +1,37 @@
+.product-list-page {
+    padding: 20px;
+  }
+  
+  .filters {
+    margin-bottom: 20px;
+  }
+  
+  .product-card {
+    text-align: center;
+  }
+  
+  .product-info h3 {
+    font-size: 16px;
+    margin: 10px 0;
+    height: 40px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .price {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ff4d4f;
+  }
+  
+  .original-price {
+    font-size: 14px;
+    color: #888;
+    text-decoration: line-through;
+    margin-left: 10px;
+  }
+  
+  .add-to-cart-btn {
+    margin-top: 10px;
+    width: 100%;
+  }
