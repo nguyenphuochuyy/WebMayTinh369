@@ -15,6 +15,8 @@ import Profile from "./components/AccountPage/Profile.jsx";
 import Addresses from "./components/AccountPage/Addresses.jsx";
 import MyOrder from "./components/AccountPage/MyOrder.jsx";
 import ProductListPage from "./pages/ProductListPage/index.jsx";
+import Checkout from "./components/DetailPage/Checkout.jsx";
+import OrderSuccess from "./pages/OrderSuccessPage.jsx";
 function App() {
 
   const { user, setUser } = useContext(AuthContext);
@@ -69,6 +71,9 @@ function App() {
             <Route path="addresses" element={<Addresses />} />
             <Route path="myOrder" element={<MyOrder />} />
           </Route>
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/OrderSuccess" element={<OrderSuccess />} />
+          <Route path="/vnpay-return" element={<OrderSuccess />} />
           <Route path="/collection/:categoryId" element = {<ProductListPage/>}></Route>
         </Routes>
         <Footer />
