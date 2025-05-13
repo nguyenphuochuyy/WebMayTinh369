@@ -25,7 +25,7 @@ import {
 import { AuthContext } from "../context/auth.context";
 import { Link, useNavigate } from "react-router-dom";
 import { logoutAPI } from "../../services/api.service";
-
+import "../../styles/Base_CSS/style.css"
 const { Header } = Layout;
 const { Search } = Input;
 const { Title } = Typography;
@@ -117,11 +117,13 @@ const Navbar = ({ onSearch }) => {
       label: <Link to="/contactPage">Liên hệ</Link>,
     },
     {
+      label: <Link to="/about">Giới thiệu</Link>,
       key: "about",
       icon: <InfoCircleOutlined />,
-      label: <Link to="/about">Giới thiệu</Link>,
+ 
     },
   ];
+
 
   const navbarStyle = {
     header: {
@@ -134,7 +136,8 @@ const Navbar = ({ onSearch }) => {
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
-      height: 64,
+      height: 69,
+      
     },
     logo: {
       display: "flex",
@@ -189,8 +192,10 @@ const Navbar = ({ onSearch }) => {
     },
   };
 
+
   return (
-    <Header style={navbarStyle.header}>
+    <div className="container" >
+        <Header style={navbarStyle.header}>
       {/* Logo */}
       <div style={navbarStyle.logo}>
         <Link to="/" style={{ textDecoration: "none" }}>
@@ -260,6 +265,7 @@ const Navbar = ({ onSearch }) => {
         </div>
       </div>
     </Header>
+    </div>
   );
 };
 

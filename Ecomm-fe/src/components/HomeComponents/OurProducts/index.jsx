@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Button, Rate, Row, Col, Spin } from 'antd';
+import React, { useState, useEffect, useContext } from 'react';
+import { Card, Button, Rate, Row, Col, Spin, notification } from 'antd';
 import './OurProducts.css'; // Đảm bảo file CSS này tồn tại
+import { addProductToCart } from '../../../services/api.service';
+import { AuthContext } from '../../context/auth.context';
 
 const fetchAllProducts = async () => {
   try {
@@ -27,6 +29,8 @@ const ExploreOurProducts = () => {
   const [error, setError] = useState(null);
   const [showAll, setShowAll] = useState(false);
   const initialVisibleCount = 8;
+  const [note, contextHolder] = notification.useNotification();
+  const { user, setUser } = useContext(AuthContext);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -56,8 +60,31 @@ const ExploreOurProducts = () => {
     setVisibleProducts(allProducts.slice(0, initialVisibleCount));
   };
 
+  const handleAddProductToCart = async (productId, quantity) => {
+    const res = await addProductToCart(productId, quantity);
+    if(res) {
+      setUser((prevUser) => ({
+        ...prevUser,
+        refresh: !prevUser.refresh,
+      }));
+      note.info({
+        message: `Notification`,
+        description: "Thêm sản phẩm vào giỏ hàng thành công",
+        type: "success",
+      })} else {
+      note.info({
+        message: `Notification`,
+        description: "Thêm sản phẩm vào giỏ hàng thất bại",
+        type: "error",    
+      });
+    }
+
+  }
+
+
   return (
     <div className="explore-products-container">
+      {contextHolder}
       <div className="explore-products-header">
         <div className="explore-products-title">
           <span className="red-bar"></span>
@@ -66,8 +93,7 @@ const ExploreOurProducts = () => {
       </div>
       {loading ? (
         <Spin size="large" style={{ display: 'block', textAlign: 'center', marginTop: 50 }} />
-      ) : error ? (
-        <div style={{ color: 'red', textAlign: 'center', marginTop: 50 }}>{error}</div>
+      ) : error ? (<div style={{ color: 'red', textAlign: 'center', marginTop: 50 }}>{error}</div>
       ) : (
         <>
           <Row gutter={[16, 16]} className="product-list">
@@ -85,7 +111,7 @@ const ExploreOurProducts = () => {
                     <Rate allowHalf defaultValue={product.rating || 0} disabled />
                     {product.reviews && <span className="reviews">({product.reviews})</span>}
                   </div>
-                  <Button type="primary" block className="add-to-cart">
+                  <Button type="primary" block className="add-to-cart" onClick={() => handleAddProductToCart(product.id, 1)}>
                     thêm vào giỏ hàng
                   </Button>
                 </Card>

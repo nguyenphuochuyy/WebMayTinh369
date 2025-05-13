@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { use, useContext, useEffect, useState } from "react";
 import {
   Layout,
   Row,
@@ -32,6 +32,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
 import Footer from "../layout/Footer";
 import { createPaymentAPI , placeOrderAPI} from "../../services/api.service";
+import axios from "axios";
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -60,7 +61,40 @@ const Checkout = () => {
   );
   const shipping = 0;
   const total = subtotal + shipping;
+  
 
+  // lấy trạng thái thanh toán chuyển khoản 
+  useEffect(() => {
+    const handleVNPayCallback = async () => {
+      try {
+          // Gửi yêu cầu đến backend để kiểm tra trạng thái thanh toán
+          const response = await axios.get('http://localhost:8088/vnpay-return', {
+              params: new URLSearchParams(location.search),
+          });
+
+          // Lấy thông tin từ localStorage (được lưu trước khi thanh toán)
+          const pendingOrder = JSON.parse(localStorage.getItem('pendingOrder')) || {};
+          if(response.ok){
+            console.log("response", response.data);
+            
+          }
+           else {
+              // Thanh toán thất bại
+              message.error(response.data.message || 'Thanh toán thất bại.');
+              // navigate('/orderFailed');
+          }
+      } catch (error) {
+          console.error('Lỗi khi xử lý thanh toán:', error);
+          message.error('Lỗi khi xử lý thanh toán.');
+          // navigate('/orderFailed');
+      } finally {
+          setIsProcessing(false);
+      }
+  };
+
+  handleVNPayCallback();
+}, [location, navigate]);
+  
   useEffect(() => {
     if (cartItems && cartItems.length > 0) {
       const mappedProducts = cartItems.map(item => ({
@@ -189,22 +223,26 @@ const Checkout = () => {
 
       if (paymentMethod === "bank") {
         // Xử lý thanh toán ngân hàng
-        const resCreatePayment = await createPaymentAPI(4, total, "pending");
+        // tạo mã thanh toán random
+        const paymentId = `PAY${Math.floor(Math.random() * 1000000)}`;
+        const resCreatePayment = await createPaymentAPI(paymentId, total, "pending" , products);
         if (resCreatePayment && resCreatePayment.data && resCreatePayment.data.url) {
           // Lưu thông tin thanh toán vào orderInfo
           orderInfo.paymentUrl = resCreatePayment.data.url;
           orderInfo.paymentStatus = "pending";
+          console.log(resCreatePayment.data.url);
+          
           
           // Chuyển hướng đến trang thành công
-          navigate("/orderSuccess", {
-            state: {
-              orderInfo,
-              cartItems,
-              user,
-              selectedAddress,
-              total
-            }
-          });
+          // navigate("/orderSuccess", {
+          //   state: {
+          //     orderInfo,
+          //     cartItems,
+          //     user,
+          //     selectedAddress,
+          //     total
+          //   }
+          // });
           
           // Mở tab mới cho thanh toán
           window.open(resCreatePayment.data.url, "_blank");

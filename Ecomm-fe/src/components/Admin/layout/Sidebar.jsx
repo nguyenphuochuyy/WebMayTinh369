@@ -79,6 +79,12 @@ const Sidebar = () => {
           icon: <LogoutOutlined />,
           label: 'Đăng xuất',
           danger: true,
+          onClick: () => {
+            // Xử lý đăng xuất ở đây
+            setUser(null); // Giả lập đăng xuất
+            window.location.href = '/login'; // Chuyển hướng về trang đăng nhập
+          },
+
         },
       ]}
     />
@@ -142,7 +148,6 @@ const Sidebar = () => {
       }}
       trigger={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
       theme="dark"
-      // width={260}
     >
       <div className="logo" style={{ 
         height: '64px', 
@@ -189,36 +194,6 @@ const Sidebar = () => {
             </div>
           </div>
         </Dropdown>
-        
-        {/* {!collapsed && (
-          <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-around' }}>
-            <Dropdown overlay={notificationMenu} trigger={['click']} placement="bottomRight">
-              <div style={{ 
-                padding: '4px 8px', 
-                borderRadius: '4px', 
-                cursor: 'pointer',
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              }}>
-                <Space>
-                  <BellOutlined />
-                  <span>3</span>
-                </Space>
-              </div>
-            </Dropdown>
-            
-            <div style={{ 
-              padding: '4px 8px', 
-              borderRadius: '4px', 
-              cursor: 'pointer',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            }}>
-              <Space>
-                <MessageOutlined />
-                <span>5</span>
-              </Space>
-            </div>
-          </div>
-        )} */}
       </div>
       
       {/* Menu items */}

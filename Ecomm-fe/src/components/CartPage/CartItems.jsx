@@ -25,9 +25,7 @@ import { removeProductFromCart } from "../../services/api.service";
 import { AuthContext } from "../context/auth.context";
 import "../../styles/CartPage/CartItems.scss";
 import { useNavigate } from "react-router-dom";
-
 const { Title, Text } = Typography;
-
 const CartItems = () => {
   const { user, setUser } = useContext(AuthContext);
   const navigate = useNavigate();

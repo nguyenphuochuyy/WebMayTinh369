@@ -15,7 +15,8 @@ import Categories from "../components/HomeComponents/Category";
 import FlashSales from "../components/HomeComponents/FlashSale";
 import BestSellingProducts from "../components/HomeComponents/BestSellingProduct";
 import ExploreOurProducts from "../components/HomeComponents/OurProducts/index";
-
+import "../../src/styles/Base_CSS/style.css"
+import { Link, useNavigate } from "react-router-dom";
 const { Title } = Typography;
 
 const fetchCategories = async () => {
@@ -77,14 +78,14 @@ const Home = ({ onSearchHandler }) => {
   const [categoryName, setCategoryName] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const categoryProductsRef = useRef(null);
-
+  const navigate = useNavigate();
   useEffect(() => {
     const loadCategories = async () => {
       setLoadingCategories(true);
       setErrorCategories(null);
       try {
         const data = await fetchCategories();
-        setCategories(data);
+        setCategories(data);        
       } catch (err) {
         setErrorCategories(err.message || "Có lỗi xảy ra khi tải danh mục.");
       } finally {
@@ -137,11 +138,12 @@ const Home = ({ onSearchHandler }) => {
   }, [selectedCategory, searchTerm, categories]);
 
   const handleCategorySelect = (categoryId) => {
-    setSelectedCategory(categoryId);
-    setSearchTerm("");
-    if (categoryProductsRef.current) {
-      categoryProductsRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
+    // setSelectedCategory(categoryId);
+    // setSearchTerm("");
+    // if (categoryProductsRef.current) {
+    //   categoryProductsRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    // }
+    navigate(`/collection/${categoryId}`); // Chuyển hướng đến trang danh sách sản phẩm theo danh mục
   };
 
   const handleSearch = (keyword) => {
@@ -215,7 +217,6 @@ const Home = ({ onSearchHandler }) => {
               </div>
             </div>
           </div>
-
           {/* Khu vực sản phẩm theo category hoặc tìm kiếm */}
           <div style={{ marginTop: "30px" }} ref={categoryProductsRef}>
             {(selectedCategory || searchTerm) && (
@@ -317,7 +318,6 @@ const Home = ({ onSearchHandler }) => {
               />
             </div>
           </div>
-
           {/* Our product */}
           <div style={{ marginTop: "50px" }}>
             <ExploreOurProducts selectedCategory={selectedCategory} />

@@ -243,8 +243,11 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Rate, Row, Col, message } from 'antd';
 import './FlashSale.css';
+import { Link, Links, Navigate, useNavigate } from 'react-router-dom';
+import ScrollToTop from '../../ScrollToTop';
 
 const FlashSales = () => {
+  const navigate = useNavigate();
   const [timeLeft, setTimeLeft] = useState({
     days: 3,
     hours: 23,

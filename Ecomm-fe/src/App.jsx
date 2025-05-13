@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useCallback } from "react";
+import React, { useContext, useEffect, useState, useCallback, Children } from "react";
 import Home from "./pages/Home.jsx";
 import SignUp from "./components/SignUp/SignUp.jsx";
 import CartPage from "./pages/CartPage.jsx";
@@ -9,8 +9,16 @@ import Footer from "./components/layout/Footer.jsx";
 import { Outlet, Route, Routes } from "react-router-dom";
 import { Layout } from "antd";
 import "../src/styles/Reset_CSS/style.css";
-
+import DetailPage from "./pages/DetailPage.jsx";
+import AccountPage from "./pages/AccountPage.jsx";
+import Profile from "./components/AccountPage/Profile.jsx";
+import Addresses from "./components/AccountPage/Addresses.jsx";
+import MyOrder from "./components/AccountPage/MyOrder.jsx";
+import ProductListPage from "./pages/ProductListPage/index.jsx";
+import Checkout from "./components/DetailPage/Checkout.jsx";
+import OrderSuccess from "./pages/OrderSuccessPage.jsx";
 function App() {
+
   const { user, setUser } = useContext(AuthContext);
   const [searchHandler, setSearchHandler] = useState(null);
 
@@ -44,7 +52,6 @@ function App() {
       console.log("user after set cart", user);
     }
   };
-
   // Callback để nhận handleSearch từ Home
   const setSearchHandlerCallback = useCallback((handler) => {
     setSearchHandler(() => handler);
@@ -58,7 +65,16 @@ function App() {
           <Route path="/" element={<Home onSearchHandler={setSearchHandlerCallback} />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/cartPage" element={<CartPage />} />
-          {/* Thêm các route khác nếu cần */}
+          <Route path="/detailPage/:productId" element = {<DetailPage/>}/>
+          <Route path="/account" element= {<AccountPage />}>
+            <Route path="profile" element={<Profile />} />
+            <Route path="addresses" element={<Addresses />} />
+            <Route path="myOrder" element={<MyOrder />} />
+          </Route>
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/OrderSuccess" element={<OrderSuccess />} />
+          <Route path="/vnpay-return" element={<OrderSuccess />} />
+          <Route path="/collection/:categoryId" element = {<ProductListPage/>}></Route>
         </Routes>
         <Footer />
       </Layout>
