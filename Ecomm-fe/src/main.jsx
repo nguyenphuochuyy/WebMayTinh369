@@ -87,7 +87,7 @@ const router = createBrowserRouter([
       { path: "/detailPage/:productId", element: <DetailPage /> },
       // { path: "/about", element: <AboutPage /> },
       { path: "/checkout", element: <Checkout /> },
-      { path: "/orderSuccess", element: <OrderSuccess /> },
+      { path: "/orderSuccess", element: <OrderSuccess /> }, 
       { path:"/vnpay-return" ,element : <OrderSuccess/> },
       
       {path : "/collection/:categoryId", element : <ProductListPage />},

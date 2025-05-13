@@ -1,198 +1,187 @@
-import React, { useState, useEffect } from "react";
-import { Layout, Row, Col, Typography, Breadcrumb, Select, Input } from "antd";
+import React, { useState, useEffect, use } from "react";
+import {
+  Layout,
+  Row,
+  Col,
+  Typography,
+  Breadcrumb,
+  Select,
+  Input,
+  Card,
+  message,
+  Button,
+} from "antd";
 import "./ProductListPage.css";
-import { useParams } from "react-router-dom";
-import { Footer, Header } from "antd/es/layout/layout";
-import { Option } from "antd/es/mentions";
 import "../../styles/Base_CSS/style.css";
-const { Content } = Layout;
+import { useParams } from "react-router-dom";
+import { getCategories } from "../../services/product.service";
+const { Content, Footer } = Layout;
 const { Title } = Typography;
-
-// Dữ liệu giả lập (thay thế cho API)
-const mockProducts = [
-  {
-    id: 1,
-    category: "PC Gaming",
-    brand: "Intel",
-    name: "PC TTG Gaming Pro i5 14600KF - RTX 3060 8G",
-    price: 20680000,
-    originalPrice: 22680000,
-    discount: 10,
-    image: "https://via.placeholder.com/300x200?text=PC+TTG+Gaming+Pro+i5",
-  },
-  {
-    id: 2,
-    category: "PC Gaming",
-    brand: "Intel",
-    name: "PC TTG Gaming Pro i5 14600KF - RTX 3050 6G",
-    price: 18680000,
-    originalPrice: 19860000,
-    discount: 6,
-    image:
-      "https://via.placeholder.com/300x200?text=PC+TTG+Gaming+Pro+i5+RTX+3050",
-  },
-  {
-    id: 3,
-    category: "PC Gaming",
-    brand: "Intel",
-    name: "PC Mini Gaming Luxury i5 12400F",
-    price: 20380000,
-    originalPrice: 22380000,
-    discount: 11,
-    image: "https://via.placeholder.com/300x200?text=PC+Mini+Gaming+Luxury",
-  },
-  {
-    id: 4,
-    category: "PC Gaming",
-    brand: "AMD",
-    name: "PC Super Luxury AMD Gaming Ryzen 7",
-    price: 45680000,
-    originalPrice: 53680000,
-    discount: 15,
-    image: "https://via.placeholder.com/300x200?text=PC+Super+Luxury+AMD",
-  },
-  {
-    id: 5,
-    category: "PC Gaming",
-    brand: "AMD",
-    name: "PC AMD Gaming Pro Ryzen 9 9950X - RTX",
-    price: 38680000,
-    originalPrice: 40680000,
-    discount: 5,
-    image: "https://via.placeholder.com/300x200?text=PC+AMD+Gaming+Pro+Ryzen+9",
-  },
-  {
-    id: 6,
-    category: "PC Workstation",
-    brand: "Intel",
-    name: "PC TTG Gaming i7 12700KF - RTX 4060 8G",
-    price: 21680000,
-    originalPrice: 23680000,
-    discount: 9,
-    image: "https://via.placeholder.com/300x200?text=PC+TTG+Gaming+i7",
-  },
-  {
-    id: 7,
-    category: "PC Workstation",
-    brand: "Intel",
-    name: "PC TTG Gaming i7 14700KF - 32GB DDR5",
-    price: 28680000,
-    originalPrice: 30680000,
-    discount: 7,
-    image: "https://via.placeholder.com/300x200?text=PC+TTG+Gaming+i7+32GB",
-  },
-  {
-    id: 8,
-    category: "PC Workstation",
-    brand: "Intel",
-    name: "PC TTG Gaming i5 12400F-16GB DDR5",
-    price: 16980000,
-    originalPrice: 20980000,
-    discount: 19,
-    image: "https://via.placeholder.com/300x200?text=PC+TTG+Gaming+i5+16GB",
-  },
-  {
-    id: 9,
-    category: "PC Workstation",
-    brand: "AMD",
-    name: "PC AMD Gaming Ryzen 7 9700X - RTX 4070",
-    price: 35680000,
-    originalPrice: 37680000,
-    discount: 5,
-    image: "https://via.placeholder.com/300x200?text=PC+AMD+Gaming+Ryzen+7",
-  },
-  {
-    id: 10,
-    category: "PC Workstation",
-    brand: "AMD",
-    name: "PC AMD Gaming Ryzen 5 7500F - RTX 5070 Ti",
-    price: 35980000,
-    originalPrice: 37980000,
-    discount: 5,
-    image: "https://via.placeholder.com/300x200?text=PC+AMD+Gaming+Ryzen+5",
-  },
-];
+const { Option } = Select;
 
 function ProductListPage() {
   const params = useParams();
-  const { categoryId } = params;
-  const [selectedCategory, setSelectedCategory] = useState("PC Gaming");
+  const categoryId = params.categoryId;
+  const [listCategory, setListCategory] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState();
+  const [selectedBrand, setSelectedBrand] = useState("Khác");
+  const [priceRange, setPriceRange] = useState("Dưới 5.000.000đ");
+  const [searchTerm, setSearchTerm] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
 
-  // Lọc sản phẩm khi danh mục thay đổi
   useEffect(() => {
-    setFilteredProducts(mockProducts);
-  }, [selectedCategory]);
-  console.log(categoryId, "categoryId");
+    const getListCategories = async () => {
+      const result = await getCategories();
+      console.log(result);
+
+      if (result) {
+        setListCategory(result);
+      } else {
+        message.error("Lỗi khi lấy danh sách danh mục sản phẩm");
+      }
+    };
+    getListCategories();
+  }, []);
+
   return (
-    <div className="container">
-      <Layout style={{ minHeight: "100vh" }}>
-        <Content >
-          <Breadcrumb style={{ margin: "16px 0" }}>
-            <Breadcrumb.Item>Trang chủ</Breadcrumb.Item>
-            <Breadcrumb.Item>Máy tính chơi game cực mạnh</Breadcrumb.Item>
-            {/* <Breadcrumb.Item>{category}</Breadcrumb.Item> */}
-          </Breadcrumb>
-          <div style={{ background: "#ccc", padding: 24, minHeight: 280 }}>
-            <Row gutter={16}>
-              <Col span={6} style={{background : "red" }}>
-                <div>
-                  <h3>Danh mục sản phẩm</h3>
-                  <Select
-                    // defaultValue={category}
-                    style={{ width: "100%" }}
-                    // onChange={setCategory}
-                  >
-                    {/* {categories.map(cat => <Option key={cat} value={cat}>{cat}</Option>)} */}
-                  </Select>
-                </div>
-                <div style={{ marginTop: 20 }}>
-                  <h3>Nhà cung cấp</h3>
-                  <Select defaultValue="Khác" style={{ width: "100%" }}>
-                    <Option value="Khác">Khác</Option>
-                    <Option value="Mãn">Mãn</Option>
-                  </Select>
-                </div>
-                <div style={{ marginTop: 20 }}>
-                  <h3>Lọc giá</h3>
-                  <Select
-                  // value={priceRange}
-                  // style={{ width: '100%' }}
-                  // onChange={setPriceRange}
-                  >
-                    {/* {priceRanges.map(range => <Option key={range} value={range}>{range}</Option>)} */}
-                  </Select>
-                </div>
-              </Col>
-              <Col span={18}>
-                <Input
-                  placeholder="Tìm kiếm"
-                  // value={search}
-                  // onChange={e => setSearch(e.target.value)}
-                  style={{ marginBottom: 16, width: "100%" }}
-                />
-                <Row gutter={[16, 16]}>
-                  {/* {products
-              .filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
-              .map((product, index) => (
-                <Col span={6} key={index}>
-                  <Card
-                    hoverable
-                    cover={<img alt={product.name} src={product.img} />}
-                    title={product.name}
-                  >
-                    {product.price}
-                  </Card>
+    <>
+      <div className="container">
+        <Layout style={{ minHeight: "100vh", backgroundColor: "#fff" }}>
+          <Content>
+            <Breadcrumb style={{ margin: "16px 20px" }}>
+              <Breadcrumb.Item href="/">Trang chủ</Breadcrumb.Item>
+              <Breadcrumb.Item>Máy tính chơi game, Làm việc</Breadcrumb.Item>
+            </Breadcrumb>
+            <div
+              style={{ background: "#fff", padding: 24, minHeight: "100vh" }}
+            >
+              <Row gutter={24}>
+                <Col span={6}>
+                  <div>
+                    <Title level={4}>Danh mục sản phẩm</Title>
+                    <Select
+                      value={selectedCategory}
+                      style={{ width: "100%", marginBottom: 20 }}
+                      onChange={(value) => setSelectedCategory(value)}
+                    >
+                      {listCategory.map((category) => (
+                        <Option key={category.id} value={category.name}>
+                          {category.name}
+                        </Option>
+                      ))}
+                    </Select>
+                  </div>
+                  <div>
+                    <Title level={4}>Nhà cung cấp</Title>
+                    <Select
+                      value={selectedBrand}
+                      style={{ width: "100%", marginBottom: 20 }}
+                      onChange={(value) => setSelectedBrand(value)}
+                    >
+                      <Option value="Khác">Khác</Option>
+                      <Option value="Dell">Dell</Option>
+                      <Option value="AMD">AMD</Option>
+                      <Option value="pc">pc</Option>
+                    </Select>
+                  </div>
+                  <div>
+                    <Title level={4}>Lọc giá</Title>
+                    <Select
+                      value={priceRange}
+                      style={{ width: "100%" }}
+                      onChange={(value) => setPriceRange(value)}
+                    >
+                      <Option value="Dưới 5.000.000đ">Dưới 5.000.000đ</Option>
+                      <Option value="5.000.000đ - 10.000.000đ">
+                        5.000.000đ - 10.000.000đ
+                      </Option>
+                      <Option value="10.000.000đ - 15.000.000đ">
+                        10.000.000đ - 15.000.000đ
+                      </Option>
+                      <Option value="Trên 15.000.000đ">Trên 15.000.000đ</Option>
+                    </Select>
+                  </div>
                 </Col>
-              ))} */}
-                </Row>
-              </Col>
-            </Row>
-          </div>
-        </Content>
-        <Footer style={{ textAlign: "center" }}>Tự Build PC ©2025</Footer>
-      </Layout>
-    </div>
+                <Col span={18}>
+                  <Row gutter={[16, 16]}>
+                    <div
+                      className="background-img"
+                      style={{ width: "100%", height: "100%" }}
+                    >
+                      <img
+                        width={"100%"}
+                        src="https://file.hstatic.net/1000288298/collection/best-pc-cases_copy_dcd36f7314434aae9c41ebfe31662933.jpg"
+                        alt="background"
+                      />
+                    </div>
+                  </Row>
+                  <Row>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-around",
+                        alignItems: "center",
+                        marginTop: 20,
+                      }}
+                    >
+                      <h2>Pc chơi game</h2>
+                      <div>
+                        Sắp xếp theo:
+                        <Select
+                          defaultValue="Mới nhất"
+                          style={{ width: 120, marginLeft: 10 }}
+                          onChange={(value) => setSearchTerm(value)}
+                        >
+                          <Option value="Mới nhất">Mới nhất</Option>
+                          <Option value="Giá thấp đến cao">
+                            Giá thấp đến cao
+                          </Option>
+                          <Option value="Giá cao đến thấp">
+                            Giá cao đến thấp
+                          </Option>
+                          <Option value="Đánh giá cao">Đánh giá cao</Option>
+                        </Select>
+                      </div>
+                    </div>
+                  </Row>
+                  <Row>
+                    {/* danh sách sản phẩm */}
+                    <Col span={24}>
+                      <div style={{ display: "flex", flexWrap: "wrap" }}>
+                        <div>
+                          <Card
+                            hoverable
+                            style={{ width: 200, marginTop: 16 , padding: 10}}
+                            cover={
+                              <img
+                                alt="example"
+                                src="https://product.hstatic.net/1000288298/product/pc_5090_8f71e305fa744713940a9d7009a42b03_large.jpg"
+                              />
+                            }
+                          >
+                            <Title style={{ fontSize: 14 , textAlign : 'center' , fontWeight : '500' , opacity : '0.7'}} level={5}>PC TTG GAMING ULTRA 9 285K - RTX 5090 32GB</Title>
+                            <p style={{ textAlign: "center" , fontSize : '24px' , fontWeight : '500' , color : 'red'}}>10.000.000đ</p>
+                      
+                            <Button
+                            type="primary"
+                            style={{ width: "100%" }}
+                            onClick={() =>  message.success("Thêm vào giỏ hàng thành công")}
+                            >Thêm vào giỏ hàng
+                            </Button>
+                          </Card>
+                        </div>
+                     
+                     
+                      </div>
+                    </Col>
+                  </Row>
+                </Col>
+              </Row>
+            </div>
+          </Content>
+        </Layout>
+      </div>
+    </>
   );
 }
 
