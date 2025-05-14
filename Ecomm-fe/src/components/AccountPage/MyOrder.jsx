@@ -18,7 +18,13 @@ import {
   Alert,
   Timeline,
   Tooltip,
-  Image
+  Image,
+  Popconfirm,
+  notification,
+  Modal,
+  Radio,
+  Input,
+  message,
 } from "antd";
 import {
   ShoppingCartOutlined,
@@ -31,13 +37,15 @@ import {
   InfoCircleOutlined,
   SyncOutlined,
   CarOutlined,
-  HomeOutlined
+  HomeOutlined,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import AccountSidebar from "./AccountSidebar";
 import { AuthContext } from "../context/auth.context";
-import { getOrderAPI } from "../../services/api.service";
+import { getOrderAPI, updateOrderStatusAPI } from "../../services/api.service";
 
 const { Title, Text, Paragraph } = Typography;
+const { TextArea } = Input;
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat("vi-VN", {
@@ -47,61 +55,63 @@ const formatPrice = (price) => {
 };
 
 const formatDate = (dateString) => {
-  const options = { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric', 
-    hour: '2-digit', 
-    minute: '2-digit' 
+  const options = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   };
-  return new Date(dateString).toLocaleDateString('vi-VN', options);
+  return new Date(dateString).toLocaleDateString("vi-VN", options);
 };
 
 const getStatusInfo = (status) => {
   const statusMap = {
-    "PENDING": {
+    PENDING: {
       color: "orange",
       icon: <ClockCircleOutlined />,
       text: "Chờ xác nhận",
-      description: "Đơn hàng của bạn đang chờ xác nhận"
+      description: "Đơn hàng của bạn đang chờ xác nhận",
     },
-    "PROCESSING": {
+    PROCESSING: {
       color: "blue",
       icon: <SyncOutlined spin />,
       text: "Đang xử lý",
-      description: "Đơn hàng của bạn đang được chuẩn bị"
+      description: "Đơn hàng của bạn đang được chuẩn bị",
     },
-    "SHIPPING": {
+    SHIPPING: {
       color: "cyan",
       icon: <CarOutlined />,
       text: "Đang giao hàng",
-      description: "Đơn hàng của bạn đang được vận chuyển"
+      description: "Đơn hàng của bạn đang được vận chuyển",
     },
-    "COMPLETED": {
+    COMPLETED: {
       color: "green",
       icon: <CheckCircleOutlined />,
       text: "Hoàn thành",
-      description: "Đơn hàng của bạn đã được giao thành công"
+      description: "Đơn hàng của bạn đã được giao thành công",
     },
-    "CANCELED": {
+    CANCELED: {
       color: "red",
       icon: <CloseCircleOutlined />,
       text: "Đã hủy",
-      description: "Đơn hàng của bạn đã bị hủy"
+      description: "Đơn hàng của bạn đã bị hủy",
+    },
+  };
+
+  return (
+    statusMap[status] || {
+      color: "default",
+      icon: <InfoCircleOutlined />,
+      text: status,
+      description: "Trạng thái đơn hàng",
     }
-  };
-  
-  return statusMap[status] || {
-    color: "default",
-    icon: <InfoCircleOutlined />,
-    text: status,
-    description: "Trạng thái đơn hàng"
-  };
+  );
 };
 
 const OrderStatusTag = ({ status }) => {
   const statusInfo = getStatusInfo(status);
-  
+
   return (
     <Tag icon={statusInfo.icon} color={statusInfo.color}>
       {statusInfo.text}
@@ -115,44 +125,222 @@ const OrderTimeline = ({ status }) => {
       {
         color: status === "CANCELED" ? "red" : "green",
         children: "Đơn hàng đã được tạo",
-        dot: status === "CANCELED" ? <CloseCircleOutlined /> : <CheckCircleOutlined />
+        dot:
+          status === "CANCELED" ? (
+            <CloseCircleOutlined />
+          ) : (
+            <CheckCircleOutlined />
+          ),
       },
       {
-        color: status === "CANCELED" ? "red" : 
-               (["PROCESSING", "SHIPPING", "COMPLETED"].includes(status) ? "green" : "gray"),
+        color:
+          status === "CANCELED"
+            ? "red"
+            : ["PROCESSING", "SHIPPING", "COMPLETED"].includes(status)
+            ? "green"
+            : "gray",
         children: "Đã xác nhận đơn hàng",
-        dot: status === "CANCELED" ? <CloseCircleOutlined /> :
-             (["PROCESSING", "SHIPPING", "COMPLETED"].includes(status) ? <CheckCircleOutlined /> : <ClockCircleOutlined />)
+        dot:
+          status === "CANCELED" ? (
+            <CloseCircleOutlined />
+          ) : ["PROCESSING", "SHIPPING", "COMPLETED"].includes(status) ? (
+            <CheckCircleOutlined />
+          ) : (
+            <ClockCircleOutlined />
+          ),
       },
       {
-        color: status === "CANCELED" ? "red" : 
-               (["SHIPPING", "COMPLETED"].includes(status) ? "green" : "gray"),
+        color:
+          status === "CANCELED"
+            ? "red"
+            : ["SHIPPING", "COMPLETED"].includes(status)
+            ? "green"
+            : "gray",
         children: "Đang giao hàng",
-        dot: status === "CANCELED" ? <CloseCircleOutlined /> :
-             (["SHIPPING", "COMPLETED"].includes(status) ? <CarOutlined /> : <ClockCircleOutlined />)
+        dot:
+          status === "CANCELED" ? (
+            <CloseCircleOutlined />
+          ) : ["SHIPPING", "COMPLETED"].includes(status) ? (
+            <CarOutlined />
+          ) : (
+            <ClockCircleOutlined />
+          ),
       },
       {
-        color: status === "CANCELED" ? "red" : 
-               (status === "COMPLETED" ? "green" : "gray"),
+        color:
+          status === "CANCELED"
+            ? "red"
+            : status === "COMPLETED"
+            ? "green"
+            : "gray",
         children: "Đã giao hàng thành công",
-        dot: status === "CANCELED" ? <CloseCircleOutlined /> :
-             (status === "COMPLETED" ? <CheckCircleOutlined /> : <ClockCircleOutlined />)
-      }
+        dot:
+          status === "CANCELED" ? (
+            <CloseCircleOutlined />
+          ) : status === "COMPLETED" ? (
+            <CheckCircleOutlined />
+          ) : (
+            <ClockCircleOutlined />
+          ),
+      },
     ];
-    
+
     if (status === "CANCELED") {
       items.push({
         color: "red",
         children: "Đơn hàng đã bị hủy",
-        dot: <CloseCircleOutlined />
+        dot: <CloseCircleOutlined />,
       });
     }
-    
+
     return items;
   };
-  
+
+  return <Timeline items={getTimelineItems()} />;
+};
+
+const CancelOrderButton = ({ orderId, onCancelOrder }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [otherReason, setOtherReason] = useState("");
+  const [error, setError] = useState("");
+
+  const cancelReasons = [
+    "Tôi muốn thay đổi địa chỉ giao hàng",
+    "Tôi muốn thay đổi phương thức thanh toán",
+    "Tôi đặt nhầm sản phẩm",
+    "Tôi tìm thấy sản phẩm rẻ hơn ở nơi khác",
+    "Tôi không còn nhu cầu mua sản phẩm này",
+    "Khác",
+  ];
+
+  const showModal = () => {
+    setIsModalOpen(true);
+    setError("");
+    setCancelReason("");
+    setOtherReason("");
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleConfirm = () => {
+    if (!cancelReason) {
+      setError("Vui lòng chọn lý do hủy đơn hàng");
+      return;
+    }
+
+    if (cancelReason === "Khác" && !otherReason.trim()) {
+      setError("Vui lòng nhập lý do hủy đơn hàng");
+      return;
+    }
+
+    setConfirmLoading(true);
+
+    const finalReason = cancelReason === "Khác" ? otherReason : cancelReason;
+
+    onCancelOrder(orderId, finalReason);
+
+    setConfirmLoading(false);
+    setIsModalOpen(false);
+  };
+
   return (
-    <Timeline items={getTimelineItems()} />
+    <>
+      <Button
+        danger
+        type="primary"
+        block
+        icon={<CloseCircleOutlined />}
+        onClick={showModal}
+      >
+        Hủy đơn hàng
+      </Button>
+
+      <Modal
+        title={
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <ExclamationCircleOutlined
+              style={{ color: "#ff4d4f", marginRight: 8 }}
+            />
+            <span>Hủy đơn hàng</span>
+          </div>
+        }
+        open={isModalOpen}
+        onCancel={handleCancel}
+        footer={[
+          <Button key="back" onClick={handleCancel}>
+            Quay lại
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            danger
+            loading={confirmLoading}
+            onClick={handleConfirm}
+          >
+            Xác nhận hủy
+          </Button>,
+        ]}
+        confirmLoading={confirmLoading}
+      >
+        {error && (
+          <Alert
+            message={error}
+            type="error"
+            showIcon
+            style={{ marginBottom: 16 }}
+            closable
+          />
+        )}
+
+        <div style={{ marginBottom: 16 }}>
+          <Text>Vui lòng chọn lý do hủy đơn hàng:</Text>
+        </div>
+
+        <Radio.Group
+          onChange={(e) => {
+            setCancelReason(e.target.value);
+            setError("");
+          }}
+          value={cancelReason}
+          style={{ width: "100%" }}
+        >
+          <Space direction="vertical" style={{ width: "100%" }}>
+            {cancelReasons.map((reason) => (
+              <Radio
+                key={reason}
+                value={reason}
+                style={{ display: "block", marginBottom: 8 }}
+              >
+                {reason}
+              </Radio>
+            ))}
+          </Space>
+        </Radio.Group>
+
+        {cancelReason === "Khác" && (
+          <TextArea
+            placeholder="Nhập lý do hủy đơn hàng..."
+            value={otherReason}
+            onChange={(e) => {
+              setOtherReason(e.target.value);
+              setError("");
+            }}
+            rows={3}
+            style={{ marginTop: 12 }}
+          />
+        )}
+
+        <div style={{ marginTop: 16 }}>
+          <Text type="warning">
+            Lưu ý: Sau khi hủy đơn hàng, bạn không thể hoàn tác hành động này.
+          </Text>
+        </div>
+      </Modal>
+    </>
   );
 };
 
@@ -163,6 +351,7 @@ const MyOrder = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState("ALL");
+  const [note, contextHolder] = notification.useNotification();
 
   const toggleExpand = (record) => {
     setExpandedRowKeys(
@@ -172,9 +361,10 @@ const MyOrder = () => {
     );
   };
 
-  const filteredOrders = filter === "ALL" 
-    ? orders 
-    : orders.filter(order => order.status === filter);
+  const filteredOrders =
+    filter === "ALL"
+      ? orders
+      : orders.filter((order) => order.status === filter);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -197,14 +387,48 @@ const MyOrder = () => {
     fetchOrders();
   }, []);
 
+  console.log("Orders:", orders);
+
   const getOrderStats = () => {
-    const completed = orders.filter(o => o.status === "COMPLETED").length;
-    const pending = orders.filter(o => o.status === "PENDING").length;
-    const processing = orders.filter(o => o.status === "PROCESSING").length;
-    const shipping = orders.filter(o => o.status === "SHIPPING").length;
-    const canceled = orders.filter(o => o.status === "CANCELED").length;
-    
+    const completed = orders.filter((o) => o.status === "COMPLETED").length;
+    const pending = orders.filter((o) => o.status === "PENDING").length;
+    const processing = orders.filter((o) => o.status === "PROCESSING").length;
+    const shipping = orders.filter((o) => o.status === "SHIPPING").length;
+    const canceled = orders.filter((o) => o.status === "CANCELED").length;
+
     return { completed, pending, processing, shipping, canceled };
+  };
+
+  const handleCanceledOrder = async (orderId, reason) => {
+    try {
+      const res = await updateOrderStatusAPI(orderId, "CANCELED", reason);
+
+      if (res) {
+        note.success({
+          message: "Hủy đơn hàng thành công",
+          description: `Đơn hàng #${orderId} đã được hủy với ý do: ${reason}`,
+        });
+
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.id === orderId
+              ? { ...order, status: "CANCELED", cancelReason: reason }
+              : order
+          )
+        );
+      } else {
+        note.error({
+          message: "Thông báo",
+          description: "Hủy đơn hàng thất bại",
+        });
+      }
+    } catch (err) {
+      console.error("Error canceling order:", err);
+      note.error({
+        message: "Thông báo",
+        description: "Có lỗi xảy ra khi hủy đơn hàng",
+      });
+    }
   };
 
   const orderStats = getOrderStats();
@@ -279,7 +503,13 @@ const MyOrder = () => {
         <Space>
           <Button
             type={expandedRowKeys.includes(record.id) ? "default" : "primary"}
-            icon={expandedRowKeys.includes(record.id) ? <InfoCircleOutlined /> : <InfoCircleOutlined />}
+            icon={
+              expandedRowKeys.includes(record.id) ? (
+                <InfoCircleOutlined />
+              ) : (
+                <InfoCircleOutlined />
+              )
+            }
             size="middle"
             onClick={() => toggleExpand(record)}
           >
@@ -301,20 +531,19 @@ const MyOrder = () => {
         render: (name, record) => (
           <Space>
             {record.productImage && (
-              <Image 
-                src={record.productImage} 
+              <Image
+                src={record.productImage}
                 alt={name}
                 width={50}
                 height={50}
-                style={{ objectFit: 'cover', borderRadius: '4px' }}
-                fallback="data:image/png;base64,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"
+                style={{ objectFit: "cover", borderRadius: "4px" }}
               />
             )}
             <div>
               <Text strong>{name}</Text>
               {record.productVariant && (
                 <div>
-                  <Text type="secondary" style={{ fontSize: '12px' }}>
+                  <Text type="secondary" style={{ fontSize: "12px" }}>
                     {record.productVariant}
                   </Text>
                 </div>
@@ -334,13 +563,13 @@ const MyOrder = () => {
         dataIndex: "quantity",
         key: "quantity",
         render: (quantity) => (
-          <Badge 
-            count={quantity} 
-            showZero 
-            style={{ 
-              backgroundColor: quantity > 0 ? '#52c41a' : '#f5f5f5',
-              color: quantity > 0 ? 'white' : '#666' 
-            }} 
+          <Badge
+            count={quantity}
+            showZero
+            style={{
+              backgroundColor: quantity > 0 ? "#52c41a" : "#f5f5f5",
+              color: quantity > 0 ? "white" : "#666",
+            }}
           />
         ),
       },
@@ -365,16 +594,20 @@ const MyOrder = () => {
 
     const statusInfo = getStatusInfo(record.status);
 
+    const showCancelReason =
+      record.status === "CANCELED" && record.cancelReason;
+
     return (
-      <Card 
+      <Card
         className="order-details-card"
         bordered={false}
-        style={{ 
-          background: "#f9f9f9", 
-          marginBottom: "16px", 
-          boxShadow: "0 2px 8px rgba(0,0,0,0.09)" 
+        style={{
+          background: "#f9f9f9",
+          marginBottom: "16px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.09)",
         }}
       >
+        {contextHolder}
         <Row gutter={[24, 24]}>
           <Col xs={24} md={16}>
             <Row gutter={[16, 16]}>
@@ -390,8 +623,19 @@ const MyOrder = () => {
                     <Descriptions.Item label="Trạng thái" span={2}>
                       <OrderStatusTag status={record.status} />
                     </Descriptions.Item>
+                    {record.note && (
+                      <Descriptions.Item label="Ghi chú đơn hàng" span={2}>
+                        <Text italic>{record.note}</Text>
+                      </Descriptions.Item>
+                    )}
+                    {record.reasonCancel && (
+                      <Descriptions.Item label="Lý do hủy" span={2}>
+                        <Text type="danger">{record.reasonCancel}</Text>
+                      </Descriptions.Item>
+                    )}
                     <Descriptions.Item label="Phương thức thanh toán" span={2}>
-                      {record.paymentMethod.name} - {record.paymentMethod.description}
+                      {record.paymentMethod.name} -{" "}
+                      {record.paymentMethod.description}
                     </Descriptions.Item>
                     <Descriptions.Item label="Địa chỉ giao hàng" span={2}>
                       <HomeOutlined /> {record.shippingAddress}
@@ -399,7 +643,7 @@ const MyOrder = () => {
                   </Descriptions>
                 </Card>
               </Col>
-                
+
               <Col span={24}>
                 <Card title="Danh sách sản phẩm" bordered={false}>
                   <Table
@@ -408,29 +652,41 @@ const MyOrder = () => {
                     pagination={false}
                     rowKey="id"
                     summary={(pageData) => {
-                      const total = pageData.reduce((acc, current) => acc + (current.price * current.quantity), 0);
-                      const shipping = 30000; // Giả sử phí ship
+                      const total = pageData.reduce(
+                        (acc, current) =>
+                          acc + current.price * current.quantity,
+                        0
+                      );
+                      const shipping = 0; // Giả sử phí ship
                       const discount = 0; // Giả sử giảm giá
-                      
+
                       return (
                         <>
                           <Table.Summary.Row>
-                            <Table.Summary.Cell colSpan={3}>Tạm tính</Table.Summary.Cell>
+                            <Table.Summary.Cell colSpan={3}>
+                              Tạm tính
+                            </Table.Summary.Cell>
                             <Table.Summary.Cell>
                               <Text>{formatPrice(total)}</Text>
                             </Table.Summary.Cell>
                           </Table.Summary.Row>
                           <Table.Summary.Row>
-                            <Table.Summary.Cell colSpan={3}>Phí vận chuyển</Table.Summary.Cell>
+                            <Table.Summary.Cell colSpan={3}>
+                              Phí vận chuyển
+                            </Table.Summary.Cell>
                             <Table.Summary.Cell>
                               <Text>{formatPrice(shipping)}</Text>
                             </Table.Summary.Cell>
                           </Table.Summary.Row>
                           {discount > 0 && (
                             <Table.Summary.Row>
-                              <Table.Summary.Cell colSpan={3}>Giảm giá</Table.Summary.Cell>
+                              <Table.Summary.Cell colSpan={3}>
+                                Giảm giá
+                              </Table.Summary.Cell>
                               <Table.Summary.Cell>
-                                <Text type="danger">- {formatPrice(discount)}</Text>
+                                <Text type="danger">
+                                  - {formatPrice(discount)}
+                                </Text>
                               </Table.Summary.Cell>
                             </Table.Summary.Row>
                           )}
@@ -439,7 +695,10 @@ const MyOrder = () => {
                               <Text strong>Tổng thanh toán</Text>
                             </Table.Summary.Cell>
                             <Table.Summary.Cell>
-                              <Text strong style={{ color: "#f50", fontSize: "16px" }}>
+                              <Text
+                                strong
+                                style={{ color: "#f50", fontSize: "16px" }}
+                              >
                                 {formatPrice(record.totalPrice)}
                               </Text>
                             </Table.Summary.Cell>
@@ -452,20 +711,25 @@ const MyOrder = () => {
               </Col>
             </Row>
           </Col>
-          
+
           <Col xs={24} md={8}>
             <Row gutter={[16, 16]}>
               <Col span={24}>
-                <Card 
-                  title="Trạng thái đơn hàng" 
+                <Card
+                  title="Trạng thái đơn hàng"
                   bordered={false}
                   extra={<OrderStatusTag status={record.status} />}
                 >
                   <Alert
                     message={statusInfo.text}
                     description={statusInfo.description}
-                    type={record.status === "CANCELED" ? "error" : 
-                          record.status === "COMPLETED" ? "success" : "info"}
+                    type={
+                      record.status === "CANCELED"
+                        ? "error"
+                        : record.status === "COMPLETED"
+                        ? "success"
+                        : "info"
+                    }
                     showIcon
                     icon={statusInfo.icon}
                     style={{ marginBottom: "16px" }}
@@ -473,13 +737,15 @@ const MyOrder = () => {
                   <OrderTimeline status={record.status} />
                 </Card>
               </Col>
-              
-              {record.status === "PENDING" && (
+
+              {(record.status === "PENDING" ||
+                record.status === "PROCESSING") && (
                 <Col span={24}>
                   <Card bordered={false}>
-                    <Button danger type="primary" block icon={<CloseCircleOutlined />}>
-                      Hủy đơn hàng
-                    </Button>
+                    <CancelOrderButton
+                      orderId={record.id}
+                      onCancelOrder={handleCanceledOrder}
+                    />
                   </Card>
                 </Col>
               )}
@@ -492,7 +758,7 @@ const MyOrder = () => {
 
   const renderOrderStats = () => {
     const { completed, pending, processing, shipping, canceled } = orderStats;
-    
+
     return (
       <Row gutter={16} className="order-stats">
         <Col xs={12} sm={8} md={4}>
@@ -501,7 +767,7 @@ const MyOrder = () => {
               title="Tổng đơn hàng"
               value={orders.length}
               prefix={<ShoppingCartOutlined />}
-              valueStyle={{ color: '#1890ff' }}
+              valueStyle={{ color: "#1890ff" }}
             />
           </Card>
         </Col>
@@ -511,7 +777,7 @@ const MyOrder = () => {
               title="Chờ xác nhận"
               value={pending}
               prefix={<ClockCircleOutlined />}
-              valueStyle={{ color: '#faad14' }}
+              valueStyle={{ color: "#faad14" }}
             />
           </Card>
         </Col>
@@ -521,7 +787,7 @@ const MyOrder = () => {
               title="Đang xử lý"
               value={processing}
               prefix={<SyncOutlined spin />}
-              valueStyle={{ color: '#1890ff' }}
+              valueStyle={{ color: "#1890ff" }}
             />
           </Card>
         </Col>
@@ -531,7 +797,7 @@ const MyOrder = () => {
               title="Đang giao"
               value={shipping}
               prefix={<CarOutlined />}
-              valueStyle={{ color: '#13c2c2' }}
+              valueStyle={{ color: "#13c2c2" }}
             />
           </Card>
         </Col>
@@ -541,7 +807,7 @@ const MyOrder = () => {
               title="Hoàn thành"
               value={completed}
               prefix={<CheckCircleOutlined />}
-              valueStyle={{ color: '#52c41a' }}
+              valueStyle={{ color: "#52c41a" }}
             />
           </Card>
         </Col>
@@ -551,7 +817,7 @@ const MyOrder = () => {
               title="Đã hủy"
               value={canceled}
               prefix={<CloseCircleOutlined />}
-              valueStyle={{ color: '#ff4d4f' }}
+              valueStyle={{ color: "#ff4d4f" }}
             />
           </Card>
         </Col>
@@ -563,37 +829,37 @@ const MyOrder = () => {
     return (
       <div className="filter-buttons">
         <Space wrap>
-          <Button 
-            type={filter === "ALL" ? "primary" : "default"} 
+          <Button
+            type={filter === "ALL" ? "primary" : "default"}
             onClick={() => setFilter("ALL")}
           >
             Tất cả ({orders.length})
           </Button>
-          <Button 
-            type={filter === "PENDING" ? "primary" : "default"} 
+          <Button
+            type={filter === "PENDING" ? "primary" : "default"}
             onClick={() => setFilter("PENDING")}
           >
             Chờ xác nhận ({orderStats.pending})
           </Button>
-          <Button 
-            type={filter === "PROCESSING" ? "primary" : "default"} 
+          <Button
+            type={filter === "PROCESSING" ? "primary" : "default"}
             onClick={() => setFilter("PROCESSING")}
           >
             Đang xử lý ({orderStats.processing})
           </Button>
-          <Button 
+          <Button
             type={filter === "SHIPPING" ? "primary" : "default"}
             onClick={() => setFilter("SHIPPING")}
           >
             Đang giao ({orderStats.shipping})
           </Button>
-          <Button 
+          <Button
             type={filter === "COMPLETED" ? "primary" : "default"}
             onClick={() => setFilter("COMPLETED")}
           >
             Hoàn thành ({orderStats.completed})
           </Button>
-          <Button 
+          <Button
             danger
             type={filter === "CANCELED" ? "primary" : "default"}
             onClick={() => setFilter("CANCELED")}
@@ -611,13 +877,13 @@ const MyOrder = () => {
         <AccountSidebar />
         <div className="order-content-container">
           <Card className="loading-card">
-            <div style={{ textAlign: 'center', padding: '40px 0' }}>
+            <div style={{ textAlign: "center", padding: "40px 0" }}>
               <Spin size="large" />
               <p style={{ marginTop: 16 }}>Đang tải dữ liệu đơn hàng...</p>
             </div>
           </Card>
         </div>
-        
+
         <style>{`
           .order-page-container {
             display: flex;
@@ -663,7 +929,11 @@ const MyOrder = () => {
             type="error"
             showIcon
             action={
-              <Button size="small" danger onClick={() => window.location.reload()}>
+              <Button
+                size="small"
+                danger
+                onClick={() => window.location.reload()}
+              >
                 Thử lại
               </Button>
             }
@@ -677,10 +947,7 @@ const MyOrder = () => {
     <div className="order-page-container">
       <AccountSidebar />
       <div className="order-content-container">
-        <Card 
-          className="page-header-card"
-          bordered={false}
-        >
+        <Card className="page-header-card" bordered={false}>
           <div className="page-header">
             <div className="page-title">
               <ShoppingCartOutlined className="page-icon" />
@@ -698,19 +965,13 @@ const MyOrder = () => {
 
         {orders.length > 0 ? (
           <>
-            <div className="order-statistics-section">
-              {renderOrderStats()}
-            </div>
-            
-            <Card 
-              title="Lọc đơn hàng" 
-              className="filter-card"
-              bordered={false}
-            >
+            <div className="order-statistics-section">{renderOrderStats()}</div>
+
+            <Card title="Lọc đơn hàng" className="filter-card" bordered={false}>
               {renderFilterButtons()}
             </Card>
-            
-            <Card 
+
+            <Card
               title={`Danh sách đơn hàng (${filteredOrders.length})`}
               className="order-list-card"
               bordered={false}
@@ -724,11 +985,12 @@ const MyOrder = () => {
                   expandedRowKeys,
                   onExpand: (expanded, record) => toggleExpand(record),
                 }}
-                pagination={{ 
+                pagination={{
                   pageSize: 5,
-                  showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} đơn hàng`,
+                  showTotal: (total, range) =>
+                    `${range[0]}-${range[1]} của ${total} đơn hàng`,
                   showSizeChanger: true,
-                  pageSizeOptions: ['5', '10', '20'],
+                  pageSizeOptions: ["5", "10", "20"],
                 }}
               />
             </Card>
@@ -736,14 +998,18 @@ const MyOrder = () => {
         ) : (
           <Card bordered={false} className="empty-order-card">
             <Empty
-              image={<InboxOutlined style={{ fontSize: 64, color: '#bfbfbf' }} />}
+              image={
+                <InboxOutlined style={{ fontSize: 64, color: "#bfbfbf" }} />
+              }
               description={
-                <span>
-                  Bạn chưa có đơn hàng nào. Hãy tiếp tục mua sắm!
-                </span>
+                <span>Bạn chưa có đơn hàng nào. Hãy tiếp tục mua sắm!</span>
               }
             >
-              <Button type="primary" size="large" icon={<ShoppingCartOutlined />}>
+              <Button
+                type="primary"
+                size="large"
+                icon={<ShoppingCartOutlined />}
+              >
                 Tiếp tục mua sắm
               </Button>
             </Empty>

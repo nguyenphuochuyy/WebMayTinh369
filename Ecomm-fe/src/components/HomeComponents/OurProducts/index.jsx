@@ -3,6 +3,7 @@ import { Card, Button, Rate, Row, Col, Spin, notification } from 'antd';
 import './OurProducts.css'; // Đảm bảo file CSS này tồn tại
 import { addProductToCart } from '../../../services/api.service';
 import { AuthContext } from '../../context/auth.context';
+import { useNavigate } from 'react-router-dom';
 
 const fetchAllProducts = async () => {
   try {
@@ -31,6 +32,7 @@ const ExploreOurProducts = () => {
   const initialVisibleCount = 8;
   const [note, contextHolder] = notification.useNotification();
   const { user, setUser } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -101,7 +103,7 @@ const ExploreOurProducts = () => {
               <Col key={product.id} xs={24} sm={12} md={6}>
                 <Card
                   hoverable
-                  cover={product.image && <img alt={product.name} src={product.image} />}
+                  cover={product.image && <img alt={product.name} src={product.image} onClick={() => navigate(`/detailPage/${product.id}`)}/>}
                 >
                   <h3>{product.name}</h3>
                   <div className="price">

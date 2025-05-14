@@ -1,128 +1,276 @@
-import React, { use, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "../styles/DetailPage/DetailPage.scss";
 import { useParams } from "react-router-dom";
-import { Button, InputNumber, Rate } from "antd";
+import { Button, InputNumber, notification, Radio } from "antd";
 import deliver from "../images/detailproduct/icon-delivery.png";
 import returnShip from "../images/detailproduct/icon-return.png";
 import BestSellingProducts from "../components/HomeComponents/BestSellingProduct";
+import { getProductById } from "../services/product.service";
+import { addProductToCart } from "../services/api.service";
+import { AuthContext } from "../components/context/auth.context";
+
+
 const DetailPage = () => {
   const params = useParams();
   const { productId } = params;
+  // console.log("productId detail page", productId);
+  const { user, setUser } = useContext(AuthContext);
+  const [note, contextHolder] = notification.useNotification();
+
+
   const [product, setProduct] = useState({});
-  useEffect(() => {
-    const fakeProduct = {
-      id: productId,
-      name: "HAVIT HV-G92 Gamepad",
-      image:
-        "https://hanoicomputercdn.com/media/product/86482_may_choi_game_sony_playstation_5_ps5_pro_1.jpg",
-      price: 12000000,
-      originalPrice: 16000000,
-      rating: 5,
-      reviews: 88,
-      instock : 10,
-      description:
-        "PlayStation 5 Controller Skin High quality vinyl with air channel adhesive for easy bubble free install & mess free removal Pressure sensitive.",
+  const [count, setCount] = useState(1);
+
+  const getStockStatus = (quantity) => {
+    if (quantity === 0) return "Hết hàng";
+    if (quantity > 0 && quantity <= 10) return "Sắp hết hàng";
+    return"Còn hàng";
+  };
+
+  const handleAddProductToCart = async (productId, quantity) => {
+    const res = await addProductToCart(productId, quantity);
+    if (res) {
+      setUser((prevUser) => ({
+        ...prevUser,
+        refresh: !prevUser.refresh,
+      }));
+      note.info({
+        message: `Notification`,
+        description: "Thêm sản phẩm vào giỏ hàng thành công",
+        type: "success",
+      });
+    } else {
+      note.info({
+        message: `Notification`,
+        description: "Thêm sản phẩm vào giỏ hàng thất bại",
+        type: "error",
+      });
+    }
+  };
+
+  
+
+
+
+  useEffect( ()  => {
+    const fetchProduct = async () => {
+      try {
+        const product = await getProductById(productId);
+        setProduct(product);
+      } catch (error) {
+        console.error('Lỗi khi lấy thông tin sản phẩm:', error);
+      }
     };
-    setProduct(fakeProduct);
+
+    fetchProduct();
   }, [productId]);
+
+  console.log("Mô tả sản phẩm:", product.description);
+
+  const formatPrice = (price) => {
+    return price?.toLocaleString("vi-VN") + "đ";
+  };
+
+  const handleCountChange = (value) => {
+    setCount(value);
+  };
+
   return (
     <div className="container">
-      <div
-        className="detailProduct"
-        style={{ marginTop: "100px", display: "flex" }}
-      >
-        {/* Hình ảnh sản phẩm */}
+      {contextHolder}
+      <div className="breadcrumb" style={{ margin: "20px 0", fontSize: "14px" }}>
+      </div>
+      
+      <div className="detailProduct" style={{ display: "flex", gap: "30px", marginBottom: "50px" }}>
         <div className="product-detail" style={{ width: "50%" }}>
-          <img
-          style={{ width: "100%" , aspectRatio: "1/1"}}
-            src={product.image}
-            alt={product.name}
-            className="product-image"
-          />
+          <div className="main-image" style={{ border: "1px solid #eee", marginBottom: "10px" }}>
+            <img
+              style={{ width: "100%", height: "auto" }}
+              src={product.image}
+              alt={product.name}
+              className="product-image"
+            />
+          </div>
         </div>
 
         {/* Thông tin sản phẩm */}
-        <div className="product-info" style={{ width: "50%" , display: "flex", flexDirection: "column",paddingLeft : '50px'}}> 
-          {/* Tên sản phẩm */}
-          <h1 className="product-name" style={{textAlign : 'center'}}>{product.name}</h1>
-          {/* Đánh giá và tồn kho */}
-          <div style={{marginTop : '20px' , display : 'flex' , alignItems : "center"}} >
-          <Rate disabled allowHalf value={product.rating}></Rate>
-          <div style={{marginLeft : '20px'}}>
-            {product.instock > 0 ? (
-              <span style={{fontSize : '15px'}}>còn hàng ({product.instock})</span>
-            ):(
-              <span style={{color : "red" , fontSize : '15px'}}>Hết hàng</span>
-            )}
+        <div className="product-info" style={{ width: "50%" }}>
+          <h1 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "10px" }}>{product.name}</h1>
+          
+          <div style={{ display: "flex", alignItems: "center", margin: "10px 0" }}>
+            <span style={{ color: "#007bff" }}>Tình trạng:</span>
+            <span style={{ color: "#FF9017", marginLeft: "5px", fontWeight: "500" }}>{getStockStatus(product.quantity)}</span>
           </div>
-          </div>
-            {/* Giá sản phẩm */}
-          <div className="product-price" style={{marginTop : '20px'}}>
-            {/* format vnd  */}
 
-          <span className="current-price">{product.price}</span>
-          <span className="original-price">{product.originalPrice}</span>
+          <div className="price-section" style={{ margin: "20px 0" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+              <span style={{ color: "#E52525", fontSize: "28px", fontWeight: "bold" }}>
+                {formatPrice(product.price)}
+              </span>
+            </div>
+          </div>
 
-          </div>
-          {/* mô tả sản phẩm */}
-          <div className="product-description" style={{marginTop : '20px'}}>
-            <p style={{fontSize : '15px' , textAlign : 'left'}}>
-              {product.description}
-            </p>
-            <hr style={{marginTop : '50px'}} />
-          </div>
-         
-          {/* số lượng , nút mua ngay , yêu thích*/}
-            <div className="product-button" style={{marginTop : '20px' , display : 'flex' , alignItems : 'center'}}>
-             <InputNumber 
+          <div className="quantity-section" style={{ margin: "20px 0", display: "flex", alignItems: "center" }}>
+            <div style={{ fontWeight: "500", marginRight: "10px" }}>Số lượng:</div>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <Button 
+                style={{ border: "1px solid #ddd", borderRadius: "4px 0 0 4px" }}
+                onClick={() => handleCountChange(Math.max(1, count - 1))}
+                icon={<span>−</span>}
+              />
+              <InputNumber
                 min={1}
                 max={product.instock}
-                defaultValue={1}
-                style={{ padding : '0 5px'}}
+                value={count}
+                onChange={handleCountChange}
+                controls={false}
+                style={{ width: "50px", borderRadius: "0", textAlign: "center" }}
               />
-              <Button
-                type="primary"
-                style={{
-                  backgroundColor: "#DB4444",
-                  marginLeft: "10px",       
-                }}
-                size="middle"
-                onClick={() => {
-                  alert("Đã thêm vào giỏ hàng");
-                }}
-              >Mua ngay</Button>
-             <div style={{width : '30px' , height : '30px' , marginLeft : '10px' , display : 'flex' , borderRadius : '10px', justifyContent : 'center' , alignItems : 'center' , border : "1px solid #ccc"}}>
-              {/* icon thêm yêu thích */}
+              <Button 
+                style={{ border: "1px solid #ddd", borderRadius: "0 4px 4px 0" }}
+                onClick={() => handleCountChange(Math.min(count + 1))}
+                icon={<span>+</span>}
+              />
             </div>
           </div>
-                {/* freeship */}
-            <div style={{position: 'absolute' , bottom : 0 }}>
-                <div style={{border : "1px solid #ccc" , padding : '10px' , borderRadius : '10px'  }}>
-                  <div style={{display : 'flex'  , alignItems : 'center'}}>
-                    <img src={deliver}>
-                    </img>
-                    <div style={{marginLeft : '15px'}}>
-                      <span style={{fontSize : '15px'}}>Miễn phí vận chuyển</span>
-                      <p>Nhập mã postal code của bạn để được miễn phí vận chuyển</p>
-                    </div> 
-                  </div>
 
-                  <div style={{display : 'flex'  , alignItems : 'center' , marginTop : '10px' }}>
-                    <img src={returnShip}>
-                    </img>
-                    <div  style={{marginLeft : '15px'}}>
-                      <span style={{fontSize : '15px'}}>Đổi trả</span>
-                      <p>Đổi trả hàng miễn phí trong vòng 30 ngày</p>
-                    </div> 
-                  </div>
+          <div className="action-buttons" style={{ display: "flex", gap: "15px", margin: "30px 0" }}>
+            <Button
+              style={{
+                backgroundColor: "#fff",
+                color: "#FF424E",
+                borderColor: "#FF424E",
+                fontWeight: "bold",
+                height: "45px",
+                width: "200px",
+                borderRadius: "4px",
+              }}
+              onClick={() => handleAddProductToCart(product.id,count)}
+            >
+              THÊM VÀO GIỎ
+            </Button>
+            <Button
+              style={{
+                backgroundColor: "#FF424E",
+                color: "#fff",
+                fontWeight: "bold",
+                height: "45px",
+                width: "200px",
+                borderRadius: "4px",
+              }}
 
+            >
+              MUA NGAY
+            </Button>
+          </div>
+
+          <div className="share-section" style={{ display: "flex", alignItems: "center", margin: "20px 0" }}>
+            Chia sẻ:
+            <div style={{ display: "flex", gap: "8px", marginLeft: "10px" }}>
+              {["facebook", "messenger", "twitter", "pinterest", "copy"].map((platform) => (
+                <div 
+                  key={platform} 
+                  style={{ 
+                    width: "30px", 
+                    height: "30px", 
+                    borderRadius: "50%", 
+                    backgroundColor: ["facebook", "messenger", "twitter", "pinterest"].includes(platform) ? "#4267B2" : "#eee",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    color: "#fff",
+                    fontSize: "16px"
+                  }}
+                >
+                  {platform === "facebook" && "f"}
+                  {platform === "messenger" && "m"}
+                  {platform === "twitter" && "t"}
+                  {platform === "pinterest" && "p"}
+                  {platform === "copy" && "c"}
                 </div>
+              ))}
             </div>
+          </div>
+
+          <div className="sales-policy" style={{ margin: "30px 0" }}>
+            <div style={{ backgroundColor: "#f9f9f9", borderRadius: "8px", padding: "20px", marginBottom: "20px" }}>
+              <h3 style={{ fontSize: "16px", fontWeight: "bold", marginBottom: "15px" }}>Chính sách bán hàng</h3>
+              
+              <div style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
+                <div style={{ width: "24px", height: "24px", marginRight: "10px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="3" width="14" height="14" rx="2" stroke="#777" strokeWidth="1.5"/>
+                    <rect x="6" y="7" width="8" height="6" rx="1" stroke="#777" strokeWidth="1.5"/>
+                  </svg>
+                </div>
+                <span style={{ color: "#444" }}>Cam kết 100% chính hãng</span>
+              </div>
+              
+              <div style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
+                <div style={{ width: "24px", height: "24px", marginRight: "10px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="7" stroke="#777" strokeWidth="1.5"/>
+                    <path d="M10 6V10L13 13" stroke="#777" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                </div>
+                <span style={{ color: "#444" }}>Hỗ trợ 24/7</span>
+              </div>
+              
+              <h3 style={{ fontSize: "16px", fontWeight: "bold", margin: "20px 0 15px 0" }}>Thông tin thêm</h3>
+              
+              <div style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
+                <div style={{ width: "24px", height: "24px", marginRight: "10px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 3L12.5 8.5H17.5L13.5 12L15.5 17L10 14L4.5 17L6.5 12L2.5 8.5H7.5L10 3Z" fill="#3B82F6" stroke="#3B82F6" strokeWidth="1.5"/>
+                  </svg>
+                </div>
+                <span style={{ color: "#444" }}>Hoàn tiền 111% nếu hàng giả</span>
+              </div>
+              
+              <div style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
+                <div style={{ width: "24px", height: "24px", marginRight: "10px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5 10L8 13L15 6" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <span style={{ color: "#444" }}>Mở hộp kiểm tra nhận hàng</span>
+              </div>
+              
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <div style={{ width: "24px", height: "24px", marginRight: "10px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="5" width="14" height="10" rx="1" stroke="#3B82F6" strokeWidth="1.5"/>
+                    <path d="M7 5V3H13V5" stroke="#3B82F6" strokeWidth="1.5"/>
+                  </svg>
+                </div>
+                <span style={{ color: "#444" }}>Đổi trả trong 7 ngày</span>
+              </div>
+            </div>
+          </div>
         </div>
-        
       </div>
+
+      <div className="product-details-tabs" style={{ margin: "30px 0" }}>
+        <div style={{ 
+          fontWeight: "bold", 
+          fontSize: "18px", 
+          padding: "15px 0", 
+          borderBottom: "2px solid #eee",
+          marginBottom: "20px"
+        }}>
+          MÔ TẢ SẢN PHẨM
+        </div>
+        <div style={{ lineHeight: "1.6" }}>
+          {product.description &&
+            product.description.replace(/\\n/g, '\n').split('\n').map((line, index) => (
+              <p key={index}>{line}</p>
+            ))}
+        </div>
+
+      </div>
+
       {/* sản phẩm nổi bật */}
-      <BestSellingProducts/>  
+      <BestSellingProducts/>
     </div>
   );
 };
