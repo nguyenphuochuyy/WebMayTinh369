@@ -21,11 +21,13 @@ import {
   SyncOutlined,
   CreditCardOutlined,
 } from "@ant-design/icons";
-import { removeProductFromCart } from "../../services/api.service";
+import { checkProductQuantityAPI, removeProductFromCart } from "../../services/api.service";
 import { AuthContext } from "../context/auth.context";
 import "../../styles/CartPage/CartItems.scss";
 import { useNavigate } from "react-router-dom";
+
 const { Title, Text } = Typography;
+
 const CartItems = () => {
   const { user, setUser } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -156,7 +158,7 @@ const CartItems = () => {
     }
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async ()  => {
     if (selectedItems.length === 0) {
       message.warning("Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
       return;
@@ -182,10 +184,30 @@ const CartItems = () => {
       });
       return;
     }
+
+   
   
     const itemsToCheckout = cartItems.filter(item =>
       selectedItems.includes(item.key)
     );
+
+    const itemsToCheckoutWithQuantity = itemsToCheckout.map(item => ({
+      id:  item.productId,
+      quantity: item.quantity,
+    }));
+
+    console.log("itemsToCheckoutWithQuantity", itemsToCheckoutWithQuantity);
+
+    const isCheckQuantityProduct = await checkProductQuantityAPI(itemsToCheckoutWithQuantity);
+    if(isCheckQuantityProduct.data.data === false){
+      note.warning({
+        message: isCheckQuantityProduct.data.message,
+        description: "Vui lòng kiểm tra lại số lượng sản phẩm trong giỏ hàng",
+      });
+      return;
+    }
+    console.log("isCheckQuantityProduct", isCheckQuantityProduct);
+
   
     navigate("/checkout", { state: { cartItems: itemsToCheckout } });
   };

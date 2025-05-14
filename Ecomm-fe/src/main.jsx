@@ -27,6 +27,7 @@ import MyOrder from "./components/AccountPage/MyOrder.jsx";
 import DashboardPage from "./pages/adminPage/DashboardPage.jsx";
 import { Spin } from "antd";
 import ProductListPage from "./pages/ProductListPage/index.jsx";
+import Order from "./pages/adminPage/Order.jsx";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const [tokenChecked, setTokenChecked] = useState(false);
@@ -106,6 +107,7 @@ const router = createBrowserRouter([
       { path: "/admin/products", element: <Product /> },
       { path: "/admin/users", element: <User /> },
       { path: "/admin/dashboard", element: <DashboardPage /> },
+      { path: "/admin/orders", element: <Order /> },
     ],
   },
   { path: "/login", element: <LogIn /> },
