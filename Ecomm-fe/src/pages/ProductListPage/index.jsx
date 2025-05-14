@@ -1,4 +1,4 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Layout,
   Row,
@@ -6,7 +6,6 @@ import {
   Typography,
   Breadcrumb,
   Select,
-  Input,
   Card,
   message,
   Button,
@@ -14,174 +13,304 @@ import {
 import "./ProductListPage.css";
 import "../../styles/Base_CSS/style.css";
 import { useParams } from "react-router-dom";
-import { getCategories } from "../../services/product.service";
-const { Content, Footer } = Layout;
+import axios from "axios";
+
+const { Content } = Layout;
 const { Title } = Typography;
 const { Option } = Select;
+
+const API_URL = "http://localhost:8082/api";
 
 function ProductListPage() {
   const params = useParams();
   const categoryId = params.categoryId;
   const [listCategory, setListCategory] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState();
-  const [selectedBrand, setSelectedBrand] = useState("Khác");
-  const [priceRange, setPriceRange] = useState("Dưới 5.000.000đ");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [factories, setFactories] = useState([]); // Danh sách factory từ API
+  const [allProducts, setAllProducts] = useState([]); // Lưu danh sách sản phẩm gốc
+  const [filteredProducts, setFilteredProducts] = useState([]); // Danh sách sản phẩm đã lọc
+  const [selectedCategory, setSelectedCategory] = useState(null); // Lưu cả { value, label }
+  const [selectedBrand, setSelectedBrand] = useState("Tất cả");
+  const [priceRange, setPriceRange] = useState("all");
+  const [sortOption, setSortOption] = useState("Mới nhất");
+  const [loading, setLoading] = useState(false);
+  const [categoriesLoading, setCategoriesLoading] = useState(true); // Trạng thái tải danh mục
 
+  // Lấy danh mục và đặt category mặc định
   useEffect(() => {
-    const getListCategories = async () => {
-      const result = await getCategories();
-      console.log(result);
+    const initializeCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+        const response = await axios.get(`${API_URL}/categories`);
+        const categories = response.data;
+        setListCategory(categories);
 
-      if (result) {
-        setListCategory(result);
-      } else {
-        message.error("Lỗi khi lấy danh sách danh mục sản phẩm");
+        // Tìm tên danh mục dựa trên categoryId
+        if (categoryId) {
+          const category = categories.find(cat => cat.id === categoryId);
+          if (category) {
+            setSelectedCategory({ value: category.id, label: category.name });
+          } else {
+            setSelectedCategory(null);
+          }
+          fetchFactories(categoryId);
+          fetchProductsByCategory(categoryId);
+        }
+      } catch (error) {
+        message.error("Lỗi khi lấy danh sách danh mục: " + error.message);
+      } finally {
+        setCategoriesLoading(false);
       }
     };
-    getListCategories();
-  }, []);
+    initializeCategories();
+  }, [categoryId]);
+
+  // Áp dụng bộ lọc và sắp xếp khi các state thay đổi
+  useEffect(() => {
+    applyFiltersAndSort();
+  }, [allProducts, selectedBrand, priceRange, sortOption]);
+
+  const fetchFactories = async (catId) => {
+    try {
+      const response = await axios.get(`${API_URL}/products/category/${catId}/factories`);
+      const factoryList = response.data;
+      setFactories(["Tất cả", ...factoryList]);
+      setSelectedBrand("Tất cả"); // Đặt mặc định là "Tất cả"
+    } catch (error) {
+      message.error("Lỗi khi lấy danh sách nhà cung cấp: " + error.message);
+      setFactories([]);
+      setSelectedBrand("Tất cả");
+    }
+  };
+
+  const fetchProductsByCategory = async (catId) => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API_URL}/products/category/${catId}`);
+      const products = response.data;
+      setAllProducts(products); // Lưu danh sách gốc
+    } catch (error) {
+      message.error("Lỗi khi lấy sản phẩm: " + error.message);
+      setAllProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const applyFiltersAndSort = () => {
+    let filtered = [...allProducts];
+
+    // 1. Lọc theo nhà cung cấp (factory)
+    filtered = applyBrandFilter(filtered);
+
+    // 2. Lọc theo giá
+    filtered = applyPriceFilter(filtered);
+
+    // 3. Sắp xếp
+    filtered = applySort(filtered);
+
+    setFilteredProducts(filtered);
+  };
+
+  const applyBrandFilter = (products) => {
+    if (!selectedBrand || selectedBrand === "Tất cả") {
+      return products;
+    }
+    return products.filter((product) => product.factory === selectedBrand);
+  };
+
+  const applyPriceFilter = (products) => {
+    if (priceRange === "all") return products;
+    const [min, max] = parsePriceRange(priceRange);
+    return products.filter((product) => {
+      const price = product.price || 0;
+      return price >= min && price <= max;
+    });
+  };
+
+  const parsePriceRange = (range) => {
+    switch (range) {
+      case "under_5m":
+        return [0, 5000000];
+      case "5m_to_10m":
+        return [5000000, 10000000];
+      case "10m_to_15m":
+        return [10000000, 15000000];
+      case "over_15m":
+        return [15000000, Infinity];
+      default:
+        return [0, Infinity];
+    }
+  };
+
+  const applySort = (products) => {
+    const sortedProducts = [...products];
+    switch (sortOption) {
+      case "Giá thấp đến cao":
+        return sortedProducts.sort((a, b) => (a.price || 0) - (b.price || 0));
+      case "Giá cao đến thấp":
+        return sortedProducts.sort((a, b) => (b.price || 0) - (a.price || 0));
+      case "Đánh giá cao":
+        return sortedProducts.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      default:
+        return sortedProducts; // Mới nhất, giữ nguyên thứ tự từ API
+    }
+  };
 
   return (
-    <>
-      <div className="container">
-        <Layout style={{ minHeight: "100vh", backgroundColor: "#fff" }}>
-          <Content>
-            <Breadcrumb style={{ margin: "16px 20px" }}>
+    <Layout style={{ minHeight: "100vh", backgroundColor: "#fff",marginLeft: 75 ,marginRight: 75 ,marginTop: 20 ,marginBottom: 20 }}>
+      <Content style={{ padding: "0 50px" }}>
+        <Breadcrumb style={{ margin: "20px 20px" }}>
               <Breadcrumb.Item href="/">Trang chủ</Breadcrumb.Item>
-              <Breadcrumb.Item>Máy tính chơi game, Làm việc</Breadcrumb.Item>
+              <Breadcrumb.Item>
+                {selectedCategory ? selectedCategory.label : ""}
+              </Breadcrumb.Item>
             </Breadcrumb>
-            <div
-              style={{ background: "#fff", padding: 24, minHeight: "100vh" }}
-            >
-              <Row gutter={24}>
-                <Col span={6}>
+        <div style={{ background: "#fff", padding: 24, minHeight: "100vh" }}>
+          <Row gutter={24}>
+            <Col span={6}>
+              <div>
+                <Title level={4}>Danh mục sản phẩm</Title>
+                <Select
+                  labelInValue
+                  value={selectedCategory}
+                  style={{ width: "100%", marginBottom: 20 }}
+                  onChange={(value) => {
+                    setSelectedCategory(value);
+                    fetchFactories(value.value);
+                    fetchProductsByCategory(value.value);
+                  }}
+                  placeholder={categoriesLoading ? "Đang tải danh mục..." : "Chọn danh mục"}
+                  loading={categoriesLoading}
+                >
+                  {listCategory.map((category) => (
+                    <Option key={category.id} value={category.id}>
+                      {category.name}
+                    </Option>
+                  ))}
+                </Select>
+              </div>
+              <div>
+                <Title level={4}>Nhà cung cấp</Title>
+                <Select
+                  value={selectedBrand}
+                  style={{ width: "100%", marginBottom: 20 }}
+                  onChange={(value) => {
+                    setSelectedBrand(value);
+                  }}
+                  placeholder="Chọn nhà cung cấp"
+                >
+                  {factories.map((factory) => (
+                    <Option key={factory} value={factory}>
+                      {factory}
+                    </Option>
+                  ))}
+                </Select>
+              </div>
+              <div>
+                <Title level={4}>Lọc giá</Title>
+                <Select
+                  value={priceRange}
+                  style={{ width: "100%" }}
+                  onChange={(value) => {
+                    setPriceRange(value);
+                  }}
+                >
+                  <Option value="all">Tất cả</Option>
+                  <Option value="under_5m">Dưới 5.000.000đ</Option>
+                  <Option value="5m_to_10m">5.000.000đ - 10.000.000đ</Option>
+                  <Option value="10m_to_15m">10.000.000đ - 15.000.000đ</Option>
+                  <Option value="over_15m">Trên 15.000.000đ</Option>
+                </Select>
+              </div>
+            </Col>
+            <Col span={18}>
+              <Row gutter={[16, 16]}>
+                <div className="background-img" style={{ width: "100%", height: "100%" }}>
+                  <img
+                    width={"100%"}
+                    src="https://file.hstatic.net/1000288298/collection/best-pc-cases_copy_dcd36f7314434aae9c41ebfe31662933.jpg"
+                    alt="background"
+                  />
+                </div>
+              </Row>
+              <Row>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-around",
+                    alignItems: "center",
+                    marginTop: 20,
+                  }}
+                >
+                  <h2>{selectedCategory ? selectedCategory.label : ""}</h2>
                   <div>
-                    <Title level={4}>Danh mục sản phẩm</Title>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    Sắp xếp theo:
                     <Select
-                      value={selectedCategory}
-                      style={{ width: "100%", marginBottom: 20 }}
-                      onChange={(value) => setSelectedCategory(value)}
-                    >
-                      {listCategory.map((category) => (
-                        <Option key={category.id} value={category.name}>
-                          {category.name}
-                        </Option>
-                      ))}
-                    </Select>
-                  </div>
-                  <div>
-                    <Title level={4}>Nhà cung cấp</Title>
-                    <Select
-                      value={selectedBrand}
-                      style={{ width: "100%", marginBottom: 20 }}
-                      onChange={(value) => setSelectedBrand(value)}
-                    >
-                      <Option value="Khác">Khác</Option>
-                      <Option value="Dell">Dell</Option>
-                      <Option value="AMD">AMD</Option>
-                      <Option value="pc">pc</Option>
-                    </Select>
-                  </div>
-                  <div>
-                    <Title level={4}>Lọc giá</Title>
-                    <Select
-                      value={priceRange}
-                      style={{ width: "100%" }}
-                      onChange={(value) => setPriceRange(value)}
-                    >
-                      <Option value="Dưới 5.000.000đ">Dưới 5.000.000đ</Option>
-                      <Option value="5.000.000đ - 10.000.000đ">
-                        5.000.000đ - 10.000.000đ
-                      </Option>
-                      <Option value="10.000.000đ - 15.000.000đ">
-                        10.000.000đ - 15.000.000đ
-                      </Option>
-                      <Option value="Trên 15.000.000đ">Trên 15.000.000đ</Option>
-                    </Select>
-                  </div>
-                </Col>
-                <Col span={18}>
-                  <Row gutter={[16, 16]}>
-                    <div
-                      className="background-img"
-                      style={{ width: "100%", height: "100%" }}
-                    >
-                      <img
-                        width={"100%"}
-                        src="https://file.hstatic.net/1000288298/collection/best-pc-cases_copy_dcd36f7314434aae9c41ebfe31662933.jpg"
-                        alt="background"
-                      />
-                    </div>
-                  </Row>
-                  <Row>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-around",
-                        alignItems: "center",
-                        marginTop: 20,
+                      value={sortOption}
+                      style={{ width: 120, marginLeft: 10 }}
+                      onChange={(value) => {
+                        setSortOption(value);
                       }}
                     >
-                      <h2>Pc chơi game</h2>
-                      <div>
-                        Sắp xếp theo:
-                        <Select
-                          defaultValue="Mới nhất"
-                          style={{ width: 120, marginLeft: 10 }}
-                          onChange={(value) => setSearchTerm(value)}
+                      <Option value="Mới nhất">Mới nhất</Option>
+                      <Option value="Giá thấp đến cao">Giá thấp đến cao</Option>
+                      <Option value="Giá cao đến thấp">Giá cao đến thấp</Option>
+                      <Option value="Đánh giá cao">Đánh giá cao</Option>
+                    </Select>
+                  </div>
+                </div>
+              </Row>
+              <Row gutter={[16, 16]}>
+                <Col span={24}>
+                  <div className="product-list">
+                    {loading ? (
+                      <p>Đang tải...</p>
+                    ) : filteredProducts.length > 0 ? (
+                      filteredProducts.map((product) => (
+                        <Card
+                          key={product.id}
+                          hoverable
+                          className="product-card"
+                          cover={
+                            <img
+                              alt={product.name}
+                              src={product.image || "https://via.placeholder.com/200"}
+                              className="product-image"
+                            />
+                          }
                         >
-                          <Option value="Mới nhất">Mới nhất</Option>
-                          <Option value="Giá thấp đến cao">
-                            Giá thấp đến cao
-                          </Option>
-                          <Option value="Giá cao đến thấp">
-                            Giá cao đến thấp
-                          </Option>
-                          <Option value="Đánh giá cao">Đánh giá cao</Option>
-                        </Select>
-                      </div>
-                    </div>
-                  </Row>
-                  <Row>
-                    {/* danh sách sản phẩm */}
-                    <Col span={24}>
-                      <div style={{ display: "flex", flexWrap: "wrap" }}>
-                        <div>
-                          <Card
-                            hoverable
-                            style={{ width: 200, marginTop: 16 , padding: 10}}
-                            cover={
-                              <img
-                                alt="example"
-                                src="https://product.hstatic.net/1000288298/product/pc_5090_8f71e305fa744713940a9d7009a42b03_large.jpg"
-                              />
-                            }
-                          >
-                            <Title style={{ fontSize: 14 , textAlign : 'center' , fontWeight : '500' , opacity : '0.7'}} level={5}>PC TTG GAMING ULTRA 9 285K - RTX 5090 32GB</Title>
-                            <p style={{ textAlign: "center" , fontSize : '24px' , fontWeight : '500' , color : 'red'}}>10.000.000đ</p>
-                      
+                          <div className="product-content">
+                            <Title
+                              className="product-title"
+                              level={5}
+                            >
+                              {product.name}
+                            </Title>
+                            <p className="product-price">
+                              {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(product.price)}
+                            </p>
                             <Button
-                            type="primary"
-                            style={{ width: "100%" }}
-                            onClick={() =>  message.success("Thêm vào giỏ hàng thành công")}
-                            >Thêm vào giỏ hàng
+                              type="primary"
+                              className="add-to-cart-button"
+                              onClick={() => message.success("Thêm vào giỏ hàng thành công")}
+                            >
+                              Thêm vào giỏ hàng
                             </Button>
-                          </Card>
-                        </div>
-                     
-                     
-                      </div>
-                    </Col>
-                  </Row>
+                          </div>
+                        </Card>
+                      ))
+                    ) : (
+                      <p>Không có sản phẩm nào.</p>
+                    )}
+                  </div>
                 </Col>
               </Row>
-            </div>
-          </Content>
-        </Layout>
-      </div>
-    </>
+            </Col>
+          </Row>
+        </div>
+      </Content>
+    </Layout>
   );
 }
 
