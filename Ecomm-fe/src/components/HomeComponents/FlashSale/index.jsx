@@ -313,12 +313,12 @@ const FlashSales = () => {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
-        console.log('Dữ liệu thô từ API:', JSON.stringify(data, null, 2));
+        // console.log('Dữ liệu thô từ API:', JSON.stringify(data, null, 2));
         if (!Array.isArray(data)) {
           throw new Error('Dữ liệu không phải là mảng!');
         }
         const mappedProducts = data.map((product, index) => {
-          console.log(`Ánh xạ sản phẩm ${index}:`, product);
+          // console.log(`Ánh xạ sản phẩm ${index}:`, product);
           return {
             id: product.id ?? index,
             name: product.name ?? 'Tên không xác định',
@@ -333,7 +333,7 @@ const FlashSales = () => {
             reviews: product.reviews ?? Math.floor(Math.random() * 100), // Giả lập số đánh giá
           };
         });
-        console.log('Dữ liệu đã ánh xạ:', JSON.stringify(mappedProducts, null, 2));
+        // console.log('Dữ liệu đã ánh xạ:', JSON.stringify(mappedProducts, null, 2));
         if (mappedProducts.length === 0) {
           console.warn('Mảng mappedProducts rỗng sau ánh xạ!');
         }
@@ -360,24 +360,27 @@ const FlashSales = () => {
   };
 
   const handleAddProductToCart = async (productId, quantity) => {
-    const res = await addProductToCart(productId, quantity);
-    if(res) {
-      setUser((prevUser) => ({
-        ...prevUser,
-        refresh: !prevUser.refresh,
-      }));
-      note.info({
-        message: `Notification`,
-        description: "Thêm sản phẩm vào giỏ hàng thành công",
-        type: "success",
-      })} else {
-      note.info({
-        message: `Notification`,
-        description: "Thêm sản phẩm vào giỏ hàng thất bại",
-        type: "error",    
-      });
+    if (user.id === "") {
+      navigate("/login");
+    } else{
+      const res = await addProductToCart(productId, quantity);
+      if(res) {
+        setUser((prevUser) => ({
+          ...prevUser,
+          refresh: !prevUser.refresh,
+        }));
+        note.info({
+          message: `Notification`,
+          description: "Thêm sản phẩm vào giỏ hàng thành công",
+          type: "success",
+        })} else {
+        note.info({
+          message: `Notification`,
+          description: "Thêm sản phẩm vào giỏ hàng thất bại",
+          type: "error",    
+        });
+      }
     }
-
   }
 
   const displayedProducts = viewAll ? products : products.slice(0, initialDisplayCount);

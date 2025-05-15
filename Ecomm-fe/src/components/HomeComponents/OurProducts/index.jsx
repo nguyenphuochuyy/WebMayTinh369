@@ -63,24 +63,27 @@ const ExploreOurProducts = () => {
   };
 
   const handleAddProductToCart = async (productId, quantity) => {
-    const res = await addProductToCart(productId, quantity);
-    if(res) {
-      setUser((prevUser) => ({
-        ...prevUser,
-        refresh: !prevUser.refresh,
-      }));
-      note.info({
-        message: `Notification`,
-        description: "Thêm sản phẩm vào giỏ hàng thành công",
-        type: "success",
-      })} else {
-      note.info({
-        message: `Notification`,
-        description: "Thêm sản phẩm vào giỏ hàng thất bại",
-        type: "error",    
-      });
+    if (user.id === "") {
+      navigate("/login");
+    } else {
+      const res = await addProductToCart(productId, quantity);
+      if(res) {
+        setUser((prevUser) => ({
+          ...prevUser,
+          refresh: !prevUser.refresh,
+        }));
+        note.info({
+          message: `Notification`,
+          description: "Thêm sản phẩm vào giỏ hàng thành công",
+          type: "success",
+        })} else {
+        note.info({
+          message: `Notification`,
+          description: "Thêm sản phẩm vào giỏ hàng thất bại",
+          type: "error",    
+        });
+      }
     }
-
   }
 
 

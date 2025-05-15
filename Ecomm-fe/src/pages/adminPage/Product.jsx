@@ -87,6 +87,7 @@ const Products = () => {
           description: product.description || "",
           image: product.image || "",
           factory: product.factory || "",
+          discount: product.discount || 0,
         }));
         allProducts.push(...productsData);
       }
@@ -119,6 +120,7 @@ const Products = () => {
         quantity: product.quantity,
         description: product.description,
         factory: product.factory,
+        discount: product.discount,
       });
     } else {
       productForm.resetFields();
@@ -185,6 +187,7 @@ const Products = () => {
         quantity: values.quantity,
         description: values.description,
         factory: values.factory,
+        discount: values.discount,
       };
 
       // Nếu không có ảnh mới, giữ nguyên ảnh cũ
@@ -324,6 +327,14 @@ const Products = () => {
       key: "stock",
       sorter: (a, b) => a.quantity - b.quantity,
       render: (quantity) => quantity || 0,
+      width: "10%",
+    },
+    {
+      title: "Giảm giá (%)",
+      dataIndex: "discount",
+      key: "stock",
+      sorter: (a, b) => a.discount - b.discount,
+      render: (discount) => discount || 0,
       width: "10%",
     },
     {
@@ -521,6 +532,14 @@ const Products = () => {
                 name="quantity"
                 label="Tồn kho"
                 rules={[{ required: true, message: "Vui lòng nhập số lượng tồn kho!" }]}
+              >
+                <InputNumber min={0} placeholder="0" style={{ width: "100%" }} />
+              </Form.Item>
+
+              <Form.Item
+                name="discount"
+                label="Giảm giá (%)"
+                rules={[{ required: true, message: "Vui lòng nhập mức giảm giá của sản phẩm!" }]}
               >
                 <InputNumber min={0} placeholder="0" style={{ width: "100%" }} />
               </Form.Item>

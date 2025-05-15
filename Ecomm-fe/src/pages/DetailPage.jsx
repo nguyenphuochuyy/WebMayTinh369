@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import "../styles/DetailPage/DetailPage.scss";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button, InputNumber, notification, Radio } from "antd";
 import deliver from "../images/detailproduct/icon-delivery.png";
 import returnShip from "../images/detailproduct/icon-return.png";
 import BestSellingProducts from "../components/HomeComponents/BestSellingProduct";
 import { getProductById } from "../services/product.service";
-import { addProductToCart } from "../services/api.service";
+import { addProductToCart, checkProductQuantityAPI } from "../services/api.service";
 import { AuthContext } from "../components/context/auth.context";
 
 
@@ -16,10 +16,16 @@ const DetailPage = () => {
   // console.log("productId detail page", productId);
   const { user, setUser } = useContext(AuthContext);
   const [note, contextHolder] = notification.useNotification();
-
-
   const [product, setProduct] = useState({});
   const [count, setCount] = useState(1);
+  const navigate = useNavigate();
+
+  const [selectedItem, setSelectedItem] = useState([]);
+
+  
+  
+  
+
 
   const getStockStatus = (quantity) => {
     if (quantity === 0) return "Hết hàng";
@@ -28,28 +34,29 @@ const DetailPage = () => {
   };
 
   const handleAddProductToCart = async (productId, quantity) => {
-    const res = await addProductToCart(productId, quantity);
-    if (res) {
-      setUser((prevUser) => ({
-        ...prevUser,
-        refresh: !prevUser.refresh,
-      }));
-      note.info({
-        message: `Notification`,
-        description: "Thêm sản phẩm vào giỏ hàng thành công",
-        type: "success",
-      });
+    if (user.id === "") {
+      navigate("/login");
     } else {
-      note.info({
-        message: `Notification`,
-        description: "Thêm sản phẩm vào giỏ hàng thất bại",
-        type: "error",
-      });
+      const res = await addProductToCart(productId, quantity);
+      if (res) {
+        setUser((prevUser) => ({
+          ...prevUser,
+          refresh: !prevUser.refresh,
+        }));
+        note.info({
+          message: `Notification`,
+          description: "Thêm sản phẩm vào giỏ hàng thành công",
+          type: "success",
+        });
+      } else {
+        note.info({
+          message: `Notification`,
+          description: "Thêm sản phẩm vào giỏ hàng thất bại",
+          type: "error",
+        });
+      }
     }
   };
-
-  
-
 
 
   useEffect( ()  => {
@@ -57,6 +64,14 @@ const DetailPage = () => {
       try {
         const product = await getProductById(productId);
         setProduct(product);
+        setSelectedItem([{
+          productId: productId,
+          quantity: count,
+          productName: product.name,
+          price: product.price,
+          totalPrice: product.price * count,
+    
+        }]);
       } catch (error) {
         console.error('Lỗi khi lấy thông tin sản phẩm:', error);
       }
@@ -74,6 +89,63 @@ const DetailPage = () => {
   const handleCountChange = (value) => {
     setCount(value);
   };
+
+  useEffect(() => {
+    setSelectedItem([{
+      productId: productId,
+      quantity: count,
+      productName: product.name,
+      price: product.price,
+      totalPrice: product.price * count,
+    }]);
+  }, [count]);
+
+  console.log("selectedItem", selectedItem);
+
+
+  const handleCheckout = async ()  => {
+    if (!user.phone || user.phone.trim() === "" || !user.addresses || user.addresses.length === 0) {
+      note.warning({
+        message: "Thiếu thông tin cá nhân",
+        description: (
+          <div>
+            <p>Vui lòng cập nhật số điện thoại và địa chỉ trước khi thanh toán.</p>
+            <Button
+              type="primary"
+              size="small"
+              onClick={() => navigate("/account/profile")}
+              style={{ marginTop: 8 }}
+            >
+              Cập nhật ngay
+            </Button>
+          </div>
+        ),
+        duration: 0,
+      });
+      return;
+    }
+
+    const payload = [{
+      id: selectedItem[0].productId,
+      quantity: selectedItem[0].quantity,
+    }];
+    
+    console.log("payload", payload);
+    
+    const isCheckQuantityProduct = await checkProductQuantityAPI(payload);
+    if(isCheckQuantityProduct.data.data === false){
+      note.warning({
+        message: isCheckQuantityProduct.data.message,
+        description: "Vui lòng kiểm tra lại số lượng sản phẩm trong giỏ hàng",
+      });
+      return;
+    }
+    console.log("isCheckQuantityProduct", isCheckQuantityProduct);
+
+  
+    navigate("/checkout", { state: { cartItems: selectedItem } });
+  };
+
 
   return (
     <div className="container">
@@ -158,7 +230,7 @@ const DetailPage = () => {
                 width: "200px",
                 borderRadius: "4px",
               }}
-
+              onClick={handleCheckout}
             >
               MUA NGAY
             </Button>

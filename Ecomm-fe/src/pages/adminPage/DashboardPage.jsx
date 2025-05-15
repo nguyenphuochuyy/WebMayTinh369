@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Layout, Typography, Row, Col, Card, Statistic, Table, Button } from 'antd';
 import { 
   ArrowUpOutlined, 
@@ -6,48 +6,85 @@ import {
   UserOutlined, 
   ShoppingOutlined, 
   DollarOutlined, 
-  EyeOutlined 
+  EyeOutlined, 
+  ShoppingCartOutlined
 } from '@ant-design/icons';
+import { getListUser } from '../../services/user.service';
+import { getAllOrdersAPI } from '../../services/api.service';
 
 const { Content } = Layout;
 const { Title } = Typography;
 
 const Dashboard = () => {
-  // Dữ liệu giả lập cho các thống kê
+
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [totalProduct, setTotalProduct] = useState(0);
+  const [totalOrder, setTotalOrder] = useState(0);
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [recentOrders, setRecentOrders] = useState([]);
+
+  const formatPrice = (price) => {
+    return `${Math.round(price)
+      .toString()
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ".")} ₫`;
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // const userResponse = await getListUser();
+        // console.log("users" , userResponse);
+        // console.log("users length" , userResponse.length);
+
+        const orderResponse = await getAllOrdersAPI();
+        // Nếu orders đã được sắp xếp theo thời gian giảm dần
+        const recentOrders = orderResponse.data.orders.slice(0, 10);
+        setRecentOrders(recentOrders);
+        setTotalOrder(orderResponse.data.orders.length);
+
+        
+        const total = orderResponse.data.orders.reduce((acc, order) => acc + order.total, 0);
+        setTotalRevenue(total);
+
+        console.log("total revenue calculated:", total);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  },[])
+
+  
+
+
+
   const stats = [
     {
       title: 'Tổng người dùng',
       value: 4523,
       icon: <UserOutlined />,
       color: '#1890ff',
-      percent: 12.3,
-      isIncrease: true,
     },
     {
       title: 'Sản phẩm',
       value: 1200,
       icon: <ShoppingOutlined />,
       color: '#52c41a',
-      percent: 4.2,
-      isIncrease: true,
+    },
+    {
+      title: 'Tổng hóa đơn',
+      value: totalOrder,
+      icon: <ShoppingCartOutlined />,
+      color: '#fa8c16',
     },
     {
       title: 'Doanh thu',
-      value: 25400,
-      prefix: '$',
+      value: formatPrice(totalRevenue),
       icon: <DollarOutlined />,
       color: '#722ed1',
-      percent: 8.7,
-      isIncrease: true,
     },
-    {
-      title: 'Lượt truy cập',
-      value: 983457,
-      icon: <EyeOutlined />,
-      color: '#fa8c16',
-      percent: 3.5,
-      isIncrease: false,
-    },
+    
   ];
 
   // Dữ liệu giả lập cho bảng giao dịch gần đây
@@ -153,15 +190,9 @@ const Dashboard = () => {
                   <Statistic
                     title={stat.title}
                     value={stat.value}
-                    prefix={stat.prefix}
+                    // prefix={stat.prefix}
                     valueStyle={{ color: stat.color }}
-                    // prefix={stat.icon}
-                    suffix={
-                      <span style={{ fontSize: '14px', marginLeft: '8px', color: stat.isIncrease ? '#3f8600' : '#cf1322' }}>
-                        {stat.percent}%
-                        {stat.isIncrease ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
-                      </span>
-                    }
+                    prefix={stat.icon}
                   />
                 </Card>
               </Col>
@@ -172,7 +203,7 @@ const Dashboard = () => {
           <Card title="Giao dịch gần đây" style={{ marginBottom: 24 }}>
             <Table
               columns={columns}
-              dataSource={recentTransactions}
+              dataSource={recentOrders}
               pagination={false}
             />
           </Card>

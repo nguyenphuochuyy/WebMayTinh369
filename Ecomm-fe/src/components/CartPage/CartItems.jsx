@@ -207,6 +207,7 @@ const CartItems = () => {
       return;
     }
     console.log("isCheckQuantityProduct", isCheckQuantityProduct);
+    console.log("itemsToCheckout", itemsToCheckout);
 
   
     navigate("/checkout", { state: { cartItems: itemsToCheckout } });

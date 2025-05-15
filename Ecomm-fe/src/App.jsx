@@ -17,6 +17,7 @@ import MyOrder from "./components/AccountPage/MyOrder.jsx";
 import ProductListPage from "./pages/ProductListPage/index.jsx";
 import Checkout from "./components/DetailPage/Checkout.jsx";
 import OrderSuccess from "./pages/OrderSuccessPage.jsx";
+import PrivateRoute from "./pages/private.route.jsx";
 function App() {
 
   const { user, setUser } = useContext(AuthContext);
@@ -64,14 +65,26 @@ function App() {
         <Routes>
           <Route path="/" element={<Home onSearchHandler={setSearchHandlerCallback} />} />
           <Route path="/signup" element={<SignUp />} />
-          <Route path="/cartPage" element={<CartPage />} />
+          <Route path="/cartPage" element={(
+            <PrivateRoute>
+              <CartPage />
+            </PrivateRoute>
+          )} />
           <Route path="/detailPage/:productId" element = {<DetailPage/>}/>
-          <Route path="/account" element= {<AccountPage />}>
+          <Route path="/account" element= {(
+            <PrivateRoute>
+              <AccountPage />
+            </PrivateRoute>
+          )}>
             <Route path="profile" element={<Profile />} />
             <Route path="addresses" element={<Addresses />} />
             <Route path="myOrder" element={<MyOrder />} />
           </Route>
-          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/checkout" element={(
+            <PrivateRoute>
+              <Checkout />
+            </PrivateRoute>
+          )} />
           <Route path="/OrderSuccess" element={<OrderSuccess />} />
           <Route path="/vnpay-return" element={<OrderSuccess />} />
           <Route path="/collection/:categoryId" element = {<ProductListPage/>}></Route>

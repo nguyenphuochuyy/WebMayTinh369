@@ -12,6 +12,7 @@ const BestSellingProducts = () => {
   const [loading, setLoading] = useState(false);
   const { user, setUser } = useContext(AuthContext);
   const [note, contextHolder] = notification.useNotification();
+  const [priceDecreased, setPriceDecreased] = useState(0);
   const navigate = useNavigate();
 
   // Số lượng sản phẩm hiển thị ban đầu
@@ -31,20 +32,23 @@ const BestSellingProducts = () => {
       const response = await axios.get(
         "http://localhost:8090/api/recommendations/product-sales"
       );
+
       if (response.data.code === 200 && response.data.data) {
-        const validProducts = response.data.data.filter(
+        const filteredProducts = response.data.data.filter(
           (product) =>
             product.id &&
             product.name &&
             product.image &&
-            product.price &&
-            product.originalPrice &&
-            product.rating &&
-            product.reviews
+            product.price !== undefined &&
+            product.discount !== undefined
         );
-        if (validProducts.length === 0) {
+        if (filteredProducts.length === 0) {
           message.error("Dữ liệu sản phẩm không đầy đủ để hiển thị");
         } else {
+          const validProducts = filteredProducts.map((product) => ({
+            ...product,
+            productAfterDiscount: product.price * (1 - product.discount) /100,
+          }));
           setProducts(validProducts);
         }
       } else {
@@ -76,23 +80,27 @@ const BestSellingProducts = () => {
   // Xử lý thêm sản phẩm vào giỏ hàng
 
   const handleAddProductToCart = async (productId, quantity) => {
-    const res = await addProductToCart(productId, quantity);
-    if (res) {
-      setUser((prevUser) => ({
-        ...prevUser,
-        refresh: !prevUser.refresh,
-      }));
-      note.info({
-        message: `Notification`,
-        description: "Thêm sản phẩm vào giỏ hàng thành công",
-        type: "success",
-      });
+    if (user.id === "") {
+      navigate("/login");
     } else {
-      note.info({
-        message: `Notification`,
-        description: "Thêm sản phẩm vào giỏ hàng thất bại",
-        type: "error",
-      });
+      const res = await addProductToCart(productId, quantity);
+      if (res) {
+        setUser((prevUser) => ({
+          ...prevUser,
+          refresh: !prevUser.refresh,
+        }));
+        note.info({
+          message: `Notification`,
+          description: "Thêm sản phẩm vào giỏ hàng thành công",
+          type: "success",
+        });
+      } else {
+        note.info({
+          message: `Notification`,
+          description: "Thêm sản phẩm vào giỏ hàng thất bại",
+          type: "error",
+        });
+      }
     }
   };
 
@@ -149,11 +157,9 @@ const BestSellingProducts = () => {
                     {formatPrice(product.price)}
                   </span>
                   <span className="original-price">
-                    {formatPrice(product.originalPrice)}
+                    {formatPrice(product.productAfterDiscount)}
                   </span>
                 </div>
-                <Rate allowHalf defaultValue={product.rating} disabled />
-                <span className="reviews">({product.reviews})</span>
                 <Button
                   type="primary"
                   style={{ marginTop: "10px", width: "100%" }}
