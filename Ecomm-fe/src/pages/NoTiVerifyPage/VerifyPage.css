@@ -1,0 +1,98 @@
+
+
+/* Style cho Layout */
+.layout {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f2f5;
+}
+
+/* Style cho Content */
+.content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+/* Style cho confirmation-container */
+.confirmation-container {
+  max-width: 500px;
+  width: 90%;
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Style cho Title (h2) */
+.confirmation-container h2 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+}
+
+/* Style cho Paragraph */
+.confirmation-container p {
+  font-size: 16px;
+  color: #595959;
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+/* Style cho Button */
+.confirmation-container button {
+  background: #1890ff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.confirmation-container button:hover {
+  background: #40a9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Animation cho container */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .confirmation-container {
+    padding: 24px;
+    margin: 16px;
+  }
+
+  .confirmation-container h2 {
+    font-size: 24px;
+  }
+
+  .confirmation-container p {
+    font-size: 14px;
+  }
+
+  .confirmation-container button {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+}

@@ -17,6 +17,8 @@ import MyOrder from "./components/AccountPage/MyOrder.jsx";
 import ProductListPage from "./pages/ProductListPage/index.jsx";
 import Checkout from "./components/DetailPage/Checkout.jsx";
 import OrderSuccess from "./pages/OrderSuccessPage.jsx";
+import NoTiVerifyPage from "./pages/NoTiVerifyPage/index.jsx";
+import VerifyPage from "./pages/VerifyPage/index.jsx";
 function App() {
 
   const { user, setUser } = useContext(AuthContext);
@@ -64,6 +66,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Home onSearchHandler={setSearchHandlerCallback} />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/notiVerify" element={<NoTiVerifyPage />} />
+          <Route path="/verify" element={<VerifyPage />} />
           <Route path="/cartPage" element={<CartPage />} />
           <Route path="/detailPage/:productId" element = {<DetailPage/>}/>
           <Route path="/account" element= {<AccountPage />}>

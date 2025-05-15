@@ -18,7 +18,7 @@ function SignupForm() {
         message: 'Đăng ký thành công!',
         description: 'Bạn đã đăng ký tài khoản thành công.',
       });
-      navigate("/login");
+      navigate("/notiVerify");
     } else {
       notification.error({
         message: 'Đăng ký thất bại!',
