@@ -77,7 +77,7 @@ function App() {
           </Route>
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/OrderSuccess" element={<OrderSuccess />} />
-          <Route path="/vnpay-return" element={<OrderSuccess />} />
+          {/* <Route path="/vnpay-return" element={<OrderSuccess />} /> */}
           <Route path="/collection/:categoryId" element = {<ProductListPage/>}></Route>
         </Routes>
         <Footer />
