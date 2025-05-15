@@ -23,7 +23,8 @@ import {
   EnvironmentOutlined,
   PhoneOutlined,
   UserOutlined,
-  MailOutlined
+  MailOutlined,
+  MessageOutlined
 } from "@ant-design/icons";
 import Navbar from "../components/layout/Navbar"; 
 import Footer from "../components/layout/Footer"; 
@@ -37,7 +38,7 @@ const OrderSuccess = () => {
   const location = useLocation();
   
   // Lấy thông tin từ state (được truyền từ trang Checkout)
-  const { orderInfo, cartItems, user, selectedAddress, total } = location.state || {};
+  const { orderInfo, cartItems, user, selectedAddress, total, note } = location.state || {};
   
   // Tạo orderID mẫu nếu không có
   const [orderId] = useState(orderInfo?.id || `ORD${Math.floor(Math.random() * 1000000)}`);
@@ -210,6 +211,27 @@ const OrderSuccess = () => {
                   </Card>
                 </Col>
               </Row>
+
+              {/* Thêm phần Ghi chú đơn hàng */}
+              {note && note.trim() !== "" && (
+                <>
+                  <Divider />
+                  <Card
+                    type="inner"
+                    title={
+                      <Space>
+                        <MessageOutlined />
+                        <span>Ghi chú đơn hàng</span>
+                      </Space>
+                    }
+                    style={{ marginBottom: 16 }}
+                  >
+                    <Paragraph style={{ margin: 0 }}>
+                      {note}
+                    </Paragraph>
+                  </Card>
+                </>
+              )}
 
               <Divider />
 

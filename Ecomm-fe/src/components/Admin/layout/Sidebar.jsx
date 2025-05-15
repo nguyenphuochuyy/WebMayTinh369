@@ -12,14 +12,16 @@ import {
   MessageOutlined,
   EditOutlined
 } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/auth.context';
+import { logoutAPI } from '../../../services/api.service';
 
 const { Sider } = Layout;
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
- const { user, setUser } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   // Giả lập dữ liệu người dùng
   const userInfo = {
@@ -27,6 +29,30 @@ const Sidebar = () => {
     email: user.email,
     role: 'Admin',
     avatar: user.avatar // Đặt URL hình avatar ở đây nếu có
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logoutAPI();
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("role");
+      navigate("/login");
+
+      setUser({
+        avatar: "",
+        email: "",
+        fullName: "",
+        id: "",
+        phone: "",
+        role: "",
+        username: "",
+        sum: 0,
+        cartDetails: [],
+        refresh: false,
+      });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   const menuItems = [
@@ -44,6 +70,11 @@ const Sidebar = () => {
       key: 'products',
       icon: <ShoppingOutlined />,
       label: <Link to="/admin/products">Products</Link>,
+    },
+    {
+      key: 'orders',
+      icon: <ShoppingOutlined />,
+      label: <Link to="/admin/orders">Orders</Link>,
     },
     {
       key: 'settings',
@@ -79,12 +110,7 @@ const Sidebar = () => {
           icon: <LogoutOutlined />,
           label: 'Đăng xuất',
           danger: true,
-          onClick: () => {
-            // Xử lý đăng xuất ở đây
-            setUser(null); // Giả lập đăng xuất
-            window.location.href = '/login'; // Chuyển hướng về trang đăng nhập
-          },
-
+          onClick: handleLogout,
         },
       ]}
     />
@@ -148,6 +174,7 @@ const Sidebar = () => {
       }}
       trigger={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
       theme="dark"
+      // width={260}
     >
       <div className="logo" style={{ 
         height: '64px', 
@@ -194,6 +221,36 @@ const Sidebar = () => {
             </div>
           </div>
         </Dropdown>
+        
+        {/* {!collapsed && (
+          <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-around' }}>
+            <Dropdown overlay={notificationMenu} trigger={['click']} placement="bottomRight">
+              <div style={{ 
+                padding: '4px 8px', 
+                borderRadius: '4px', 
+                cursor: 'pointer',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              }}>
+                <Space>
+                  <BellOutlined />
+                  <span>3</span>
+                </Space>
+              </div>
+            </Dropdown>
+            
+            <div style={{ 
+              padding: '4px 8px', 
+              borderRadius: '4px', 
+              cursor: 'pointer',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            }}>
+              <Space>
+                <MessageOutlined />
+                <span>5</span>
+              </Space>
+            </div>
+          </div>
+        )} */}
       </div>
       
       {/* Menu items */}

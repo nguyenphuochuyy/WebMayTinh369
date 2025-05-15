@@ -152,20 +152,38 @@ const updateAddressAPI = async (addressId, street, city) => {
   }
 }
 
-const placeOrderAPI = async (products, paymentMethodId, shippingAddress) => {
+const placeOrderAPI = async (products, paymentMethodId, shippingAddress, note) => {
   try {
     const response = await axios.post(
       "http://localhost:8085/api/v1/order/placeOrder",
       {
         products: products, 
         paymentMethodId: paymentMethodId,
-        shippingAddress: shippingAddress 
+        shippingAddress: shippingAddress,
+        note: note,
       }
     );
     console.log("Đặt hàng thành công:", response);
     return response;
   } catch (error) {
     console.error("Lỗi khi đặt hàng:", error);
+    return null;
+  }
+}
+
+const checkProductQuantityAPI = async (products) => {
+  try {
+    const response = await axios.post(
+      "http://localhost:8085/api/v1/order/checkProductQuantity",
+      {
+        products: products,
+      }
+    );
+
+    console.log("Kiểm tra số lượng sản phẩm thành công:", response);
+    return response;
+  } catch (error) {
+    console.error("Lỗi khi kiểm tra số lượng sản phẩm:", error);
     return null;
   }
 }
@@ -185,6 +203,39 @@ const getOrderAPI = async () => {
 }
 
 
+const getAllOrdersAPI = async () => {
+  try {
+    const response = await axios.get(
+      "http://localhost:8085/api/v1/order/getOrderAllOrder"
+    );
+
+    console.log("Lấy danh sách đơn hàng thành công:", response);
+    return response;
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách đơn hàng:", error);
+    return null;
+  }
+}
+
+const updateOrderStatusAPI = async (orderId, status, message) => {
+  try {
+    const response = await axios.post(
+      `http://localhost:8085/api/v1/order/updateStatus/${orderId}`,
+      {
+        status: status,
+        message: message,
+      }
+    );
+
+    console.log("Cập nhật trạng thái đơn hàng thành công:", response);
+    return response;
+  } catch (error) {
+    console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
+    return null;
+  }
+}
+
+
 export {
   signupAPI,
   loginAPI,
@@ -199,5 +250,8 @@ export {
   addAddressAPI,
   updateAddressAPI,
   placeOrderAPI,
-  getOrderAPI
+  getOrderAPI,
+  getAllOrdersAPI,
+  updateOrderStatusAPI,
+  checkProductQuantityAPI
 };

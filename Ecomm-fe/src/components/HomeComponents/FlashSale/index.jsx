@@ -240,11 +240,13 @@
 // export default FlashSales;
 
 
-import React, { useState, useEffect } from 'react';
-import { Card, Button, Rate, Row, Col, message } from 'antd';
+import React, { useState, useEffect, useContext } from 'react';
+import { Card, Button, Rate, Row, Col, message, notification } from 'antd';
 import './FlashSale.css';
 import { Link, Links, Navigate, useNavigate } from 'react-router-dom';
 import ScrollToTop from '../../ScrollToTop';
+import { AuthContext } from '../../context/auth.context';
+import { addProductToCart } from '../../../services/api.service';
 
 const FlashSales = () => {
   const navigate = useNavigate();
@@ -257,6 +259,8 @@ const FlashSales = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewAll, setViewAll] = useState(false);
+  const [note, contextHolder] = notification.useNotification();
+  const { user, setUser } = useContext(AuthContext);
 
   const API_URL = 'http://localhost:8090/api/recommendations';
   const initialDisplayCount = 4; // Khớp với BestSellingProducts
@@ -355,39 +359,32 @@ const FlashSales = () => {
     setViewAll(true);
   };
 
-  const handleAddToCart = async (productId) => {
-    try {
-      const response = await fetch('http://localhost:8080/api/cart/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          productId: productId,
-          quantity: 1,
-        }),
+  const handleAddProductToCart = async (productId, quantity) => {
+    const res = await addProductToCart(productId, quantity);
+    if(res) {
+      setUser((prevUser) => ({
+        ...prevUser,
+        refresh: !prevUser.refresh,
+      }));
+      note.info({
+        message: `Notification`,
+        description: "Thêm sản phẩm vào giỏ hàng thành công",
+        type: "success",
+      })} else {
+      note.info({
+        message: `Notification`,
+        description: "Thêm sản phẩm vào giỏ hàng thất bại",
+        type: "error",    
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (data.code === 200) {
-        message.success('Đã thêm sản phẩm vào giỏ hàng!');
-      } else {
-        message.error('Thêm vào giỏ hàng thất bại');
-      }
-    } catch (error) {
-      message.error('Lỗi khi thêm vào giỏ hàng');
-      console.error('Error adding to cart:', error);
     }
-  };
+
+  }
 
   const displayedProducts = viewAll ? products : products.slice(0, initialDisplayCount);
 
   return (
     <div className="best-selling-container">
+       {contextHolder}
       <div className="best-selling-header">
         <div className="best-selling-title">
           <span className="red-bar"></span>
@@ -441,10 +438,12 @@ const FlashSales = () => {
               <Card
                 style={{ width: '100%', textAlign: 'center' }}
                 hoverable
+                
                 cover={
                   <img
                     alt={product.name}
                     src={product.image}
+                    onClick={() => navigate(`/detailPage/${product.id}`)}
                     onError={(e) => {
                       e.target.src = 'https://via.placeholder.com/200';
                       console.log('Hình ảnh lỗi, sử dụng placeholder:', product.image);
@@ -464,7 +463,7 @@ const FlashSales = () => {
                 <Button
                   type="primary"
                   style={{ marginTop: '10px', width: '100%' }}
-                  onClick={() => handleAddToCart(product.id)}
+                  onClick={() => handleAddProductToCart(product.id,1)}
                 >
                   Thêm vào giỏ hàng
                 </Button>

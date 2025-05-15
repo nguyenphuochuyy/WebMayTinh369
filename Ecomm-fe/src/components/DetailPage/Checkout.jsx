@@ -1,4 +1,4 @@
-import React, { use, useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Layout,
   Row,
@@ -14,7 +14,7 @@ import {
   message,
   Steps,
   Table,
-  Select
+  Select,
 } from "antd";
 import {
   UserOutlined,
@@ -25,14 +25,13 @@ import {
   TagOutlined,
   ShoppingCartOutlined,
   CheckCircleOutlined,
-  EnvironmentOutlined
+  EnvironmentOutlined,
 } from "@ant-design/icons";
 import Navbar from "../layout/Navbar";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
 import Footer from "../layout/Footer";
-import { createPaymentAPI , placeOrderAPI} from "../../services/api.service";
-import axios from "axios";
+import { createPaymentAPI, placeOrderAPI } from "../../services/api.service";
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -46,6 +45,7 @@ const Checkout = () => {
   const { user } = useContext(AuthContext);
   const [currentStep, setCurrentStep] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("bank");
+  const [note, setNote] = useState("");
   const [selectedAddress, setSelectedAddress] = useState(null);
   console.log("cartItems", cartItems);
   const [products, setProducts] = useState([]);
@@ -61,62 +61,28 @@ const Checkout = () => {
   );
   const shipping = 0;
   const total = subtotal + shipping;
-  
 
-  // lấy trạng thái thanh toán chuyển khoản 
-  useEffect(() => {
-    const handleVNPayCallback = async () => {
-      try {
-          // Gửi yêu cầu đến backend để kiểm tra trạng thái thanh toán
-          const response = await axios.get('http://localhost:8088/vnpay-return', {
-              params: new URLSearchParams(location.search),
-          });
-
-          // Lấy thông tin từ localStorage (được lưu trước khi thanh toán)
-          const pendingOrder = JSON.parse(localStorage.getItem('pendingOrder')) || {};
-          if(response.ok){
-            console.log("response", response.data);
-            
-          }
-           else {
-              // Thanh toán thất bại
-              message.error(response.data.message || 'Thanh toán thất bại.');
-              // navigate('/orderFailed');
-          }
-      } catch (error) {
-          console.error('Lỗi khi xử lý thanh toán:', error);
-          message.error('Lỗi khi xử lý thanh toán.');
-          // navigate('/orderFailed');
-      } finally {
-          setIsProcessing(false);
-      }
-  };
-
-  handleVNPayCallback();
-}, [location, navigate]);
-  
   useEffect(() => {
     if (cartItems && cartItems.length > 0) {
-      const mappedProducts = cartItems.map(item => ({
-        id: item.productId,     // backend cần id
-        quantity: item.quantity // số lượng
+      const mappedProducts = cartItems.map((item) => ({
+        id: item.productId, // backend cần id
+        quantity: item.quantity, // số lượng
       }));
       setProducts(mappedProducts);
     }
   }, [cartItems]);
 
   // console.log("products", products);
-  
 
   useEffect(() => {
     if (user) {
       // Nếu có địa chỉ, chọn địa chỉ đầu tiên làm mặc định
       if (user.addresses && user.addresses.length > 0) {
         setSelectedAddress(user.addresses[0]);
-        
+
         // Tạo địa chỉ đầy đủ từ địa chỉ được chọn
         const fullAddress = `${user.addresses[0].street}, ${user.addresses[0].city}`;
-        
+
         form.setFieldsValue({
           fullName: user.fullName || user.username || "",
           address: fullAddress,
@@ -137,19 +103,24 @@ const Checkout = () => {
   // Hàm xử lý khi thay đổi địa chỉ
   const handleAddressChange = (addressId) => {
     if (user.addresses && user.addresses.length > 0) {
-      const address = user.addresses.find(addr => addr.id === addressId);
+      const address = user.addresses.find((addr) => addr.id === addressId);
       if (address) {
         setSelectedAddress(address);
-        
+
         // Tạo địa chỉ đầy đủ từ địa chỉ được chọn
         const fullAddress = `${address.street}, ${address.city}`;
-        
+
         form.setFieldsValue({
           address: fullAddress,
-          addressId: addressId
+          addressId: addressId,
         });
       }
     }
+  };
+
+  // Hàm xử lý khi thay đổi ghi chú
+  const handleNoteChange = (e) => {
+    setNote(e.target.value);
   };
 
   // Định nghĩa cột với kích thước lớn hơn
@@ -209,57 +180,42 @@ const Checkout = () => {
   const nextStep = () => setCurrentStep(currentStep + 1);
   const prevStep = () => setCurrentStep(currentStep - 1);
 
-
   const onFinish = async () => {
     try {
       setIsProcessing(true);
-      
+
       // Tạo object chứa thông tin đơn hàng để chuyển sang trang thành công
       const orderInfo = {
         id: `ORD${Math.floor(Math.random() * 1000000)}`,
         paymentMethod: paymentMethod,
-        status: "processing"
+        status: "processing",
       };
+
+      // Lấy ghi chú từ form
+      const formValues = form.getFieldsValue();
+      const noteValue = formValues.note || note;
 
       if (paymentMethod === "bank") {
         // Xử lý thanh toán ngân hàng
-        // tạo mã thanh toán random
-        const paymentId = `PAY${Math.floor(Math.random() * 1000000)}`;
-        const resCreatePayment = await createPaymentAPI(paymentId, total, "pending" , products);
-        if (resCreatePayment && resCreatePayment.data && resCreatePayment.data.url) {
+        // random id cho payment
+        const paymentId = Math.floor(Math.random() * 1000000);
+        const resCreatePayment = await createPaymentAPI(
+          paymentId,
+          total,
+          "pending"
+        );
+        if (
+          resCreatePayment &&
+          resCreatePayment.data &&
+          resCreatePayment.data.url
+        ) {
           // Lưu thông tin thanh toán vào orderInfo
           orderInfo.paymentUrl = resCreatePayment.data.url;
           orderInfo.paymentStatus = "pending";
-          console.log(resCreatePayment.data.url);
-          
-          
-          // Chuyển hướng đến trang thành công
-          // navigate("/orderSuccess", {
-          //   state: {
-          //     orderInfo,
-          //     cartItems,
-          //     user,
-          //     selectedAddress,
-          //     total
-          //   }
-          // });
-          
+
           // Mở tab mới cho thanh toán
           window.open(resCreatePayment.data.url, "_blank");
-        } else {
-          message.error("Không lấy được link thanh toán.");
-          setIsProcessing(false);
-        }
-      } else if (paymentMethod === "cod") {
-        // Gọi API tạo đơn hàng
-        const res = await placeOrderAPI(products, 2, `${selectedAddress.street}, ${selectedAddress.city}`);
-        
-        if (res && res.data) {
-          // Nếu có API response, cập nhật orderInfo
-          if (res.data.id) {
-            orderInfo.id = res.data.id;
-          }
-          
+
           // Chuyển hướng đến trang thành công
           navigate("/orderSuccess", {
             state: {
@@ -267,10 +223,41 @@ const Checkout = () => {
               cartItems,
               user,
               selectedAddress,
-              total
-            }
+              total,
+              note: noteValue,
+            },
           });
-          
+        } else {
+          message.error("Không lấy được link thanh toán.");
+          setIsProcessing(false);
+        }
+      } else if (paymentMethod === "cod") {
+        // Gọi API tạo đơn hàng
+        const res = await placeOrderAPI(
+          products,
+          2,
+          `${selectedAddress.street}, ${selectedAddress.city}`,
+          noteValue
+        );
+
+        if (res && res.data) {
+          // Nếu có API response, cập nhật orderInfo
+          if (res.data.id) {
+            orderInfo.id = res.data.id;
+          }
+
+          // Chuyển hướng đến trang thành công
+          navigate("/orderSuccess", {
+            state: {
+              orderInfo,
+              cartItems,
+              user,
+              selectedAddress,
+              total,
+              note: noteValue,
+            },
+          });
+
           message.success("Đặt hàng thành công!");
         } else if (res && res.error) {
           message.error("Đặt hàng thất bại!");
@@ -286,7 +273,7 @@ const Checkout = () => {
       setIsProcessing(false);
     }
   };
-  
+
   // Render các options địa chỉ
   const renderAddressOptions = () => {
     if (!user || !user.addresses || user.addresses.length === 0) {
@@ -327,13 +314,20 @@ const Checkout = () => {
               <Form.Item
                 label="Chọn địa chỉ giao hàng"
                 name="addressId"
-                rules={[{ required: true, message: "Vui lòng chọn địa chỉ giao hàng" }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng chọn địa chỉ giao hàng",
+                  },
+                ]}
               >
                 <Select
                   placeholder="Chọn địa chỉ giao hàng"
                   onChange={handleAddressChange}
-                  style={{ width: '100%' }}
-                  disabled={!user || !user.addresses || user.addresses.length === 0}
+                  style={{ width: "100%" }}
+                  disabled={
+                    !user || !user.addresses || user.addresses.length === 0
+                  }
                   suffixIcon={<EnvironmentOutlined />}
                 >
                   {renderAddressOptions()}
@@ -390,6 +384,18 @@ const Checkout = () => {
                   placeholder="Nhập email"
                   disabled
                   style={{ backgroundColor: "#fff", color: "#000", opacity: 1 }}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={24}>
+            <Col xs={24}>
+              <Form.Item label="Ghi chú" name="note">
+                <Input.TextArea
+                  placeholder="Nhập ghi chú (nếu có)"
+                  rows={4}
+                  onChange={handleNoteChange}
                 />
               </Form.Item>
             </Col>
@@ -457,13 +463,40 @@ const Checkout = () => {
           </div>
 
           {selectedAddress && (
-            <div style={{ marginTop: 24, padding: 16, background: "#f0f7ff", borderRadius: 8 }}>
-              <Title level={5}><EnvironmentOutlined /> Địa chỉ giao hàng</Title>
-              <Text>{selectedAddress.street}, {selectedAddress.city}</Text>
-              <Title level={5}><PhoneOutlined /> Số điện thoại</Title>
+            <div
+              style={{
+                marginTop: 24,
+                padding: 16,
+                background: "#f0f7ff",
+                borderRadius: 8,
+              }}
+            >
+              <Title level={5}>
+                <EnvironmentOutlined /> Địa chỉ giao hàng
+              </Title>
+              <Text>
+                {selectedAddress.street}, {selectedAddress.city}
+              </Text>
+              <Title level={5}>
+                <PhoneOutlined /> Số điện thoại
+              </Title>
               <Text>{user.phone}</Text>
             </div>
-            
+          )}
+          
+          {/* Hiển thị ghi chú nếu có */}
+          {note && (
+            <div
+              style={{
+                marginTop: 16,
+                padding: 16,
+                background: "#f9f9f9",
+                borderRadius: 8,
+              }}
+            >
+              <Title level={5}>Ghi chú</Title>
+              <Text>{note}</Text>
+            </div>
           )}
         </Card>
       ),
@@ -620,7 +653,6 @@ const Checkout = () => {
           </div>
         </Card>
       </Content>
-
 
       <style>{`
         .order-summary-card .ant-card-head {
