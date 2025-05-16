@@ -1,18 +1,17 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Card, Button, Rate, Row, Col, message, notification } from "antd";
-import axios from "axios";
+import { Card, Button, notification } from "antd";
 import "./BestSellingProduct.css";
 import { AuthContext } from "../../context/auth.context";
-import { addProductToCart } from "../../../services/api.service";
+import { addProductToCart, getProductSoldAPI } from "../../../services/api.service";
 import { useNavigate } from "react-router-dom";
+import { getProductById } from "../../../services/product.service";
 
 const BestSellingProducts = () => {
-  const [products, setProducts] = useState([]);
+  const [productsBestSelling, setProductsBestSelling] = useState([]);
   const [displayAll, setDisplayAll] = useState(false);
   const [loading, setLoading] = useState(false);
   const { user, setUser } = useContext(AuthContext);
   const [note, contextHolder] = notification.useNotification();
-  const [priceDecreased, setPriceDecreased] = useState(0);
   const navigate = useNavigate();
 
   // Số lượng sản phẩm hiển thị ban đầu
@@ -20,43 +19,26 @@ const BestSellingProducts = () => {
 
   // Hàm định dạng giá tiền thành VND
   const formatPrice = (price) => {
-    return `${Math.round(price)
-      .toString()
-      .replace(/\B(?=(\d{3})+(?!\d))/g, ".")} ₫`;
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
   };
 
-  // Gọi API để lấy danh sách sản phẩm bán chạy
   const fetchBestSellingProducts = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(
-        "http://localhost:8090/api/recommendations/product-sales"
+      const products = await getProductSoldAPI();
+      console.log("products", products.data.products);
+      const sortedProducts = products.data.products.sort((a, b) => b.totalSold - a.totalSold);
+      // Lấy 8 sản phẩm đầu (top 8)
+      const top8Products = sortedProducts.slice(0, 8);
+      const detailedProducts = await Promise.all(
+        top8Products.map(async (prod) => {
+          const detail = await getProductById(prod.id);
+          return {...detail,  totalSold: prod.totalSold};
+        })
       );
-
-      if (response.data.code === 200 && response.data.data) {
-        const filteredProducts = response.data.data.filter(
-          (product) =>
-            product.id &&
-            product.name &&
-            product.image &&
-            product.price !== undefined &&
-            product.discount !== undefined
-        );
-        if (filteredProducts.length === 0) {
-          message.error("Dữ liệu sản phẩm không đầy đủ để hiển thị");
-        } else {
-          const validProducts = filteredProducts.map((product) => ({
-            ...product,
-            productAfterDiscount: product.price * (1 - product.discount) /100,
-          }));
-          setProducts(validProducts);
-        }
-      } else {
-        message.error("Không tìm thấy dữ liệu sản phẩm bán chạy");
-      }
+      setProductsBestSelling(detailedProducts);
     } catch (error) {
-      message.error("Lỗi khi lấy danh sách sản phẩm bán chạy");
-      console.error("Error fetching products:", error);
+      console.error("Lỗi khi lấy sản phẩm bán chạy:", error);
     } finally {
       setLoading(false);
     }
@@ -78,7 +60,6 @@ const BestSellingProducts = () => {
   };
 
   // Xử lý thêm sản phẩm vào giỏ hàng
-
   const handleAddProductToCart = async (productId, quantity) => {
     if (user.id === "") {
       navigate("/login");
@@ -106,8 +87,8 @@ const BestSellingProducts = () => {
 
   // Lấy danh sách sản phẩm để hiển thị
   const displayedProducts = displayAll
-    ? products
-    : products.slice(0, initialDisplayCount);
+    ? productsBestSelling
+    : productsBestSelling.slice(0, initialDisplayCount);
 
   return (
     <div className="best-selling-container">
@@ -118,7 +99,7 @@ const BestSellingProducts = () => {
           <span>Sản phẩm bán chạy</span>
         </div>
         <div className="best-selling-actions">
-          {!displayAll && products.length > initialDisplayCount && (
+          {!displayAll && productsBestSelling.length > initialDisplayCount && (
             <Button
               type="primary"
               danger
@@ -128,7 +109,7 @@ const BestSellingProducts = () => {
               Xem tất cả
             </Button>
           )}
-          {displayAll && products.length > initialDisplayCount && (
+          {displayAll && productsBestSelling.length > initialDisplayCount && (
             <Button
               type="primary"
               className="collapse-btn"
@@ -139,43 +120,67 @@ const BestSellingProducts = () => {
           )}
         </div>
       </div>
-      <Row gutter={[16, 16]} className="product-list">
+      <div className="custom-product-grid">
         {loading ? (
-          <Col span={24}>
-            <div>Đang tải...</div>
-          </Col>
+          <div className="loading-container">Đang tải...</div>
         ) : displayedProducts.length > 0 ? (
           displayedProducts.map((product) => (
-            <Col key={product.id} xs={24} sm={12} md={6}>
+            <div key={product.id} className="product-grid-item">
               <Card
                 hoverable
-                cover={<img alt={product.name} src={product.image} onClick={() => navigate(`/detailPage/${product.id}`)}/>}
+                cover={
+                  <img 
+                    alt={product.name} 
+                    src={product.image} 
+                    onClick={() => navigate(`/detailPage/${product.id}`)}
+                    onError={(e) => {
+                      e.target.src = 'https://via.placeholder.com/200';
+                      console.log('Hình ảnh lỗi, sử dụng placeholder:', product.image);
+                    }}
+                  />
+                }
               >
                 <h3>{product.name}</h3>
+                <h4 className="sold-count">Đã bán {product.totalSold}</h4>
                 <div className="price">
                   <span className="current-price">
-                    {formatPrice(product.price)}
+                    {formatPrice(product.priceAfterDiscount)}
                   </span>
-                  <span className="original-price">
-                    {formatPrice(product.productAfterDiscount)}
-                  </span>
+                  {product.discount !== 0 && (
+                    <>
+                      <span className="original-price">
+                        {formatPrice(product.price)}
+                      </span>
+                      <span
+                        className="discount-percent"
+                        style={{
+                          backgroundColor: '#e60023',
+                          color: '#fff',
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          fontWeight: 'bold',
+                          fontSize: '0.875rem',
+                        }}
+                      >
+                        -{product.discount}%
+                      </span>
+                    </>
+                  )}
                 </div>
                 <Button
                   type="primary"
-                  style={{ marginTop: "10px", width: "100%" }}
-                  onClick={() => handleAddProductToCart(product.id,1)}
+                  className="add-to-cart"
+                  onClick={() => handleAddProductToCart(product.id, 1)}
                 >
                   Thêm vào giỏ hàng
                 </Button>
               </Card>
-            </Col>
+            </div>
           ))
         ) : (
-          <Col span={24}>
-            <div>Không có sản phẩm bán chạy nào</div>
-          </Col>
+          <div className="error-container">Không có sản phẩm bán chạy nào</div>
         )}
-      </Row>
+      </div>
     </div>
   );
 };

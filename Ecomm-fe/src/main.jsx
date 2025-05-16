@@ -18,7 +18,8 @@ import { AuthWrapper } from "./components/context/auth.context.jsx";
 import Admin from "./Admin.jsx";
 import Product from "./pages/adminPage/Product.jsx";
 import User from "./pages/adminPage/User.jsx";
-
+import NoTiVerifyPage from "../src/pages/NoTiVerifyPage/index.jsx"
+import VerifyPage from "./pages/VerifyPage/index.jsx";
 import Checkout from "./components/DetailPage/Checkout.jsx";
 import Addresses from "./components/AccountPage/Addresses.jsx";
 import Profile from "./components/AccountPage/Profile.jsx";
@@ -33,8 +34,6 @@ import PrivateRoute from "./pages/private.route.jsx";
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const [tokenChecked, setTokenChecked] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
-
-
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     const role = localStorage.getItem("role");
@@ -96,7 +95,8 @@ const router = createBrowserRouter([
       { path: "/checkout", element: <Checkout /> },
       { path: "/orderSuccess", element: <OrderSuccess /> }, 
       { path:"/vnpay-return" ,element : <OrderSuccess/> },
-      
+      { path:"/notiVerify" ,element : <NoTiVerifyPage/> },
+      { path:"/verify" ,element : <VerifyPage/> },
       {path : "/collection/:categoryId", element : <ProductListPage />},
     ],
   },

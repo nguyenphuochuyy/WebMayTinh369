@@ -1,107 +1,103 @@
-.best-selling-container {
-    padding: 30px 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    margin: 20px 0;
+/* Custom grid layout */
+.custom-product-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -8px;
+}
+.product-grid-item {
+  width: 25%;
+  padding: 0 8px;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+.loading-container {
+  width: 100%;
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+.error-container {
+  width: 100%;
+  text-align: center;
+  padding: 20px;
+  color: #ff0000;
+}
+/* Card styling */
+.product-grid-item .ant-card {
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #76a77c;
+  height: 100%;
+}
+.product-grid-item .ant-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+.product-grid-item .ant-card-cover img {
+  height: 150px;
+  object-fit: contain;
+  padding: 10px;
+  background-color: #fff;
+  cursor: pointer;
+}
+.product-grid-item .ant-card-body h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.price {
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.current-price {
+  color: #db4444;
+  font-weight: 700;
+  font-size: 18px;
+}
+.original-price {
+  text-decoration: line-through;
+  color: #888;
+  font-size: 14px;
+}
+.add-to-cart {
+  margin-top: 10px;
+  background-color: #000;
+  border-color: #000;
+  color: #fff;
+  width: 100%;
+}
+.add-to-cart:hover {
+  background-color: #333;
+  border-color: #333;
+}
+/* Responsive */
+@media (max-width: 992px) {
+  .product-grid-item {
+    width: 50%;
   }
-  
+}
+@media (max-width: 576px) {
+  .product-grid-item {
+    width: 100%;
+  }
   .best-selling-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 30px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
   }
-  
-  .best-selling-title {
-    display: flex;
-    align-items: center;
-  }
-  
-  .red-bar {
-    width: 20px;
-    height: 40px;
-    background-color: #db4444;
-    margin-right: 12px;
-    border-radius: 4px;
-  }
-  
-  .best-selling-title span {
-    font-size: 18px;
-    font-weight: 600;
-    color: #db4444;
-  }
-  
-  .best-selling-actions {
-    display: flex;
-    align-items: center;
-  }
-  
-  .best-selling-actions h2 {
-    margin-right: 20px;
-    font-size: 28px;
-    font-weight: 700;
-    color: #333;
-  }
-  
-  .view-all-btn {
-    background-color: #db4444;
-    border-color: #db4444;
-    padding: 8px 20px;
-    height: auto;
-    font-size: 14px;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-  }
-  
-  .view-all-btn:hover {
-    background-color: #c0392b;
-    border-color: #c0392b;
-  }
-  
-  .product-list .ant-card {
-    border-radius: 10px;
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid #76a77c;
-  }
-  
-  .product-list .ant-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  }
-  
-  .product-list .ant-card-cover img {
-    height: 150px;
-    object-fit: contain;
-    padding: 10px;
-    background-color: #fff;
-  }
-  
-  .ant-card-body h3 {
-    font-size: 16px;
-    margin-bottom: 8px;
-    color: #333;
-  }
-  
-  .price {
-    margin: 10px 0;
-  }
-  
-  .current-price {
-    color: #db4444;
-    font-weight: 700;
-    font-size: 18px;
-    margin-right: 10px;
-  }
-  
-  .original-price {
-    text-decoration: line-through;
-    color: #888;
-    font-size: 14px;
-  }
-  
-  .reviews {
-    margin-left: 5px;
-    color: #666;
-    font-size: 14px;
-  }
+}
+
+.sold-count {
+  color: #ff4d4f;
+  font-weight: 600;
+  font-size: 1.1rem;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  white-space: nowrap;
+}

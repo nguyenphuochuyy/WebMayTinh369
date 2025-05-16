@@ -37,7 +37,7 @@ function LoginForm() {
         }, 1000);
       } else {
         setTimeout(() => {
-          navigate("/");  // Navigate to home if the role is USER
+          navigate("/");  // Navigate to verify page if the role is USER
         }, 1000);
       }
     } else {

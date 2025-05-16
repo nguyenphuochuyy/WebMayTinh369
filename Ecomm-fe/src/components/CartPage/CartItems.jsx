@@ -25,6 +25,7 @@ import { checkProductQuantityAPI, removeProductFromCart } from "../../services/a
 import { AuthContext } from "../context/auth.context";
 import "../../styles/CartPage/CartItems.scss";
 import { useNavigate } from "react-router-dom";
+import { getProductById } from "../../services/product.service";
 
 const { Title, Text } = Typography;
 
@@ -39,19 +40,50 @@ const CartItems = () => {
   const [note, contextHolder] = notification.useNotification();
 
   useEffect(() => {
-    if (user && user.cartDetails) {
-      const items = user.cartDetails.map((item) => ({
-        ...item,
-        key: item.id || item.productId, // Ensure each item has a unique key
-        totalPrice: item.price * item.quantity,
-      }));
-
-      setCartItems(items);
-
-      const total = calculateTotalAmount(user.cartDetails);
-      setTotalAmount(total);
-    }
+    const fetchCartItemsWithDiscount = async () => {
+      if (user && user.cartDetails) {
+        try {
+          const items = await Promise.all(
+            user.cartDetails.map(async (item) => {
+              try {
+                const res = await getProductById(item.productId);
+                console.log("res getProductById", res);
+                const discount = res.discount;
+                const priceAfterDiscount = res.priceAfterDiscount
+                return {
+                  ...item,
+                  key: item.id || item.productId,       
+                  discount: discount,
+                  priceAfterDiscount: priceAfterDiscount,
+                  totalPrice: priceAfterDiscount * item.quantity,
+                };
+              } catch (error) {
+                console.error("Error fetching product discount:", error);
+                return {
+                  ...item,
+                  key: item.id || item.productId,
+                  totalPrice: item.priceAfterDiscount * item.quantity,
+                  discount: 0,
+                };
+              }
+            })
+          );
+  
+          setCartItems(items);
+  
+          const total = calculateTotalAmount(items); // dùng items có discount cập nhật
+          setTotalAmount(total);
+        } catch (error) {
+          console.error("Error fetching cart items discounts:", error);
+        }
+      }
+    };
+  
+    fetchCartItemsWithDiscount();
   }, [user]);
+  
+
+  console.log("cartItems", cartItems);
 
   // Effect để theo dõi và tính lại tổng tiền dựa trên các mục đã chọn
   useEffect(() => {
@@ -64,7 +96,7 @@ const CartItems = () => {
   }, [selectedItems, cartItems]);
 
   const calculateTotalAmount = (items) => {
-    return items.reduce((total, item) => total + item.price * item.quantity, 0);
+    return items.reduce((total, item) => total + item.priceAfterDiscount * item.quantity, 0);
   };
 
   const handleQuantityChange = (record, newQuantity) => {
@@ -75,7 +107,7 @@ const CartItems = () => {
         return {
           ...item,
           quantity: newQuantity,
-          totalPrice: item.price * newQuantity,
+          totalPrice: item.priceAfterDiscount * newQuantity,
         };
       }
       return item;
@@ -242,8 +274,29 @@ const CartItems = () => {
       dataIndex: "price",
       key: "price",
       align: "right",
-      render: (price) => `${price.toLocaleString()} VND`,
-    },
+      width: 150,
+      sorter: (a, b) => {
+        const priceA = a.price * (1 - (a.discount || 0) / 100);
+        const priceB = b.price * (1 - (b.discount || 0) / 100);
+        return priceA - priceB;
+      },
+      render: (price, record) => {
+        const discountedPrice = price * (1 - (record.discount || 0) / 100);
+      
+        return (
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontSize: '1.1em' }}>
+              {discountedPrice.toLocaleString()} VND
+            </div>
+            {record.discount !== 0 && (
+              <div style={{ textDecoration: "line-through", color: "#999", fontSize: '0.85em' }}>
+                {price.toLocaleString()} VND
+              </div>
+            )}
+          </div>
+        );
+      },
+    }, 
     {
       title: "Số lượng",
       dataIndex: "quantity",
@@ -263,7 +316,7 @@ const CartItems = () => {
       key: "totalPrice",
       align: "right",
       render: (record) =>
-        `${(record.price * record.quantity).toLocaleString()} VND`,
+        `${(record.priceAfterDiscount * record.quantity).toLocaleString()} VND`,
     },
     {
       title: "Xóa",

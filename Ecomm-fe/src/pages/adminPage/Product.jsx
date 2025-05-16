@@ -317,10 +317,29 @@ const Products = () => {
       title: "Giá",
       dataIndex: "price",
       key: "price",
-      sorter: (a, b) => a.price - b.price,
-      render: (price) => formatVND(price),
+      sorter: (a, b) => {
+        const priceA = a.price * (1 - (a.discount || 0) / 100);
+        const priceB = b.price * (1 - (b.discount || 0) / 100);
+        return priceA - priceB;
+      },
+      render: (price, record) => {
+        const discountedPrice = price * (1 - (record.discount || 0) / 100);
+    
+        return (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4 }}>
+            <span style={{ color: "#E52525", fontWeight: "bold", fontSize: '1.1em' }}>
+              {formatVND(discountedPrice)}
+            </span>
+            {record.discount !== 0 && (
+              <span style={{ textDecoration: "line-through", color: "#999", fontSize: '0.85em' }}>
+                {formatVND(price)}
+              </span>
+            )}
+          </div>
+        );
+      },
       width: "10%",
-    },
+    }, 
     {
       title: "Tồn kho",
       dataIndex: "quantity",
@@ -334,7 +353,7 @@ const Products = () => {
       dataIndex: "discount",
       key: "stock",
       sorter: (a, b) => a.discount - b.discount,
-      render: (discount) => discount || 0,
+      render: (discount) => `${discount || 0}%`,
       width: "10%",
     },
     {

@@ -5,7 +5,7 @@ import { Navigate } from "react-router-dom";
 const PrivateRoute = (props) => {
     const {user} = useContext(AuthContext)
     console.log("user private route", user)
-    if(user && user.id){
+    if(localStorage.getItem("access_token") && localStorage.getItem("role")){
         return(
             <>
             {props.children}

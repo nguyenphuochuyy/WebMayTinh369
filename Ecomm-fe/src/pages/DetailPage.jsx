@@ -177,11 +177,37 @@ const DetailPage = () => {
           <div className="price-section" style={{ margin: "20px 0" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
               <span style={{ color: "#E52525", fontSize: "28px", fontWeight: "bold" }}>
-                {formatPrice(product.price)}
+                {formatPrice(product.priceAfterDiscount)}
               </span>
+              {product.discount !== 0 && (
+                <>
+                  <span
+                    style={{
+                      textDecoration: "line-through",
+                      color: "#999",
+                      fontSize: "20px",
+                      fontWeight: "normal",
+                    }}
+                  >
+                    {formatPrice(product.price)}
+                  </span>
+                  <span
+                    style={{
+                      backgroundColor: "#E52525",
+                      color: "#fff",
+                      padding: "2px 8px",
+                      borderRadius: "4px",
+                      fontWeight: "bold",
+                      fontSize: "18px",
+                    }}
+                  >
+                    -{product.discount}%
+                  </span>
+                </>
+              )}
             </div>
           </div>
-
+          
           <div className="quantity-section" style={{ margin: "20px 0", display: "flex", alignItems: "center" }}>
             <div style={{ fontWeight: "500", marginRight: "10px" }}>Số lượng:</div>
             <div style={{ display: "flex", alignItems: "center" }}>
