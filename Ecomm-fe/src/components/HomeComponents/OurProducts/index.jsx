@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Card, Button, Rate, Row, Col, Spin, notification } from 'antd';
-import './OurProducts.css'; // Đảm bảo file CSS này tồn tại
+import './OurProducts.css';
 import { addProductToCart } from '../../../services/api.service';
 import { AuthContext } from '../../context/auth.context';
 import { useNavigate } from 'react-router-dom';
@@ -63,24 +63,27 @@ const ExploreOurProducts = () => {
   };
 
   const handleAddProductToCart = async (productId, quantity) => {
-    const res = await addProductToCart(productId, quantity);
-    if(res) {
-      setUser((prevUser) => ({
-        ...prevUser,
-        refresh: !prevUser.refresh,
-      }));
-      note.info({
-        message: `Notification`,
-        description: "Thêm sản phẩm vào giỏ hàng thành công",
-        type: "success",
-      })} else {
-      note.info({
-        message: `Notification`,
-        description: "Thêm sản phẩm vào giỏ hàng thất bại",
-        type: "error",    
-      });
+    if (user.id === "") {
+      navigate("/login");
+    } else {
+      const res = await addProductToCart(productId, quantity);
+      if(res) {
+        setUser((prevUser) => ({
+          ...prevUser,
+          refresh: !prevUser.refresh,
+        }));
+        note.info({
+          message: `Notification`,
+          description: "Thêm sản phẩm vào giỏ hàng thành công",
+          type: "success",
+        })} else {
+        note.info({
+          message: `Notification`,
+          description: "Thêm sản phẩm vào giỏ hàng thất bại",
+          type: "error",    
+        });
+      }
     }
-
   }
 
 
@@ -92,48 +95,86 @@ const ExploreOurProducts = () => {
           <span className="red-bar"></span>
           <span>Tất cả sản phẩm</span>
         </div>
+        <div className="explore-products-actions">
+          {!showAll && allProducts.length > initialVisibleCount && (
+            <Button type="primary" danger className="view-all-btn" onClick={handleViewAll}>
+              Xem toàn bộ
+            </Button>
+          )}
+          {showAll && allProducts.length > initialVisibleCount && (
+            <Button type="primary" className="collapse-btn" onClick={handleCollapse}>
+              Thu gọn
+            </Button>
+          )}
+        </div>
       </div>
-      {loading ? (
-        <Spin size="large" style={{ display: 'block', textAlign: 'center', marginTop: 50 }} />
-      ) : error ? (<div style={{ color: 'red', textAlign: 'center', marginTop: 50 }}>{error}</div>
-      ) : (
-        <>
-          <Row gutter={[16, 16]} className="product-list">
-            {visibleProducts.map((product) => (
-              <Col key={product.id} xs={24} sm={12} md={6}>
-                <Card
-                  hoverable
-                  cover={product.image && <img alt={product.name} src={product.image} onClick={() => navigate(`/detailPage/${product.id}`)}/>}
+      <div className="custom-product-grid">
+        {loading ? (
+          <div className="loading-container">Đang tải sản phẩm...</div>
+        ) : error ? (
+          <div className="error-container">{error}</div>
+        ) : (
+          visibleProducts.map((product) => (
+            <div key={product.id} className="product-grid-item">
+              <Card
+                style={{ width: '100%', textAlign: 'center', height: '100%' }}
+                hoverable
+                cover={
+                  product.image && (
+                    <img
+                      alt={product.name}
+                      src={product.image}
+                      onClick={() => navigate(`/detailPage/${product.id}`)}
+                      onError={(e) => {
+                        e.target.src = 'https://via.placeholder.com/200';
+                        console.log('Hình ảnh lỗi, sử dụng placeholder:', product.image);
+                      }}
+                    />
+                  )
+                }
+              >
+                <h3 style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {product.name}
+                </h3>
+                <div className="price" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span className="current-price">{formatVND(product.priceAfterDiscount)}</span>
+                  {product.discount !== 0 && (
+                    <>
+                      <span
+                        className="original-price"
+                        style={{ textDecoration: 'line-through', color: '#999' }}
+                      >
+                        {formatVND(product.price)}
+                      </span>
+                      <span
+                        className="discount-percent"
+                        style={{
+                          backgroundColor: '#e60023',
+                          color: '#fff',
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          fontWeight: 'bold',
+                          fontSize: '0.875rem',
+                        }}
+                      >
+                        -{product.discount}%
+                      </span>
+                    </>
+                  )}
+                </div>
+                <Button
+                  type="primary"
+                  block
+                  className="add-to-cart"
+                  onClick={() => handleAddProductToCart(product.id, 1)}
                 >
-                  <h3>{product.name}</h3>
-                  <div className="price">
-                    <span className="current-price">{formatVND(product.price)}</span>
-                  </div>
-                  <div className="rating">
-                    <Rate allowHalf defaultValue={product.rating || 0} disabled />
-                    {product.reviews && <span className="reviews">({product.reviews})</span>}
-                  </div>
-                  <Button type="primary" block className="add-to-cart" onClick={() => handleAddProductToCart(product.id, 1)}>
-                    thêm vào giỏ hàng
-                  </Button>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-          <div className="view-all">
-            {!showAll && allProducts.length > initialVisibleCount && (
-              <Button type="primary" danger onClick={handleViewAll}>
-                Xem toàn bộ
-              </Button>
-            )}
-            {showAll && allProducts.length > initialVisibleCount && (
-              <Button onClick={handleCollapse}>
-                Thu gọn
-              </Button>
-            )}
-          </div>
-        </>
-      )}
+                  Thêm vào giỏ hàng
+                </Button>
+              </Card>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 };

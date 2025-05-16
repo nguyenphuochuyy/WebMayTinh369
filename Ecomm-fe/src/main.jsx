@@ -29,6 +29,7 @@ import DashboardPage from "./pages/adminPage/DashboardPage.jsx";
 import { Spin } from "antd";
 import ProductListPage from "./pages/ProductListPage/index.jsx";
 import Order from "./pages/adminPage/Order.jsx";
+import PrivateRoute from "./pages/private.route.jsx";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const [tokenChecked, setTokenChecked] = useState(false);
@@ -72,7 +73,12 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: <Home /> },
-      { path: "/cartPage", element: <CartPage /> },
+      { path: "/cartPage", 
+        element: (
+          <PrivateRoute>
+            <CartPage />
+          </PrivateRoute>
+        )},
       {
         path: "/account",
         element: <AccountPage />,

@@ -270,7 +270,7 @@ const OrderSuccess = () => {
                         description={
                           <Space direction="vertical" size={0}>
                             <Text type="secondary">Số lượng: {item.quantity}</Text>
-                            <Text type="secondary">Đơn giá: {item.price.toLocaleString()} VND</Text>
+                            <Text type="secondary">Đơn giá: {item.priceAfterDiscount.toLocaleString()} VND</Text>
                           </Space>
                         }
                       />

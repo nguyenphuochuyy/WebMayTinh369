@@ -151,3 +151,63 @@
 .add-to-cart {
   margin-top: 10px;
 }
+
+/* Bỏ Ant Design Row/Col và sử dụng custom grid */
+.custom-product-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -8px; /* Bù đắp cho padding của các item */
+}
+
+.product-grid-item {
+  width: 25%; /* Đảm bảo 4 sản phẩm một hàng */
+  padding: 0 8px;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+
+.loading-container {
+  width: 100%;
+  text-align: center;
+  padding: 20px;
+}
+
+.no-products-container {
+  width: 100%;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Card styling */
+.product-grid-item .ant-card {
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #76a77c;
+  height: 100%;
+}
+
+.product-grid-item .ant-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.product-grid-item .ant-card-cover img {
+  height: 150px;
+  object-fit: contain;
+  padding: 10px;
+  background-color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .product-grid-item {
+    width: 50%; /* 2 sản phẩm một hàng trên tablet */
+  }
+}
+
+@media (max-width: 576px) {
+  .product-grid-item {
+    width: 100%; /* 1 sản phẩm một hàng trên mobile */
+  }
+}
