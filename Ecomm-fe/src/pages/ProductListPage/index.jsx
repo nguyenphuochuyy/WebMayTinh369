@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Layout,
   Row,
@@ -9,11 +9,16 @@ import {
   Card,
   message,
   Button,
+  notification,
+  Empty,
+  Spin,
 } from "antd";
 import "./ProductListPage.css";
 import "../../styles/Base_CSS/style.css";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import { AuthContext } from "../../components/context/auth.context";
+import { addProductToCart } from "../../services/api.service";
 
 const { Content } = Layout;
 const { Title } = Typography;
@@ -31,9 +36,12 @@ function ProductListPage() {
   const [selectedCategory, setSelectedCategory] = useState(null); // Lưu cả { value, label }
   const [selectedBrand, setSelectedBrand] = useState("Tất cả");
   const [priceRange, setPriceRange] = useState("all");
-  const [sortOption, setSortOption] = useState("Mới nhất");
+  const [sortOption, setSortOption] = useState("Giá thấp đến cao");
   const [loading, setLoading] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(true); // Trạng thái tải danh mục
+  const { user, setUser } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const [note, contextHolder] = notification.useNotification();
 
   // Lấy danh mục và đặt category mặc định
   useEffect(() => {
@@ -46,7 +54,7 @@ function ProductListPage() {
 
         // Tìm tên danh mục dựa trên categoryId
         if (categoryId) {
-          const category = categories.find(cat => cat.id === categoryId);
+          const category = categories.find((cat) => cat.id === categoryId);
           if (category) {
             setSelectedCategory({ value: category.id, label: category.name });
           } else {
@@ -71,7 +79,9 @@ function ProductListPage() {
 
   const fetchFactories = async (catId) => {
     try {
-      const response = await axios.get(`${API_URL}/products/category/${catId}/factories`);
+      const response = await axios.get(
+        `${API_URL}/products/category/${catId}/factories`
+      );
       const factoryList = response.data;
       setFactories(["Tất cả", ...factoryList]);
       setSelectedBrand("Tất cả"); // Đặt mặc định là "Tất cả"
@@ -88,6 +98,7 @@ function ProductListPage() {
       const response = await axios.get(`${API_URL}/products/category/${catId}`);
       const products = response.data;
       setAllProducts(products); // Lưu danh sách gốc
+      console.log("Sản phẩm:", products);
     } catch (error) {
       message.error("Lỗi khi lấy sản phẩm: " + error.message);
       setAllProducts([]);
@@ -122,8 +133,8 @@ function ProductListPage() {
     if (priceRange === "all") return products;
     const [min, max] = parsePriceRange(priceRange);
     return products.filter((product) => {
-      const price = product.price || 0;
-      return price >= min && price <= max;
+      const priceAfterDiscount = product.priceAfterDiscount || 0;
+      return priceAfterDiscount >= min && priceAfterDiscount <= max;
     });
   };
 
@@ -146,25 +157,62 @@ function ProductListPage() {
     const sortedProducts = [...products];
     switch (sortOption) {
       case "Giá thấp đến cao":
-        return sortedProducts.sort((a, b) => (a.price || 0) - (b.price || 0));
+        return sortedProducts.sort(
+          (a, b) => (a.priceAfterDiscount || 0) - (b.priceAfterDiscount || 0)
+        );
       case "Giá cao đến thấp":
-        return sortedProducts.sort((a, b) => (b.price || 0) - (a.price || 0));
-      case "Đánh giá cao":
-        return sortedProducts.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        return sortedProducts.sort(
+          (a, b) => (b.priceAfterDiscount || 0) - (a.priceAfterDiscount || 0)
+        );
       default:
         return sortedProducts; // Mới nhất, giữ nguyên thứ tự từ API
     }
   };
 
+  const handleAddProductToCart = async (productId, quantity) => {
+    if (user.id === "") {
+      navigate("/login");
+    } else {
+      const res = await addProductToCart(productId, quantity);
+      if (res) {
+        setUser((prevUser) => ({
+          ...prevUser,
+          refresh: !prevUser.refresh,
+        }));
+        note.info({
+          message: `Notification`,
+          description: "Thêm sản phẩm vào giỏ hàng thành công",
+          type: "success",
+        });
+      } else {
+        note.info({
+          message: `Notification`,
+          description: "Thêm sản phẩm vào giỏ hàng thất bại",
+          type: "error",
+        });
+      }
+    }
+  };
+
   return (
-    <Layout style={{ minHeight: "100vh", backgroundColor: "#fff",marginLeft: 75 ,marginRight: 75 ,marginTop: 20 ,marginBottom: 20 }}>
+    <Layout
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "#fff",
+        marginLeft: 75,
+        marginRight: 75,
+        marginTop: 20,
+        marginBottom: 20,
+      }}
+    >
+      {contextHolder}
       <Content style={{ padding: "0 50px" }}>
         <Breadcrumb style={{ margin: "20px 20px" }}>
-              <Breadcrumb.Item href="/">Trang chủ</Breadcrumb.Item>
-              <Breadcrumb.Item>
-                {selectedCategory ? selectedCategory.label : ""}
-              </Breadcrumb.Item>
-            </Breadcrumb>
+          <Breadcrumb.Item href="/">Trang chủ</Breadcrumb.Item>
+          <Breadcrumb.Item>
+            {selectedCategory ? selectedCategory.label : ""}
+          </Breadcrumb.Item>
+        </Breadcrumb>
         <div style={{ background: "#fff", padding: 24, minHeight: "100vh" }}>
           <Row gutter={24}>
             <Col span={6}>
@@ -179,7 +227,9 @@ function ProductListPage() {
                     fetchFactories(value.value);
                     fetchProductsByCategory(value.value);
                   }}
-                  placeholder={categoriesLoading ? "Đang tải danh mục..." : "Chọn danh mục"}
+                  placeholder={
+                    categoriesLoading ? "Đang tải danh mục..." : "Chọn danh mục"
+                  }
                   loading={categoriesLoading}
                 >
                   {listCategory.map((category) => (
@@ -225,7 +275,10 @@ function ProductListPage() {
             </Col>
             <Col span={18}>
               <Row gutter={[16, 16]}>
-                <div className="background-img" style={{ width: "100%", height: "100%" }}>
+                <div
+                  className="background-img"
+                  style={{ width: "100%", height: "100%" }}
+                >
                   <img
                     width={"100%"}
                     src="https://file.hstatic.net/1000288298/collection/best-pc-cases_copy_dcd36f7314434aae9c41ebfe31662933.jpg"
@@ -244,8 +297,7 @@ function ProductListPage() {
                 >
                   <h2>{selectedCategory ? selectedCategory.label : ""}</h2>
                   <div>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    Sắp xếp theo:
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Sắp xếp theo:
                     <Select
                       value={sortOption}
                       style={{ width: 120, marginLeft: 10 }}
@@ -253,55 +305,104 @@ function ProductListPage() {
                         setSortOption(value);
                       }}
                     >
-                      <Option value="Mới nhất">Mới nhất</Option>
+             
                       <Option value="Giá thấp đến cao">Giá thấp đến cao</Option>
                       <Option value="Giá cao đến thấp">Giá cao đến thấp</Option>
-                      <Option value="Đánh giá cao">Đánh giá cao</Option>
+               
                     </Select>
                   </div>
                 </div>
               </Row>
-              <Row gutter={[16, 16]}>
+              <Row gutter={[24, 24]} className="products-container">
                 <Col span={24}>
                   <div className="product-list">
                     {loading ? (
-                      <p>Đang tải...</p>
+                      <div className="loading-container">
+                        <Spin size="large" />
+                        <p className="mt-4">Đang tải sản phẩm...</p>
+                      </div>
                     ) : filteredProducts.length > 0 ? (
-                      filteredProducts.map((product) => (
-                        <Card
-                          key={product.id}
-                          hoverable
-                          className="product-card"
-                          cover={
-                            <img
-                              alt={product.name}
-                              src={product.image || "https://via.placeholder.com/200"}
-                              className="product-image"
-                            />
-                          }
-                        >
-                          <div className="product-content">
-                            <Title
-                              className="product-title"
-                              level={5}
+                      <Row gutter={[24, 24]}>
+                        {filteredProducts.map((product) => (
+                          <Col xs={24} sm={12} md={8} lg={6} key={product.id}>
+                            <Card
+                              hoverable
+                              className="product-card shadow-sm"
+                              cover={
+                                <div className="product-image-container">
+                                  <img
+                                    alt={product.name}
+                                    src={
+                                      product.image ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    className="product-image"
+                                    onClick={() =>
+                                      navigate(`/detailPage/${product.id}`)
+                                    }
+                                  />
+                                  {product.discount > 0 && (
+                                    <div className="discount-badge">
+                                      -{product.discount}%
+                                    </div>
+                                  )}
+                                </div>
+                              }
+                              bodyStyle={{ padding: "16px" }}
                             >
-                              {product.name}
-                            </Title>
-                            <p className="product-price">
-                              {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(product.price)}
-                            </p>
-                            <Button
-                              type="primary"
-                              className="add-to-cart-button"
-                              onClick={() => message.success("Thêm vào giỏ hàng thành công")}
-                            >
-                              Thêm vào giỏ hàng
-                            </Button>
-                          </div>
-                        </Card>
-                      ))
+                              <div className="product-content">
+                                <Title
+                                  className="product-title"
+                                  level={5}
+                                  ellipsis={{ rows: 2, tooltip: product.name }}
+                                  onClick={() =>
+                                    navigate(`/detailPage/${product.id}`)
+                                  }
+                                >
+                                  {product.name}
+                                </Title>
+
+                                <div className="product-price">
+                                  <span className="sale-price">
+                                    {new Intl.NumberFormat("vi-VN", {
+                                      style: "currency",
+                                      currency: "VND",
+                                    }).format(product.priceAfterDiscount)}
+                                  </span>
+
+                                  {product.discount > 0 && (
+                                    <span className="original-price">
+                                      {new Intl.NumberFormat("vi-VN", {
+                                        style: "currency",
+                                        currency: "VND",
+                                      }).format(product.price)}
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div className="button-container">
+                                  <Button
+                                    type="primary"
+                                    className="add-to-cart-button"
+                                    // icon={<ShoppingCartOutlined />}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleAddProductToCart(product.id, 1);
+                                    }}
+                                  >
+                                    Thêm vào giỏ
+                                  </Button>
+                                </div>
+                              </div>
+                            </Card>
+                          </Col>
+                        ))}
+                      </Row>
                     ) : (
-                      <p>Không có sản phẩm nào.</p>
+                      <Empty
+                        description="Không tìm thấy sản phẩm nào"
+                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      />
                     )}
                   </div>
                 </Col>

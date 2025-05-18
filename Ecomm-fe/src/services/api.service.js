@@ -235,6 +235,19 @@ const updateOrderStatusAPI = async (orderId, status, message) => {
   }
 }
 
+const getProductSoldAPI = async () => {
+  try {
+    const response = await axios.get(
+      "http://localhost:8085/api/v1/order/getProductSold"
+    );
+    console.log("Lấy danh sách sản phẩm đã bán thành công:", response);
+    return response;
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách sản phẩm đã bán:", error);
+    return null;
+  }
+}
+
 
 export {
   signupAPI,
@@ -253,5 +266,6 @@ export {
   getOrderAPI,
   getAllOrdersAPI,
   updateOrderStatusAPI,
-  checkProductQuantityAPI
+  checkProductQuantityAPI,
+  getProductSoldAPI
 };

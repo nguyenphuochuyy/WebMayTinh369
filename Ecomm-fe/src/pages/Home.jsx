@@ -10,6 +10,7 @@ import {
   Empty,
   Rate,
   Menu,
+  Modal,
 } from "antd";
 import Categories from "../components/HomeComponents/Category";
 import FlashSales from "../components/HomeComponents/FlashSale";
@@ -17,6 +18,13 @@ import BestSellingProducts from "../components/HomeComponents/BestSellingProduct
 import ExploreOurProducts from "../components/HomeComponents/OurProducts/index";
 import "../../src/styles/Base_CSS/style.css"
 import { Link, useNavigate } from "react-router-dom";
+import { MessageOutlined } from "@ant-design/icons";
+import ChatBox from "../components/ChatBox/ChatBox";
+
+// Import hình ảnh từ src/images
+import zaloQr from "../images/zalo-qr.jpg";
+import zaloIcon from "../images/images.png";
+
 const { Title } = Typography;
 
 const fetchCategories = async () => {
@@ -79,6 +87,8 @@ const Home = ({ onSearchHandler }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const categoryProductsRef = useRef(null);
   const navigate = useNavigate();
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isQrModalVisible, setIsQrModalVisible] = useState(false);
   useEffect(() => {
     const loadCategories = async () => {
       setLoadingCategories(true);
@@ -160,6 +170,16 @@ const Home = ({ onSearchHandler }) => {
       onSearchHandler(handleSearch);
     }
   }, [onSearchHandler]);
+
+  // Hàm mở/đóng chat
+  const toggleChat = () => {
+    setIsChatOpen(!isChatOpen);
+  };
+
+  // Hàm mở/đóng modal QR
+  const toggleQrModal = () => {
+    setIsQrModalVisible(!isQrModalVisible);
+  };
 
   return (
     <>
@@ -322,6 +342,67 @@ const Home = ({ onSearchHandler }) => {
           <div style={{ marginTop: "50px" }}>
             <ExploreOurProducts selectedCategory={selectedCategory} />
           </div>
+
+          {/* Nút chat */}
+          <Button
+            type="primary"
+            shape="circle"
+            icon={<MessageOutlined />}
+            size="large"
+            style={{
+              position: "fixed",
+              bottom: "20px",
+              right: "20px",
+              zIndex: 1000,
+            }}
+            onClick={toggleChat}
+          />
+
+          {/* Nút Zalo */}
+          <Button
+            type="default"
+            shape="circle"
+            size="large"
+            onClick={toggleQrModal}
+            style={{
+              position: "fixed",
+              bottom: "20px",
+              right: "80px",
+              zIndex: 1000,
+              padding: 0,
+              backgroundColor: "transparent",
+            }}
+          >
+            <img
+              src={zaloIcon} // Sử dụng biến đã import
+              alt="Zalo"
+              style={{ width: "42px", height: "42px", borderRadius: "50%" }}
+            />
+          </Button>
+
+          {/* Modal QR */}
+          <Modal
+            title="Quét mã QR để liên hệ qua Zalo"
+            visible={isQrModalVisible}
+            onCancel={toggleQrModal}
+            footer={[
+              <Button key="close" onClick={toggleQrModal}>
+                Đóng
+              </Button>,
+            ]}
+          >
+            <div style={{ textAlign: "center" }}>
+              <img
+                src={zaloQr} // Sử dụng biến đã import
+                alt="Zalo QR Code"
+                style={{ width: "400px", height: "500px" }}
+              />
+              <p>Quét mã QR để vào Zalo cá nhân của tôi!</p>
+            </div>
+          </Modal>
+
+          {/* Cửa sổ chat */}
+          {isChatOpen && <ChatBox onClose={toggleChat} />}
         </div>
       </div>
     </>

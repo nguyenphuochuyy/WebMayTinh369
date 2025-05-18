@@ -53,6 +53,7 @@ const Checkout = () => {
   const navigate = useNavigate();
 
   console.log("user", user);
+  console.log("selectedAddress", cartItems);
 
   // 👉 Tính tổng tiền từ cartItems
   const subtotal = cartItems.reduce(
@@ -146,11 +147,11 @@ const Checkout = () => {
     },
     {
       title: "Giá (VND)",
-      dataIndex: "price",
-      key: "price",
+      dataIndex: "priceAfterDiscount",
+      key: "priceAfterDiscount",
       width: 150,
       align: "right",
-      render: (price) => `${price.toLocaleString()} VND`,
+      render: (priceAfterDiscount) => `${priceAfterDiscount.toLocaleString()} VND`,
     },
     {
       title: "Thành tiền",

@@ -17,9 +17,12 @@ import MyOrder from "./components/AccountPage/MyOrder.jsx";
 import ProductListPage from "./pages/ProductListPage/index.jsx";
 import Checkout from "./components/DetailPage/Checkout.jsx";
 import OrderSuccess from "./pages/OrderSuccessPage.jsx";
+import PrivateRoute from "./pages/private.route.jsx";
 import NoTiVerifyPage from "./pages/NoTiVerifyPage/index.jsx";
 import VerifyPage from "./pages/VerifyPage/index.jsx";
 import OrderSuccessBank from "./pages/OrderSuccessPageBank/index.jsx";
+import ContactPage from "./pages/ContactPage.jsx";
+import AboutPage from "./components/About/Main.jsx";
 function App() {
 
   const { user, setUser } = useContext(AuthContext);
@@ -67,16 +70,32 @@ function App() {
         <Routes>
           <Route path="/" element={<Home onSearchHandler={setSearchHandlerCallback} />} />
           <Route path="/signup" element={<SignUp />} />
+
+          <Route path="/cartPage" element={(
+            <PrivateRoute>
+              <CartPage />
+            </PrivateRoute>
+          )} />
+          <Route path = '/contactPage' element = {<ContactPage/>}></Route>
+          <Route path="/about" element={<AboutPage />} />
           <Route path="/notiVerify" element={<NoTiVerifyPage />} />
           <Route path="/verify" element={<VerifyPage />} />
           <Route path="/cartPage" element={<CartPage />} />
           <Route path="/detailPage/:productId" element = {<DetailPage/>}/>
-          <Route path="/account" element= {<AccountPage />}>
+          <Route path="/account" element= {(
+            <PrivateRoute>
+              <AccountPage />
+            </PrivateRoute>
+          )}>
             <Route path="profile" element={<Profile />} />
             <Route path="addresses" element={<Addresses />} />
             <Route path="myOrder" element={<MyOrder />} />
           </Route>
-          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/checkout" element={(
+            <PrivateRoute>
+              <Checkout />
+            </PrivateRoute>
+          )} />
           <Route path="/OrderSuccess" element={<OrderSuccess />} />
           <Route path="/payment-return" element={<OrderSuccessBank />} />
           <Route path="/collection/:categoryId" element = {<ProductListPage/>}></Route>
