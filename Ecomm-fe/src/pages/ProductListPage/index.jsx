@@ -36,7 +36,7 @@ function ProductListPage() {
   const [selectedCategory, setSelectedCategory] = useState(null); // Lưu cả { value, label }
   const [selectedBrand, setSelectedBrand] = useState("Tất cả");
   const [priceRange, setPriceRange] = useState("all");
-  const [sortOption, setSortOption] = useState("Mới nhất");
+  const [sortOption, setSortOption] = useState("Giá thấp đến cao");
   const [loading, setLoading] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(true); // Trạng thái tải danh mục
   const { user, setUser } = useContext(AuthContext);
@@ -164,8 +164,6 @@ function ProductListPage() {
         return sortedProducts.sort(
           (a, b) => (b.priceAfterDiscount || 0) - (a.priceAfterDiscount || 0)
         );
-      case "Đánh giá cao":
-        return sortedProducts.sort((a, b) => (b.rating || 0) - (a.rating || 0));
       default:
         return sortedProducts; // Mới nhất, giữ nguyên thứ tự từ API
     }
@@ -307,10 +305,10 @@ function ProductListPage() {
                         setSortOption(value);
                       }}
                     >
-                      <Option value="Mới nhất">Mới nhất</Option>
+             
                       <Option value="Giá thấp đến cao">Giá thấp đến cao</Option>
                       <Option value="Giá cao đến thấp">Giá cao đến thấp</Option>
-                      <Option value="Đánh giá cao">Đánh giá cao</Option>
+               
                     </Select>
                   </div>
                 </div>

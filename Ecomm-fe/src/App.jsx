@@ -20,6 +20,9 @@ import OrderSuccess from "./pages/OrderSuccessPage.jsx";
 import PrivateRoute from "./pages/private.route.jsx";
 import NoTiVerifyPage from "./pages/NoTiVerifyPage/index.jsx";
 import VerifyPage from "./pages/VerifyPage/index.jsx";
+import OrderSuccessBank from "./pages/OrderSuccessPageBank/index.jsx";
+import ContactPage from "./pages/ContactPage.jsx";
+import AboutPage from "./components/About/Main.jsx";
 function App() {
 
   const { user, setUser } = useContext(AuthContext);
@@ -73,6 +76,8 @@ function App() {
               <CartPage />
             </PrivateRoute>
           )} />
+          <Route path = '/contactPage' element = {<ContactPage/>}></Route>
+          <Route path="/about" element={<AboutPage />} />
           <Route path="/notiVerify" element={<NoTiVerifyPage />} />
           <Route path="/verify" element={<VerifyPage />} />
           <Route path="/cartPage" element={<CartPage />} />
@@ -92,7 +97,7 @@ function App() {
             </PrivateRoute>
           )} />
           <Route path="/OrderSuccess" element={<OrderSuccess />} />
-          <Route path="/vnpay-return" element={<OrderSuccess />} />
+          <Route path="/payment-return" element={<OrderSuccessBank />} />
           <Route path="/collection/:categoryId" element = {<ProductListPage/>}></Route>
         </Routes>
         <Footer />

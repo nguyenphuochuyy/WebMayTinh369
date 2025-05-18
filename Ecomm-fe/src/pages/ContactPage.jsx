@@ -52,7 +52,7 @@ const ContactPage = () => {
 
       <div className="contact-content container">
         <Row gutter={[32, 32]} className="contact-section">
-          <Col xs={24} md={12} lg={10}>
+          <Col xs={24} md={12} lg={24}>
             <Card bordered={false} className="contact-info-card">
               <Title level={3}>Cửa hàng 369</Title>
               <Divider />

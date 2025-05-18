@@ -73,6 +73,7 @@ const Profile = () => {
 
   const handleFinish = (values) => {
     setLoading(true);
+    console.log(values);
     
     // Create a copy of values to avoid mutating the parameter
     const updatedValues = { ...values };

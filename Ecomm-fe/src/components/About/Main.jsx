@@ -79,13 +79,13 @@ const AboutPage = () => {
 
   return (
     <Layout className="about-page-layout">
-      {/* Breadcrumb Navigation */}
-      <div className="breadcrumb-container">
+    
+      {/* <div className="breadcrumb-container">
         <Breadcrumb>
           <Breadcrumb.Item><a href="/">Trang chủ</a></Breadcrumb.Item>
           <Breadcrumb.Item>Giới thiệu</Breadcrumb.Item>
         </Breadcrumb>
-      </div>
+      </div> */}
 
       <Content className="site-content">
         {/* Hero Section with Title */}

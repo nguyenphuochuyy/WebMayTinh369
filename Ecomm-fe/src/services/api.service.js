@@ -81,7 +81,6 @@ const createPaymentAPI = async ( id , amount, status) => {
         status: status,
       }
     );
-
     // Xử lý thành công
     console.log("Tạo thanh toán thành công:", response);
     return response;
@@ -164,7 +163,6 @@ const placeOrderAPI = async (products, paymentMethodId, shippingAddress, note) =
         note: note,
       }
     );
-
     console.log("Đặt hàng thành công:", response);
     return response;
   } catch (error) {
