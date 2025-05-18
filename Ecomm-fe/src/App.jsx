@@ -19,6 +19,7 @@ import Checkout from "./components/DetailPage/Checkout.jsx";
 import OrderSuccess from "./pages/OrderSuccessPage.jsx";
 import NoTiVerifyPage from "./pages/NoTiVerifyPage/index.jsx";
 import VerifyPage from "./pages/VerifyPage/index.jsx";
+import OrderSuccessBank from "./pages/OrderSuccessPageBank/index.jsx";
 function App() {
 
   const { user, setUser } = useContext(AuthContext);
@@ -77,7 +78,7 @@ function App() {
           </Route>
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/OrderSuccess" element={<OrderSuccess />} />
-          {/* <Route path="/vnpay-return" element={<OrderSuccess />} /> */}
+          <Route path="/payment-return" element={<OrderSuccessBank />} />
           <Route path="/collection/:categoryId" element = {<ProductListPage/>}></Route>
         </Routes>
         <Footer />

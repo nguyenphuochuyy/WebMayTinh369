@@ -9,7 +9,6 @@ const OrderSuccess = () => {
     const location = useLocation();
     const params = new URLSearchParams(location.search);
     console.log('params', params);
-    
     const navigate = useNavigate();
     const { orderInfo, cartItems, user, selectedAddress, total } = location.state || {};
 

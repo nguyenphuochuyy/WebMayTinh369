@@ -29,6 +29,7 @@ import DashboardPage from "./pages/adminPage/DashboardPage.jsx";
 import { Spin } from "antd";
 import ProductListPage from "./pages/ProductListPage/index.jsx";
 import Order from "./pages/adminPage/Order.jsx";
+import OrderSuccessBank from "./pages/OrderSuccessPageBank/index.jsx";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const [tokenChecked, setTokenChecked] = useState(false);
@@ -88,7 +89,7 @@ const router = createBrowserRouter([
       // { path: "/about", element: <AboutPage /> },
       { path: "/checkout", element: <Checkout /> },
       { path: "/orderSuccess", element: <OrderSuccess /> }, 
-      // { path:"/vnpay-return" ,element : <OrderSuccess/> },
+      { path:"/payment-return" ,element : <OrderSuccessBank/> },
       { path:"/notiVerify" ,element : <NoTiVerifyPage/> },
       { path:"/verify" ,element : <VerifyPage/> },
       {path : "/collection/:categoryId", element : <ProductListPage />},

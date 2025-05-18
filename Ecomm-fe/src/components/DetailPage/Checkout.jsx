@@ -183,7 +183,6 @@ const Checkout = () => {
   const onFinish = async () => {
     try {
       setIsProcessing(true);
-
       // Tạo object chứa thông tin đơn hàng để chuyển sang trang thành công
       const orderInfo = {
         id: `ORD${Math.floor(Math.random() * 1000000)}`,
@@ -212,21 +211,19 @@ const Checkout = () => {
           // Lưu thông tin thanh toán vào orderInfo
           orderInfo.paymentUrl = resCreatePayment.data.url;
           orderInfo.paymentStatus = "pending";
-
           // Mở tab mới cho thanh toán
-          window.open(resCreatePayment.data.url, "_blank");
-
-          // Chuyển hướng đến trang thành công
-          navigate("/orderSuccess", {
-            state: {
-              orderInfo,
-              cartItems,
-              user,
-              selectedAddress,
-              total,
-              note: noteValue,
-            },
-          });
+          window.open(resCreatePayment.data.url, "_blank"); 
+          // lưu đơn hàng tạm vào localStorage
+          const orderData = {
+            orderInfo,
+            cartItems,
+            products,
+            user,
+            selectedAddress,
+            total,
+            note: noteValue,
+          };
+          localStorage.setItem("pendingOrder", JSON.stringify(orderData));
         } else {
           message.error("Không lấy được link thanh toán.");
           setIsProcessing(false);
