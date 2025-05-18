@@ -1,4 +1,3 @@
-// Navbar/index.js
 import React, { useContext, useState } from "react";
 import {
   Layout,
@@ -25,7 +24,7 @@ import {
 import { AuthContext } from "../context/auth.context";
 import { Link, useNavigate } from "react-router-dom";
 import { logoutAPI } from "../../services/api.service";
-import "../../styles/Base_CSS/style.css"
+import "../../styles/Base_CSS/style.css";
 const { Header } = Layout;
 const { Search } = Input;
 const { Title } = Typography;
@@ -67,7 +66,7 @@ const Navbar = ({ onSearch }) => {
 
   const handleSearchSubmit = () => {
     if (onSearch) {
-      onSearch(searchTerm.trim()); // Gọi onSearch với searchTerm đã trim
+      onSearch(searchTerm.trim());
     }
   };
 
@@ -75,7 +74,6 @@ const Navbar = ({ onSearch }) => {
     navigate("/cartPage");
   };
 
-  // User menu items
   const userMenuProps = {
     items: [
       {
@@ -104,7 +102,6 @@ const Navbar = ({ onSearch }) => {
     ],
   };
 
-  // Main menu items
   const mainMenuItems = [
     {
       key: "home",
@@ -120,24 +117,24 @@ const Navbar = ({ onSearch }) => {
       label: <Link to="/about">Giới thiệu</Link>,
       key: "about",
       icon: <InfoCircleOutlined />,
- 
     },
   ];
-
 
   const navbarStyle = {
     header: {
       background: token.colorBgContainer,
       boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
       padding: "0 24px",
-      position: "sticky",
+      position: "fixed", // Changed to fixed to stay at top of viewport
       top: 0,
+      left: 0, // Ensure it spans full width
+      right: 0, // Ensure it spans full width
       zIndex: 100,
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
       height: 69,
-      
+      transition: "box-shadow 0.3s ease",
     },
     logo: {
       display: "flex",
@@ -192,79 +189,78 @@ const Navbar = ({ onSearch }) => {
     },
   };
 
-
   return (
-    <div className="container" >
-        <Header style={navbarStyle.header}>
-      {/* Logo */}
-      <div style={navbarStyle.logo}>
-        <Link to="/" style={{ textDecoration: "none" }}>
-          <Title level={3} style={navbarStyle.logoText}>369</Title>
-        </Link>
-      </div>
+    <div className="container">
+      <Header style={navbarStyle.header}>
+        {/* Logo */}
+        <div style={navbarStyle.logo}>
+          <Link to="/" style={{ textDecoration: "none" }}>
+            <Title level={3} style={navbarStyle.logoText}>369</Title>
+          </Link>
+        </div>
 
-      {/* Main Navigation Menu */}
-      <Menu
-        mode="horizontal"
-        items={mainMenuItems}
-        style={navbarStyle.mainMenu}
-      />
-
-      {/* Search & Action Icons */}
-      <div style={navbarStyle.searchSection}>
-        <Search
-          placeholder="Tìm kiếm sản phẩm"
-          value={searchTerm}
-          onChange={(e) => handleSearchInputChange(e.target.value)}
-          onSearch={handleSearchSubmit}
-          style={{ width: 250, marginRight: 16 }}
+        {/* Main Navigation Menu */}
+        <Menu
+          mode="horizontal"
+          items={mainMenuItems}
+          style={navbarStyle.mainMenu}
         />
 
-        <div style={navbarStyle.actionButtons}>
-          {/* Wishlist Icon */}
-          <Badge count={0} size="small">
-            <Button
-              type="text"
-              icon={<HeartOutlined style={navbarStyle.iconButton} />}
-              aria-label="Wishlist"
-            />
-          </Badge>
+        {/* Search & Action Icons */}
+        <div style={navbarStyle.searchSection}>
+          <Search
+            placeholder="Tìm kiếm sản phẩm"
+            value={searchTerm}
+            onChange={(e) => handleSearchInputChange(e.target.value)}
+            onSearch={handleSearchSubmit}
+            style={{ width: 250, marginRight: 16 }}
+          />
 
-          {/* Cart Icon */}
-          <Badge count={user.sum || 0} size="small" overflowCount={99}>
-            <Button
-              type="text"
-              icon={<ShoppingCartOutlined style={navbarStyle.iconButton} />}
-              onClick={goToCartPage}
-              aria-label="Cart"
-            />
-          </Badge>
+          <div style={navbarStyle.actionButtons}>
+            {/* Wishlist Icon */}
+            <Badge count={0} size="small">
+              <Button
+                type="text"
+                icon={<HeartOutlined style={navbarStyle.iconButton} />}
+                aria-label="Wishlist"
+              />
+            </Badge>
 
-          {/* User Account / Login Button */}
-          {user.id ? (
-            <Dropdown menu={userMenuProps} placement="bottomRight">
-              <div style={navbarStyle.userSection}>
-                <Avatar
-                  src={user?.avatar || null} // Prevent empty string for src
-                  icon={!user?.avatar && <UserOutlined />}
-                  size="default"
-                  style={{ backgroundColor: user?.avatar ? undefined : token.colorPrimary }}
-                />
-                <span style={navbarStyle.username}>{user.fullName || user.username}</span>
-              </div>
-            </Dropdown>
-          ) : (
-            <Button
-              type="primary"
-              icon={<LoginOutlined />}
-              onClick={() => navigate("/login")}
-            >
-              Đăng nhập
-            </Button>
-          )}
+            {/* Cart Icon */}
+            <Badge count={user.sum || 0} size="small" overflowCount={99}>
+              <Button
+                type="text"
+                icon={<ShoppingCartOutlined style={navbarStyle.iconButton} />}
+                onClick={goToCartPage}
+                aria-label="Cart"
+              />
+            </Badge>
+
+            {/* User Account / Login Button */}
+            {user.id ? (
+              <Dropdown menu={userMenuProps} placement="bottomRight">
+                <div style={navbarStyle.userSection}>
+                  <Avatar
+                    src={user?.avatar || null}
+                    icon={!user?.avatar && <UserOutlined />}
+                    size="default"
+                    style={{ backgroundColor: user?.avatar ? undefined : token.colorPrimary }}
+                  />
+                  <span style={navbarStyle.username}>{user.fullName || user.username}</span>
+                </div>
+              </Dropdown>
+            ) : (
+              <Button
+                type="primary"
+                icon={<LoginOutlined />}
+                onClick={() => navigate("/login")}
+              >
+                Đăng nhập
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
-    </Header>
+      </Header>
     </div>
   );
 };
