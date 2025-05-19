@@ -186,7 +186,7 @@ const Home = ({ onSearchHandler }) => {
       <div className="home-container">
         <div className="container">
           {/* Sidebar & Banner */}
-          <div style={{ display: "flex", flexDirection: "row" }}>
+          <div style={{ display: "flex", flexDirection: "row" , marginTop: "100px" }}>
             {/* Sidebar Categories */}
             <div
               className="sidebar-categories"

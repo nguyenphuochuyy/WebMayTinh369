@@ -76,35 +76,35 @@ const Sidebar = () => {
       icon: <ShoppingOutlined />,
       label: <Link to="/admin/orders">Orders</Link>,
     },
-    {
-      key: 'settings',
-      icon: <SettingOutlined />,
-      label: <Link to="/settings">Settings</Link>,
-    },
+    // {
+    //   key: 'settings',
+    //   icon: <SettingOutlined />,
+    //   label: <Link to="/settings">Settings</Link>,
+    // },
   ];
 
   // Menu dropdown cho tài khoản
   const userMenu = (
     <Menu
       items={[
-        {
-          key: '1',
-          icon: <UserOutlined />,
-          label: 'Thông tin tài khoản',
-        },
-        {
-          key: '2',
-          icon: <EditOutlined />,
-          label: 'Chỉnh sửa hồ sơ',
-        },
-        {
-          key: '3',
-          icon: <SettingOutlined />,
-          label: 'Cài đặt tài khoản',
-        },
-        {
-          type: 'divider',
-        },
+        // {
+        //   key: '1',
+        //   icon: <UserOutlined />,
+        //   label: 'Thông tin tài khoản',
+        // },
+        // {
+        //   key: '2',
+        //   icon: <EditOutlined />,
+        //   label: 'Chỉnh sửa hồ sơ',
+        // },
+        // {
+        //   key: '3',
+        //   icon: <SettingOutlined />,
+        //   label: 'Cài đặt tài khoản',
+        // },
+        // {
+        //   type: 'divider',
+        // },
         {
           key: '4',
           icon: <LogoutOutlined />,
