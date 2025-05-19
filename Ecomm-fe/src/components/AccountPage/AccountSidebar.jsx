@@ -83,25 +83,25 @@ const AccountSidebar = ({ user }) => {
                   key: "all-orders",
                   label: <Link to="/account/myOrder">Tất cả đơn hàng</Link>,
                 },
-                {
-                  key: "completed-orders",
-                  icon: <CheckCircleOutlined />,
-                  label: (
-                    <Link to="/account/orders/completed">Đã hoàn thành</Link>
-                  ),
-                },
-                {
-                  key: "cancelled-orders",
-                  icon: <CloseCircleOutlined />,
-                  label: <Link to="/account/orders/cancelled">Đã hủy</Link>,
-                },
+                // {
+                //   key: "completed-orders",
+                //   icon: <CheckCircleOutlined />,
+                //   label: (
+                //     <Link to="/account/orders/completed">Đã hoàn thành</Link>
+                //   ),
+                // },
+                // {
+                //   key: "cancelled-orders",
+                //   icon: <CloseCircleOutlined />,
+                //   label: <Link to="/account/orders/cancelled">Đã hủy</Link>,
+                // },
               ],
             },
-            {
-              key: "wishlist",
-              icon: <HeartOutlined />,
-              label: <Link to="/account/wishlist">Sản phẩm yêu thích</Link>,
-            },
+            // {
+            //   key: "wishlist",
+            //   icon: <HeartOutlined />,
+            //   label: <Link to="/account/wishlist">Sản phẩm yêu thích</Link>,
+            // },
           ]}
         />
       </Card>

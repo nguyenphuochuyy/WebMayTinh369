@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Form,
   Input,
@@ -25,6 +25,7 @@ import {
 import { addUser, getListUser, updateUser } from "../../services/user.service";
 import { Content } from "antd/es/layout/layout";
 import Title from "antd/es/typography/Title";
+import { AuthContext } from "../../components/context/auth.context";
 const { Option } = Select;
 
 const User = () => {
@@ -46,6 +47,8 @@ const User = () => {
   const [form] = Form.useForm();
   // state quản lý form thêm người dùng
   const [addForm] = Form.useForm();
+  const { user, setUser } = useContext(AuthContext);
+  
   const navigate = useNavigate();
 
   const onFinish = (values) => {
@@ -93,16 +96,14 @@ const User = () => {
       email: values.email,
       phone: values.phone,
     };
-    if (values.password) {
-      userData.password = values.password;
-    }
     const response = await updateUser(userData);
-    if (response.status === "success") {
+    const getAllUser = await getListUser();
+    if (response.data) {
       message.success("Cập nhật thông tin người dùng thành công!");
-      const updatedUsers = users.map((user) =>
-        user.id === selectedUser.id ? { ...user, ...userData } : user
-      );
-      setFilteredUsers(updatedUsers);
+      // const updatedUsers = users.map((user) =>
+      //   user.id === selectedUser.id ? { ...user, ...userData } : user
+      // );
+      fetchUsers();
       setIsVisible(false);
     } else {
       message.error(
@@ -126,8 +127,9 @@ const User = () => {
         throw new Error("Thêm người dùng không thành công");
       }
       message.success("Thêm người dùng thành công!");
-      setFilteredUsers((prevUsers) => [...prevUsers, response.data]);
-      setUsers((prevUsers) => [...prevUsers, response.data]);
+      // setFilteredUsers((prevUsers) => [...prevUsers, response.data]);
+      fetchUsers();
+      // setUsers((prevUsers) => [...prevUsers, response.data]);
       // Reset form sau khi thêm người dùng
       addForm.resetFields();
       setIsAddModalVisible(false);
@@ -165,9 +167,9 @@ const User = () => {
         }
         message.success("Xóa người dùng thành công!");
         // Cập nhật danh sách người dùng sau khi xóa
-        const updatedUsers = users.filter((user) => user.id !== userId);
-        setFilteredUsers(updatedUsers);
-        setUsers(updatedUsers);
+        // const updatedUsers = users.filter((user) => user.id !== userId);
+        fetchUsers()
+        // setUsers(updatedUsers);
       } catch (error) {
         message.error("Lỗi khi xóa người dùng", error);
       } 
@@ -189,11 +191,6 @@ const User = () => {
       title: "Vai trò",
       dataIndex: "role",
       key: "role",
-    },
-    {
-      title: "Họ và tên",
-      dataIndex: "name",
-      key: "name",
     },
     {
       title: "Email",
@@ -241,20 +238,30 @@ const User = () => {
   ];
 
   // Hàm gọi API lấy danh sách người dùng
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true);
+
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
       const listUser = await getListUser();
-      if (listUser) {
-        setUsers(listUser.data);
-        setFilteredUsers(listUser.data);
-        setLoading(false);
+      if (listUser && listUser.data) {
+        const filteredList = listUser.data.filter((item) => item.id !== user.id);
+        setFilteredUsers(filteredList);
       } else {
-        message.error("Lỗi khi lấy danh sách người dùng", listUser.message);
+        message.error("Lỗi khi lấy danh sách người dùng: " + (listUser?.message || "Không có dữ liệu"));
       }
-    };
-    fetchUsers();
-  }, []);
+    } catch (error) {
+      message.error("Lỗi khi lấy danh sách người dùng: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    if (user?.id) { 
+      fetchUsers();
+    }
+  }, [user]);
+ 
 
   return (
     <Layout style={{ marginLeft: 200, minHeight: "100vh" }}>
@@ -351,7 +358,7 @@ const User = () => {
                 </Select>
               </Form.Item>
             </Col>
-            <Col xs={24} sm={12}>
+            {/* <Col xs={24} sm={12}>
               <Form.Item
                 label={<span style={{ fontWeight: "500" }}>Họ và tên</span>}
                 name="name"
@@ -362,7 +369,7 @@ const User = () => {
                   style={{ height: "40px", borderRadius: "6px" }}
                 />
               </Form.Item>
-            </Col>
+            </Col> */}
             <Col xs={24} sm={12}>
               <Form.Item
                 label={<span style={{ fontWeight: "500" }}>Email</span>}
@@ -395,7 +402,7 @@ const User = () => {
                 />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={12}>
+            {/* <Col xs={24} sm={12}>
               <Form.Item
                 label={<span style={{ fontWeight: "500" }}>Mật khẩu</span>}
                 name="password"
@@ -408,7 +415,7 @@ const User = () => {
                   style={{ height: "40px", borderRadius: "6px" }}
                 />
               </Form.Item>
-            </Col>
+            </Col> */}
           </Row>
           <Form.Item>
             <Space style={{ width: "100%", justifyContent: "flex-end" }}>
@@ -436,7 +443,6 @@ const User = () => {
       </Modal>
 
       {/* Modal thêm người dùng */}
-      {/* Modal thêm mới người dùng */}
       <Modal
         width={800}
         style={{ maxHeight: "90vh", overflowY: "auto" }}
@@ -471,19 +477,6 @@ const User = () => {
               >
                 <Input
                   placeholder="Nhập tên người dùng"
-                  style={{ height: "40px", borderRadius: "6px" }}
-                />
-              </Form.Item>
-            </Col>
-
-            <Col xs={24} sm={12}>
-              <Form.Item
-                label={<span style={{ fontWeight: "500" }}>Họ và tên</span>}
-                name="name"
-                rules={[{ required: true, message: "Vui lòng nhập họ và tên" }]}
-              >
-                <Input
-                  placeholder="Nhập họ và tên"
                   style={{ height: "40px", borderRadius: "6px" }}
                 />
               </Form.Item>
