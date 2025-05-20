@@ -125,16 +125,17 @@ const Navbar = ({ onSearch }) => {
       background: token.colorBgContainer,
       boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
       padding: "0 24px",
-      position: "fixed", // Changed to fixed to stay at top of viewport
+      position: "fixed", 
       top: 0,
-      left: 0, // Ensure it spans full width
-      right: 0, // Ensure it spans full width
+      left: 0,
+      right: 0,
       zIndex: 100,
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
       height: 69,
       transition: "box-shadow 0.3s ease",
+    
     },
     logo: {
       display: "flex",

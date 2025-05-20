@@ -288,7 +288,7 @@ const DetailPage = () => {
   return (
     <div
       className="container"
-      style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px" }}
+      style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px" , marginTop: "70px"}}
     >
       {contextHolder}
       <div
@@ -301,30 +301,40 @@ const DetailPage = () => {
         }}
       >
         {/* Product Image */}
-        <div className="product-detail" style={{ width: "50%" }}>
-          <div style={{ border: "1px solid #eee", marginBottom: "10px" }}>
+        <div className="product-detail" style={{ width: "70%", height : '100%' }}>
+          <div style={{backgroundColor: "#fff", border: "1px solid #ccc" , borderRadius: "10px" , position: "relative" }}>
             <img
-              style={{ width: "100%", height: "auto", aspectRatio: "1/1" }}
-              src={product.image}
+             src={product.image}
               alt={product.name}
+              style={{
+                width: "100%",
+                height: "100%",
+                aspectRatio: "3/4",
+                objectFit: "contain",
+             
+              }}
             />
-          </div>
-          <div
-            style={{ display: "flex", gap: "10px", justifyContent: "center" }}
-          >
-            {/* {[1, 2, 3, 4].map((i) => (
-                <img
-                  key={i}
-                  style={{ width: "80px", height: "80px", border: "1px solid #eee" }}
-                  src={product.image}
-                  alt={`${product.name} thumbnail ${i}`}
-                />
-              ))} */}
+             <span
+                style={{
+                  backgroundColor: "#E52525",
+                  color: "#fff",
+                  padding: "2px 8px",
+                  borderRadius: "4px",
+                  fontWeight: "400",
+                  fontSize: "18px",
+                  position: "absolute",
+                  top : '10px',
+                  right: "10px",
+                  
+                }}
+              >
+                -{product.discount}% OFF
+              </span>
           </div>
         </div>
 
         {/* Product Info */}
-        <div className="product-info" style={{ width: "50%" }}>
+        <div className="product-info" style={{ width: "50%" , marginTop: "20px" }}>
           <h1
             style={{
               fontSize: "24px",
@@ -426,6 +436,7 @@ const DetailPage = () => {
             style={{ display: "flex", gap: "15px", margin: "30px 0" }}
           >
             <Button
+              disabled={product.quantity === 0}
               style={{
                 backgroundColor: "#fff",
                 color: "#FF424E",
@@ -440,6 +451,7 @@ const DetailPage = () => {
               THÊM VÀO GIỎ
             </Button>
             <Button
+             disabled={product.quantity === 0}
               style={{
                 backgroundColor: "#FF424E",
                 color: "#fff",
@@ -534,7 +546,7 @@ const DetailPage = () => {
         </div>
 
         {/* Sales Policy */}
-        <div className="sales-policy" style={{ margin: "30px 0" }}>
+        <div className="sales-policy">
           <div
             style={{
               backgroundColor: "#f9f9f9",
@@ -682,6 +694,7 @@ const DetailPage = () => {
               </svg>
               <span style={{ color: "#444" }}>Đổi trả trong 7 ngày</span>
             </div>
+            <img src="https://theme.hstatic.net/1000288298/1001020793/14/product_banner.jpg?v=1458" alt="Product Banner" style={{ width: "100%", marginTop: "40px" , }} />
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { Card, Button, Rate, Row, Col, Spin, notification } from 'antd';
 import './OurProducts.css';
 import { addProductToCart } from '../../../services/api.service';
 import { AuthContext } from '../../context/auth.context';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const fetchAllProducts = async () => {
   try {
@@ -52,9 +52,8 @@ const ExploreOurProducts = () => {
     loadProducts();
   }, []);
 
-  const handleViewAll = () => {
-    setShowAll(true);
-    setVisibleProducts(allProducts);
+  const handleListProducts = () => {
+      window.location.href = "/collection/1";
   };
 
   const handleCollapse = () => {
@@ -96,16 +95,11 @@ const ExploreOurProducts = () => {
           <span>Tất cả sản phẩm</span>
         </div>
         <div className="explore-products-actions">
-          {!showAll && allProducts.length > initialVisibleCount && (
-            <Button type="primary" danger className="view-all-btn" onClick={handleViewAll}>
+  
+            <Button type="primary" danger className="view-all-btn" onClick={handleListProducts}>
               Xem toàn bộ
             </Button>
-          )}
-          {showAll && allProducts.length > initialVisibleCount && (
-            <Button type="primary" className="collapse-btn" onClick={handleCollapse}>
-              Thu gọn
-            </Button>
-          )}
+        
         </div>
       </div>
       <div className="custom-product-grid">
@@ -117,7 +111,7 @@ const ExploreOurProducts = () => {
           visibleProducts.map((product) => (
             <div key={product.id} className="product-grid-item">
               <Card
-                style={{ width: '100%', textAlign: 'center', height: '100%' }}
+                style={{ width: '100%', textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
                 hoverable
                 cover={
                   product.image && (

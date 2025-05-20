@@ -11,20 +11,25 @@ import {
   Rate,
   Menu,
   Modal,
+  Carousel,
 } from "antd";
 import Categories from "../components/HomeComponents/Category";
 import FlashSales from "../components/HomeComponents/FlashSale";
 import BestSellingProducts from "../components/HomeComponents/BestSellingProduct";
 import ExploreOurProducts from "../components/HomeComponents/OurProducts/index";
-import "../../src/styles/Base_CSS/style.css"
+import "../../src/styles/Base_CSS/style.css";
 import { Link, useNavigate } from "react-router-dom";
 import { MessageOutlined } from "@ant-design/icons";
 import ChatBox from "../components/ChatBox/ChatBox";
-
 // Import hình ảnh từ src/images
 import zaloQr from "../images/zalo-qr.jpg";
 import zaloIcon from "../images/images.png";
-
+import banner1 from "../images/home/banner1.PNG";
+import banner2 from "../images/home/banner2.PNG";
+import banner3 from "../images/home/banner3.PNG";
+import banner4 from "../images/home/bannerleft1.webp";
+import banner5 from "../images/home/bannerleft2.webp";
+import banner6 from "../images/home/bannerleft3.webp";
 const { Title } = Typography;
 
 const fetchCategories = async () => {
@@ -43,7 +48,9 @@ const fetchCategories = async () => {
 
 const fetchProductsByCategory = async (categoryId) => {
   try {
-    const response = await fetch(`http://localhost:8082/api/products/category/${categoryId}`);
+    const response = await fetch(
+      `http://localhost:8082/api/products/category/${categoryId}`
+    );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -58,7 +65,9 @@ const fetchProductsByCategory = async (categoryId) => {
 const fetchProductsBySearch = async (keyword) => {
   try {
     const response = await fetch(
-      `http://localhost:8082/api/products/search?keyword=${encodeURIComponent(keyword)}`
+      `http://localhost:8082/api/products/search?keyword=${encodeURIComponent(
+        keyword
+      )}`
     );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -72,7 +81,10 @@ const fetchProductsBySearch = async (keyword) => {
 };
 
 const formatVND = (price) => {
-  return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(price);
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(price);
 };
 
 const Home = ({ onSearchHandler }) => {
@@ -95,7 +107,7 @@ const Home = ({ onSearchHandler }) => {
       setErrorCategories(null);
       try {
         const data = await fetchCategories();
-        setCategories(data);        
+        setCategories(data);
       } catch (err) {
         setErrorCategories(err.message || "Có lỗi xảy ra khi tải danh mục.");
       } finally {
@@ -115,10 +127,14 @@ const Home = ({ onSearchHandler }) => {
         try {
           const products = await fetchProductsByCategory(selectedCategory);
           setCategoryProducts(products);
-          const category = categories.find((cat) => cat.id === selectedCategory);
+          const category = categories.find(
+            (cat) => cat.id === selectedCategory
+          );
           setCategoryName(category ? category.name : null);
         } catch (error) {
-          setErrorCategoryProducts(error.message || "Có lỗi xảy ra khi tải sản phẩm theo danh mục.");
+          setErrorCategoryProducts(
+            error.message || "Có lỗi xảy ra khi tải sản phẩm theo danh mục."
+          );
           setCategoryProducts([]);
           setCategoryName(null);
         } finally {
@@ -132,7 +148,9 @@ const Home = ({ onSearchHandler }) => {
           setCategoryProducts(products);
           setCategoryName(null);
         } catch (error) {
-          setErrorCategoryProducts(error.message || "Có lỗi xảy ra khi tìm kiếm sản phẩm.");
+          setErrorCategoryProducts(
+            error.message || "Có lỗi xảy ra khi tìm kiếm sản phẩm."
+          );
           setCategoryProducts([]);
         } finally {
           setLoadingCategoryProducts(false);
@@ -160,7 +178,10 @@ const Home = ({ onSearchHandler }) => {
     setSearchTerm(keyword);
     setSelectedCategory(null);
     if (categoryProductsRef.current) {
-      categoryProductsRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      categoryProductsRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
     }
   };
 
@@ -183,24 +204,37 @@ const Home = ({ onSearchHandler }) => {
 
   return (
     <>
-      <div className="home-container">
+      <div className="home-container" style={{ marginTop: "70px" }}>
         <div className="container">
           {/* Sidebar & Banner */}
-          <div style={{ display: "flex", flexDirection: "row" , marginTop: "100px" }}>
+          <div style={{ display: "flex" }}>
             {/* Sidebar Categories */}
             <div
               className="sidebar-categories"
               style={{
-                width: "220px",
+                borderRadius: "10px",
+                marginTop: "10px",
+                width: "15%",
                 background: "white",
-                borderRight: "1px solid #f0f0f0",
                 height: "100%",
+                padding: "20px",
               }}
             >
               {loadingCategories ? (
-                <Spin size="small" style={{ display: "block", textAlign: "center", marginTop: 20 }} />
+                <Spin
+                  size="small"
+                  style={{
+                    display: "block",
+                    textAlign: "center",
+                    marginTop: 20,
+                  }}
+                />
               ) : errorCategories ? (
-                <div style={{ color: "red", textAlign: "center", marginTop: 20 }}>{errorCategories}</div>
+                <div
+                  style={{ color: "red", textAlign: "center", marginTop: 20 }}
+                >
+                  {errorCategories}
+                </div>
               ) : (
                 <Menu
                   mode="vertical"
@@ -224,24 +258,63 @@ const Home = ({ onSearchHandler }) => {
               )}
             </div>
             {/* Banner */}
-            <div style={{ display: "flex", justifyContent: "center", width: "100%", marginBottom: "30px" }}>
+           
               <div
-                className="banner"
-                style={{ width: "100%", maxWidth: "1200px", height: "400px", position: "relative" }}
+                className="banner-container"
+                style={{
+                  display: "flex",
+                  width: "85%",
+                  marginTop: "10px",
+                  marginLeft: "10px",
+                  alignItems: "center",
+                }}
               >
-                <img
-                  src="https://t3.ftcdn.net/jpg/04/65/46/52/360_F_465465254_1pN9MGrA831idD6zIBL7q8rnZZpUCQTy.jpg"
-                  alt=""
-                  style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "8px" }}
-                />
+                <div
+                  className="banner"
+                  style={{
+                    width: "70%",
+                    height: "auto",
+                    position: "relative",
+                  }}
+                >
+                  <Carousel
+                    autoplay
+                    style={{ height: "100%", width: "100%" }}
+                    autoplaySpeed={5000}
+                    dots={false}
+                    effect="scrollx"
+                  >
+                    <img src={banner1} alt="" />
+                    <img src={banner2} alt="" />
+                    <img src={banner3} alt="" />
+                  </Carousel>
+                </div>
+                <div style={{ width: "30%" , gap: "10px", display: "flex", flexDirection: "column" , marginLeft: "10px"}}>
+                  <div>
+                        <img src={banner4} alt="banner4" style={{ objectFit: "contain", width: "100%", height: "100%" }} />
+                  </div>
+               <div >
+                        <img src={banner5} alt="banner4" style={{ objectFit: "contain", width: "100%", height: "100%" }} />
+                  </div>
+                   <div style={{marginTop : '5px'}}>
+                        <img src={banner6} alt="banner4" style={{ objectFit: "contain", width: "100%", height: "100%" }} />
+                  </div>
+                 
+                </div>
+                
+               
               </div>
-            </div>
+          
           </div>
+
           {/* Khu vực sản phẩm theo category hoặc tìm kiếm */}
           <div style={{ marginTop: "30px" }} ref={categoryProductsRef}>
             {(selectedCategory || searchTerm) && (
               <>
-                <Title level={3} style={{ marginBottom: 16, textAlign: "center" }}>
+                <Title
+                  level={3}
+                  style={{ marginBottom: 16, textAlign: "center" }}
+                >
                   {searchTerm
                     ? `Kết quả tìm kiếm theo "${searchTerm}"`
                     : categoryName
@@ -253,7 +326,9 @@ const Home = ({ onSearchHandler }) => {
                     <Spin />
                   </div>
                 ) : errorCategoryProducts ? (
-                  <div style={{ color: "red", textAlign: "center" }}>{errorCategoryProducts}</div>
+                  <div style={{ color: "red", textAlign: "center" }}>
+                    {errorCategoryProducts}
+                  </div>
                 ) : categoryProducts.length > 0 ? (
                   <Row gutter={[16, 16]}>
                     {categoryProducts.map((product) => (
@@ -261,12 +336,24 @@ const Home = ({ onSearchHandler }) => {
                         <Card
                           hoverable
                           cover={
-                            <div style={{ height: 80, overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                            <div
+                              style={{
+                                height: 80,
+                                overflow: "hidden",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                              }}
+                            >
                               {product.image && (
                                 <img
                                   alt={product.name}
                                   src={product.image}
-                                  style={{ maxHeight: "100%", maxWidth: "100%", objectFit: "contain" }}
+                                  style={{
+                                    maxHeight: "100%",
+                                    maxWidth: "100%",
+                                    objectFit: "contain",
+                                  }}
                                 />
                               )}
                             </div>
@@ -281,9 +368,13 @@ const Home = ({ onSearchHandler }) => {
                             description={
                               <>
                                 <div className="price">
-                                  <span className="current-price">{formatVND(product.price)}</span>
+                                  <span className="current-price">
+                                    {formatVND(product.price)}
+                                  </span>
                                   {product.oldPrice && (
-                                    <span className="old-price">{formatVND(product.oldPrice)}</span>
+                                    <span className="old-price">
+                                      {formatVND(product.oldPrice)}
+                                    </span>
                                   )}
                                 </div>
                                 <Rate
@@ -308,7 +399,13 @@ const Home = ({ onSearchHandler }) => {
                     ))}
                   </Row>
                 ) : (
-                  <Empty description={searchTerm ? "Không tìm thấy sản phẩm." : "Không có sản phẩm nào trong danh mục này."} />
+                  <Empty
+                    description={
+                      searchTerm
+                        ? "Không tìm thấy sản phẩm."
+                        : "Không có sản phẩm nào trong danh mục này."
+                    }
+                  />
                 )}
               </>
             )}
@@ -331,12 +428,13 @@ const Home = ({ onSearchHandler }) => {
 
           {/* Middle banner */}
           <div>
-            <div style={{ display: "flex", justifyContent: "center" }}>
+            
               <img
-                src="https://t3.ftcdn.net/jpg/04/65/46/52/360_F_465465254_1pN9MGrA831idD6zIBL7q8rnZZpUCQTy.jpg"
+              style={{ width: "100%" , height: '100%' , aspectRatio : "1" , objectFit: "contain"}}
+                src= {banner1}
                 alt=""
               />
-            </div>
+           
           </div>
           {/* Our product */}
           <div style={{ marginTop: "50px" }}>

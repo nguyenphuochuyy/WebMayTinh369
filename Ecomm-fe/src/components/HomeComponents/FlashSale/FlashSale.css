@@ -183,7 +183,7 @@
   border-radius: 10px;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 1px solid #76a77c;
+  border: 1px solid #ccc;
   height: 100%;
 }
 
