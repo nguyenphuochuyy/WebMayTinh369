@@ -5,25 +5,24 @@ import { Link, useNavigate } from "react-router-dom";
 import { signupAPI } from "../../services/api.service";
 
 function SignupForm() {
-
   const [form] = Form.useForm();
   let navigate = useNavigate();
 
   const onFinish = async (values) => {
-    console.log('Form values: ', values);
+    console.log("Form values: ", values);
     const { username, email, password } = values;
     const res = await signupAPI(username, email, password);
-    if(res.data){
+    if (res.data) {
       notification.success({
-        message: 'Đăng ký thành công!',
-        description: 'Bạn đã đăng ký tài khoản thành công.',
+        message: "Đăng ký thành công!",
+        description: "Bạn đã đăng ký tài khoản thành công.",
       });
       navigate("/notiVerify");
     } else {
       notification.error({
-        message: 'Đăng ký thất bại!',
+        message: "Đăng ký thất bại!",
         description: JSON.stringify(res.message),
-      })
+      });
     }
   };
 
@@ -38,17 +37,14 @@ function SignupForm() {
       <div className="signup-form">
         <h2>Tạo tài khoản</h2>
         <p>Vui lòng nhập thông tin</p>
-        
-        <Form
-          form={form}
-          name="signup"
-          onFinish={onFinish}
-          layout="vertical"
-        >
+
+        <Form form={form} name="signup" onFinish={onFinish} layout="vertical">
           <Form.Item
             label="Tên đăng nhập"
             name="username"
-            rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập!' }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập tên đăng nhập!" },
+            ]}
           >
             <Input placeholder="Nhập tên đăng nhập" />
           </Form.Item>
@@ -57,8 +53,8 @@ function SignupForm() {
             label="Email"
             name="email"
             rules={[
-              { required: true, message: 'Vui lòng nhập email!' },
-              { type: 'email', message: 'Email không hợp lệ!' },
+              { required: true, message: "Vui lòng nhập email!" },
+              { type: "email", message: "Email không hợp lệ!" },
             ]}
           >
             <Input placeholder="Nhập email" />
@@ -67,7 +63,13 @@ function SignupForm() {
           <Form.Item
             label="Mật khẩu"
             name="password"
-            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập mật khẩu!" },
+              {
+                min: 6,
+                message: "Mật khẩu phải có ít nhất 6 ký tự!",
+              },
+            ]}
           >
             <Input.Password placeholder="Nhập mật khẩu" />
           </Form.Item>
@@ -77,12 +79,6 @@ function SignupForm() {
               Tạo tài khoản
             </Button>
           </Form.Item>
-
-          <div className="google-login">
-            <Button className="google-btn" style={{ width: '100%' }}>
-              Đăng nhập bằng Google
-            </Button>
-          </div>
         </Form>
 
         <div className="login-link">

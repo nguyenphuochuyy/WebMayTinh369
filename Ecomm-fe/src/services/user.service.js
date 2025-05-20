@@ -54,9 +54,41 @@ const getUserById = async (id) => {
   const response = await axios.get(`http://localhost:8080/users/getUserById/${id}`);
   return response;
 }
+
+const changePassword = async (body) => {
+  const URL_BACKEND = `http://localhost:8080/users/changePassword`;
+  const data = {
+    oldPassword : body.oldPassword,
+    newPassword : body.newPassword,
+    confirmPassword : body.confirmPassword,
+  };
+  return axios.post(URL_BACKEND, data);
+}
+
+const forgotPassword = async (email, username) => {
+  const URL_BACKEND = `http://localhost:8080/auth/forgot-password`;
+  const data = {
+    email: email,
+    username: username,
+  };
+  return axios.post(URL_BACKEND, data);
+}
+
+const resetPassword = async ( username, newPassword) => {
+  const URL_BACKEND = `http://localhost:8080/auth/reset-password`;
+  const data = {
+    username: username,
+    newPassword: newPassword,
+  };
+  return axios.post(URL_BACKEND, data);
+}
+
 export {
  getListUser,
  updateUser,
  addUser,
- getUserById
+ getUserById,
+ changePassword,
+ forgotPassword,
+ resetPassword
 };
