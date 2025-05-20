@@ -95,7 +95,7 @@ const FlashSales = () => {
           <span className="red-bar"></span>
           <span>Đang giảm giá</span>
         </div>
-        <div className="best-selling-actions">
+        {/* <div className="best-selling-actions">
           {!viewAll && productSale.length > initialDisplayCount && (
             <Button type="primary" danger className="view-all-btn" onClick={handleViewAll}>
               Xem tất cả
@@ -106,7 +106,7 @@ const FlashSales = () => {
               Thu gọn
             </Button>
           )}
-        </div>
+        </div> */}
       </div>
       <div className="custom-product-grid">
         {loading ? (
@@ -115,7 +115,7 @@ const FlashSales = () => {
           displayedProducts.map((product) => (
             <div key={product.id} className="product-grid-item">
               <Card
-                style={{ width: '100%', textAlign: 'center', height: '100%' }}
+                style={{ width: '100%', textAlign: 'center', height: '100%'  }}
                 hoverable 
                 cover={
                   <img
@@ -152,7 +152,7 @@ const FlashSales = () => {
                 </div>
                 <Button
                   type="primary"
-                  style={{ marginTop: '10px', width: '100%' }}
+                  style={{ marginTop: '10px', width: '50%' }}
                   onClick={() => handleAddProductToCart(product.id,1)}
                 >
                   Thêm vào giỏ hàng
