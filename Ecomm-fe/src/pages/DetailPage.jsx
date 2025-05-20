@@ -173,6 +173,7 @@ const DetailPage = () => {
         productName: product.name,
         price: product.price,
         totalPrice: product.price * count,
+        priceAfterDiscount: product.priceAfterDiscount,
       },
     ]);
   }, [count]);

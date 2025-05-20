@@ -14,6 +14,8 @@ import {
   Space,
   Skeleton,
   List,
+  Modal,
+  notification,
 } from "antd";
 import {
   UserOutlined,
@@ -26,21 +28,28 @@ import {
   HomeOutlined,
   PlusOutlined,
   DeleteOutlined,
+  LockOutlined,
+  EyeInvisibleOutlined,
+  EyeTwoTone,
 } from "@ant-design/icons";
 import axios from "axios";
 import AccountSidebar from "../../components/AccountPage/AccountSidebar";
 import { AuthContext } from "../context/auth.context";
 import "../../styles/AccountPage/Profile.scss";
 import { useNavigate } from "react-router-dom";
-import { updateUser } from "../../services/user.service";
+import { changePassword, updateUser } from "../../services/user.service";
+import { logoutAPI } from "../../services/api.service";
 
 const { Title, Text } = Typography;
 
 const Profile = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
+  const [passwordForm] = Form.useForm();
   const { user, setUser } = useContext(AuthContext);
+  const [note, contextHolder] = notification.useNotification();
   const [loading, setLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
   const [editing, setEditing] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar || null);
   const [file, setFile] = useState(null); // Lưu file ảnh
@@ -48,6 +57,7 @@ const Profile = () => {
   const [addresses, setAddresses] = useState(
     user?.addresses || [{ city: "", street: "" }]
   );
+  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
 
   console.log("user >>>>>>>>>>>>>>", user);
 
@@ -220,6 +230,44 @@ const Profile = () => {
     }
   };
 
+  // Hiển thị modal đổi mật khẩu
+  const showPasswordModal = () => {
+    passwordForm.resetFields();
+    setPasswordModalVisible(true);
+  };
+
+  // Đóng modal đổi mật khẩu
+  const closePasswordModal = () => {
+    setPasswordModalVisible(false);
+    passwordForm.resetFields();
+  };
+
+  // Xử lý đổi mật khẩu
+  const handleChangePassword = async (values) => {
+    setPasswordLoading(true);
+    const response = await changePassword(values);
+    console.log("response >>>>>", response);
+    if(response.data && response.data.status === "success") {
+      note.success({
+          message: "Thông báo",
+          description: response.data.message,
+      });
+      closePasswordModal();
+      setTimeout( async () => {
+         await logoutAPI();
+              localStorage.removeItem("access_token");
+              localStorage.removeItem("role");
+              navigate("/login");
+      }, 1000);
+    } else {
+      note.error({
+        message: "Thông báo",
+        description: response.message,
+      });
+    }
+    setPasswordLoading(false);
+  };
+
   if (!user) {
     return (
       <div className="account-page">
@@ -233,9 +281,11 @@ const Profile = () => {
 
   return (
     <div className="account-page">
+ 
       <AccountSidebar />
 
       <div className="profile-content">
+      {contextHolder}
         <Card
           className="profile-card"
           bordered={false}
@@ -246,13 +296,21 @@ const Profile = () => {
           }
           extra={
             !editing ? (
-              <Button
-                type="primary"
-                icon={<EditOutlined />}
-                onClick={handleStartEditing}
-              >
-                Chỉnh sửa
-              </Button>
+              <Space>
+                <Button
+                  type="primary"
+                  icon={<EditOutlined />}
+                  onClick={handleStartEditing}
+                >
+                  Chỉnh sửa
+                </Button>
+                <Button
+                  icon={<LockOutlined />}
+                  onClick={showPasswordModal}
+                >
+                  Đổi mật khẩu
+                </Button>
+              </Space>
             ) : null
           }
         >
@@ -563,6 +621,112 @@ const Profile = () => {
           </Row>
         </Card>
       </div>
+
+      {/* Modal đổi mật khẩu */}
+      <Modal
+        title={
+          <div>
+            <LockOutlined /> Đổi mật khẩu
+          </div>
+        }
+        open={passwordModalVisible}
+        onCancel={closePasswordModal}
+        footer={null}
+        destroyOnClose={true}
+      >
+        <Form
+          form={passwordForm}
+          layout="vertical"
+          onFinish={handleChangePassword}
+          scrollToFirstError
+        >
+          <Form.Item
+            name="oldPassword"
+            label="Mật khẩu hiện tại"
+            rules={[
+              {
+                required: true,
+                message: "Vui lòng nhập mật khẩu hiện tại!",
+              },
+            ]}
+          >
+            <Input.Password
+              prefix={<LockOutlined />}
+              placeholder="Nhập mật khẩu hiện tại"
+              iconRender={(visible) =>
+                visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+              }
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="newPassword"
+            label="Mật khẩu mới"
+            rules={[
+              {
+                required: true,
+                message: "Vui lòng nhập mật khẩu mới!",
+              },
+              {
+                min: 6,
+                message: "Mật khẩu phải có ít nhất 6 ký tự!",
+              },
+            ]}
+          >
+            <Input.Password
+              prefix={<LockOutlined />}
+              placeholder="Nhập mật khẩu mới"
+              iconRender={(visible) =>
+                visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+              }
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="confirmPassword"
+            label="Xác nhận mật khẩu mới"
+            dependencies={["newPassword"]}
+            rules={[
+              {
+                required: true,
+                message: "Vui lòng xác nhận mật khẩu mới!",
+              },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue("newPassword") === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(
+                    new Error("Mật khẩu xác nhận không khớp!")
+                  );
+                },
+              }),
+            ]}
+          >
+            <Input.Password
+              prefix={<LockOutlined />}
+              placeholder="Xác nhận mật khẩu mới"
+              iconRender={(visible) =>
+                visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+              }
+            />
+          </Form.Item>
+
+          <Form.Item>
+            <Space style={{ float: "right" }}>
+              <Button onClick={closePasswordModal}>Hủy</Button>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={passwordLoading}
+                icon={<LockOutlined />}
+              >
+                Đổi mật khẩu
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };
