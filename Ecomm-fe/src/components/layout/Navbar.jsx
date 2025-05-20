@@ -218,15 +218,6 @@ const Navbar = ({ onSearch }) => {
           />
 
           <div style={navbarStyle.actionButtons}>
-            {/* Wishlist Icon */}
-            <Badge count={0} size="small">
-              <Button
-                type="text"
-                icon={<HeartOutlined style={navbarStyle.iconButton} />}
-                aria-label="Wishlist"
-              />
-            </Badge>
-
             {/* Cart Icon */}
             <Badge count={user.sum || 0} size="small" overflowCount={99}>
               <Button

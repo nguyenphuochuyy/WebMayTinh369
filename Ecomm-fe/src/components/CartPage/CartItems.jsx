@@ -71,7 +71,7 @@ const CartItems = () => {
   
           setCartItems(items);
   
-          const total = calculateTotalAmount(items); // dùng items có discount cập nhật
+          const total = calculateTotalAmount(items);
           setTotalAmount(total);
         } catch (error) {
           console.error("Error fetching cart items discounts:", error);
@@ -385,15 +385,6 @@ const CartItems = () => {
               onClick={() => (window.location.href = "/")}
             >
               Tiếp tục mua sắm
-            </Button>
-
-            <Button
-              type="primary"
-              ghost
-              icon={<SyncOutlined />}
-              onClick={handleUpdateCart}
-            >
-              Cập nhật giỏ hàng
             </Button>
           </Space>
         </div>

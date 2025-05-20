@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import {
   Layout,
   Row,
@@ -12,6 +12,7 @@ import {
   Menu,
   Modal,
   Carousel,
+  notification,
 } from "antd";
 import Categories from "../components/HomeComponents/Category";
 import FlashSales from "../components/HomeComponents/FlashSale";
@@ -30,6 +31,8 @@ import banner3 from "../images/home/banner3.png";
 import banner4 from "../images/home/bannerleft1.webp";
 import banner5 from "../images/home/bannerleft2.webp";
 import banner6 from "../images/home/bannerleft3.webp";
+import { AuthContext } from "../components/context/auth.context";
+import { addProductToCart } from "../services/api.service";
 const { Title } = Typography;
 
 const fetchCategories = async () => {
@@ -101,6 +104,8 @@ const Home = ({ onSearchHandler }) => {
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isQrModalVisible, setIsQrModalVisible] = useState(false);
+  const { user, setUser } = useContext(AuthContext);
+  const [note, contextHolder] = notification.useNotification();
   useEffect(() => {
     const loadCategories = async () => {
       setLoadingCategories(true);
@@ -202,9 +207,35 @@ const Home = ({ onSearchHandler }) => {
     setIsQrModalVisible(!isQrModalVisible);
   };
 
+  const handleAddProductToCart = async (productId, quantity) => {
+    if (user.id === "") {
+      navigate("/login");
+    } else {
+      const res = await addProductToCart(productId, quantity);
+      if (res) {
+        setUser((prevUser) => ({
+          ...prevUser,
+          refresh: !prevUser.refresh,
+        }));
+        note.info({
+          message: `Notification`,
+          description: "Thêm sản phẩm vào giỏ hàng thành công",
+          type: "success",
+        });
+      } else {
+        note.info({
+          message: `Notification`,
+          description: "Thêm sản phẩm vào giỏ hàng thất bại",
+          type: "error",
+        });
+      }
+    }
+  };
+
   return (
     <>
       <div className="home-container" style={{ marginTop: "70px" }}>
+      {contextHolder}
         <div className="container">
           {/* Sidebar & Banner */}
           <div style={{ display: "flex" }}>
@@ -332,70 +363,57 @@ const Home = ({ onSearchHandler }) => {
                 ) : categoryProducts.length > 0 ? (
                   <Row gutter={[16, 16]}>
                     {categoryProducts.map((product) => (
-                      <Col key={product.id} xs={24} sm={12} md={8} lg={6}>
-                        <Card
-                          hoverable
-                          cover={
-                            <div
-                              style={{
-                                height: 80,
-                                overflow: "hidden",
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                              }}
-                            >
-                              {product.image && (
-                                <img
-                                  alt={product.name}
-                                  src={product.image}
-                                  style={{
-                                    maxHeight: "100%",
-                                    maxWidth: "100%",
-                                    objectFit: "contain",
-                                  }}
-                                />
-                              )}
-                            </div>
-                          }
-                        >
-                          <Card.Meta
-                            title={
-                              <Typography.Paragraph ellipsis={{ rows: 2 }}>
-                                {product.name}
-                              </Typography.Paragraph>
-                            }
-                            description={
-                              <>
-                                <div className="price">
-                                  <span className="current-price">
-                                    {formatVND(product.price)}
-                                  </span>
-                                  {product.oldPrice && (
-                                    <span className="old-price">
-                                      {formatVND(product.oldPrice)}
-                                    </span>
-                                  )}
-                                </div>
-                                <Rate
-                                  disabled
-                                  allowHalf
-                                  value={product.rating}
-                                  style={{ fontSize: 12 }}
-                                />
-                              </>
-                            }
-                          />
-                          <Button
-                            type="primary"
-                            style={{ marginTop: 16 }}
-                            block
-                            // onClick={() => handleAddToCart(product)}
-                          >
-                            Thêm vào giỏ hàng
-                          </Button>
-                        </Card>
-                      </Col>
+                       <div key={product.id} className="product-grid-item">
+                                    <Card
+                                      hoverable
+                                      cover={
+                                        <img 
+                                          alt={product.name} 
+                                          src={product.image} 
+                                          onClick={() => navigate(`/detailPage/${product.id}`)}
+                                          onError={(e) => {
+                                            e.target.src = 'https://via.placeholder.com/200';
+                                            console.log('Hình ảnh lỗi, sử dụng placeholder:', product.image);
+                                          }}
+                                        />
+                                      }
+                                    >
+                                      <h3>{product.name}</h3>
+                                      <h4 className="sold-count">Đã bán {product.totalSold}</h4>
+                                      <div className="price">
+                                        <span className="current-price">
+                                          {formatVND(product.priceAfterDiscount)}
+                                        </span>
+                                        {product.discount !== 0 && (
+                                          <>
+                                            <span className="original-price">
+                                              {formatVND(product.price)}
+                                            </span>
+                                            <span
+                                              className="discount-percent"
+                                              style={{
+                                                backgroundColor: '#e60023',
+                                                color: '#fff',
+                                                padding: '2px 6px',
+                                                borderRadius: '4px',
+                                                fontWeight: 'bold',
+                                                fontSize: '0.875rem',
+                                              }}
+                                            >
+                                              -{product.discount}%
+                                            </span>
+                                          </>
+                                        )}
+                                      </div>
+                                      <Button
+                                        type="primary"
+                                        className="add-to-cart"
+                                        onClick={() => handleAddProductToCart(product.id, 1)}
+                                      >
+                                        Thêm vào giỏ hàng
+                                      </Button>
+                                    </Card>
+                                  </div>
                     ))}
                   </Row>
                 ) : (

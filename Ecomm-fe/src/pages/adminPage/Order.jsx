@@ -34,7 +34,7 @@ import {
   CloseCircleOutlined,
   ArrowRightOutlined,
 } from "@ant-design/icons";
-import { getAllOrdersAPI } from "../../services/api.service";
+import { getAllOrdersAPI, updateOrderStatusForAdminAPI } from "../../services/api.service";
 
 const { Content } = Layout;
 const { Title } = Typography;
@@ -133,6 +133,25 @@ const Order = () => {
 
     return searchMatch && statusMatch && dateMatch;
   });
+
+  const handleUpdateStatus = async (status) => {
+    const res = await updateOrderStatusForAdminAPI(currentOrder.id, status);
+    console.log(">>>>>>>>>" , res);
+    console.log("<<<<<<<<<<<<<", status);
+    console.log("currentOrder", currentOrder.id);
+    if (res) {
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === currentOrder.id ? { ...order, status } : order
+        )
+      );
+      setCurrentOrder({ ...currentOrder, status });
+      message.success(`Đã cập nhật trạng thái đơn hàng ${currentOrder.id} thành "${status}"`);
+    } else {
+      message.error("Cập nhật trạng thái không thành công");
+    }
+  }
+
 
   // Cấu hình cột cho bảng
   const columns = [
@@ -242,7 +261,7 @@ const Order = () => {
             size="small"
             onClick={() => viewOrderDetails(record)}
           />
-          {record.status !== "COMPLETED" && record.status !== "CANCELED" && (
+          {/* {record.status !== "COMPLETED" && record.status !== "CANCELED" && (
             <Button
               type="default"
               icon={<ArrowRightOutlined />}
@@ -250,7 +269,7 @@ const Order = () => {
               onClick={() => advanceOrderStatus(record)}
               title="Chuyển đến trạng thái tiếp theo"
             />
-          )}
+          )} */}
         </Space>
       ),
     },
@@ -573,10 +592,11 @@ const Order = () => {
                     <Button
                       type="primary"
                       onClick={() => {
-                        const nextStatus = getNextStatus(currentOrder.status);
-                        if (nextStatus) {
-                          updateOrderStatus(nextStatus);
-                        }
+                        // const nextStatus = getNextStatus(currentOrder.status);
+                        // if (nextStatus) {
+                        //   updateOrderStatus(nextStatus);
+                        // }
+                        handleUpdateStatus(getNextStatus(currentOrder.status));
                       }}
                       icon={<ArrowRightOutlined />}
                     >
