@@ -24,9 +24,9 @@ import ChatBox from "../components/ChatBox/ChatBox";
 // Import hình ảnh từ src/images
 import zaloQr from "../images/zalo-qr.jpg";
 import zaloIcon from "../images/images.png";
-import banner1 from "../images/home/banner1.PNG";
-import banner2 from "../images/home/banner2.PNG";
-import banner3 from "../images/home/banner3.PNG";
+import banner1 from "../images/home/banner1.png";
+import banner2 from "../images/home/banner2.png";
+import banner3 from "../images/home/banner3.png";
 import banner4 from "../images/home/bannerleft1.webp";
 import banner5 from "../images/home/bannerleft2.webp";
 import banner6 from "../images/home/bannerleft3.webp";

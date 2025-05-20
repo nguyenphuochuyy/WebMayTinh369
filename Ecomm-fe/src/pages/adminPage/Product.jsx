@@ -32,19 +32,24 @@ const { Option } = Select;
 const { TextArea } = Input;
 
 const formatVND = (price) => {
-  return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(price);
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(price);
 };
 
 const getStockStatus = (quantity) => {
   if (quantity === 0) return { text: "Hết hàng", color: "red" };
-  if (quantity > 0 && quantity <= 10) return { text: "Sắp hết hàng", color: "orange" };
+  if (quantity > 0 && quantity <= 10)
+    return { text: "Sắp hết hàng", color: "orange" };
   return { text: "Còn hàng", color: "green" };
 };
 
 const Products = () => {
   const [searchText, setSearchText] = useState("");
   const [isProductModalVisible, setIsProductModalVisible] = useState(false);
-  const [isViewProductModalVisible, setIsViewProductModalVisible] = useState(false);
+  const [isViewProductModalVisible, setIsViewProductModalVisible] =
+    useState(false);
   const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [viewingProduct, setViewingProduct] = useState(null);
@@ -76,7 +81,9 @@ const Products = () => {
       // Lấy sản phẩm theo từng danh mục
       const allProducts = [];
       for (const category of categoriesData) {
-        const productsResponse = await axios.get(`${API_URL}/products/category/${category.id}`);
+        const productsResponse = await axios.get(
+          `${API_URL}/products/category/${category.id}`
+        );
         const productsData = productsResponse.data.map((product) => ({
           key: product.id,
           id: product.id,
@@ -91,6 +98,7 @@ const Products = () => {
         }));
         allProducts.push(...productsData);
       }
+
 
       setProducts(allProducts);
     } catch (error) {
@@ -111,7 +119,11 @@ const Products = () => {
 
   const showProductModal = (product = null) => {
     setEditingProduct(product);
-    setProductFileList(product && product.image ? [{ uid: "-1", name: "image", status: "done", url: product.image }] : []);
+    setProductFileList(
+      product && product.image
+        ? [{ uid: "-1", name: "image", status: "done", url: product.image }]
+        : []
+    );
     if (product) {
       productForm.setFieldsValue({
         name: product.name,
@@ -135,7 +147,11 @@ const Products = () => {
 
   const showCategoryModal = (category = null) => {
     setEditingCategory(category);
-    setCategoryFileList(category && category.image ? [{ uid: "-1", name: "image", status: "done", url: category.image }] : []);
+    setCategoryFileList(
+      category && category.image
+        ? [{ uid: "-1", name: "image", status: "done", url: category.image }]
+        : []
+    );
     if (category) {
       categoryForm.setFieldsValue({
         name: category.name,
@@ -197,7 +213,10 @@ const Products = () => {
         productData.image = editingProduct.image; // Gửi ảnh cũ nếu không có ảnh mới
       }
 
-      formData.append("product", new Blob([JSON.stringify(productData)], { type: "application/json" }));
+      formData.append(
+        "product",
+        new Blob([JSON.stringify(productData)], { type: "application/json" })
+      );
 
       if (editingProduct) {
         await axios.put(`${API_URL}/products/${editingProduct.id}`, formData, {
@@ -236,12 +255,19 @@ const Products = () => {
         categoryData.image = editingCategory.image; // Gửi ảnh cũ nếu không có ảnh mới
       }
 
-      formData.append("category", new Blob([JSON.stringify(categoryData)], { type: "application/json" }));
+      formData.append(
+        "category",
+        new Blob([JSON.stringify(categoryData)], { type: "application/json" })
+      );
 
       if (editingCategory) {
-        await axios.put(`${API_URL}/categories/${editingCategory.id}`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        await axios.put(
+          `${API_URL}/categories/${editingCategory.id}`,
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
         message.success("Danh mục đã được cập nhật!");
       } else {
         const response = await axios.post(`${API_URL}/categories`, formData, {
@@ -259,6 +285,12 @@ const Products = () => {
   };
 
   const handleDeleteProduct = async (id) => {
+    // Xác nhận xóa sản phẩm
+    const confirmDelete = window.confirm(
+      "Bạn có chắc chắn muốn xóa sản phẩm này?"
+    );
+    if (!confirmDelete) return;
+    // Nếu xác nhận, thực hiện xóa sản phẩm
     try {
       await axios.delete(`${API_URL}/products/${id}`);
       setProducts(products.filter((product) => product.id !== id));
@@ -272,7 +304,11 @@ const Products = () => {
     try {
       await axios.delete(`${API_URL}/categories/${id}`);
       setCategories(categories.filter((category) => category.id !== id));
-      setProducts(products.map((product) => (product.category?.id === id ? { ...product, category: null } : product)));
+      setProducts(
+        products.map((product) =>
+          product.category?.id === id ? { ...product, category: null } : product
+        )
+      );
       message.success("Danh mục đã được xóa!");
     } catch (error) {
       message.error("Lỗi khi xóa danh mục: " + error.message);
@@ -283,10 +319,15 @@ const Products = () => {
     showCategoryModal(category);
   };
 
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchText.toLowerCase()) ||
-    (product.category && product.category.name && product.category.name.toLowerCase().includes(searchText.toLowerCase())) ||
-    product.id.toString().includes(searchText)
+  const filteredProducts = products.filter(
+    (product) =>
+      product.name.toLowerCase().includes(searchText.toLowerCase()) ||
+      (product.category &&
+        product.category.name &&
+        product.category.name
+          .toLowerCase()
+          .includes(searchText.toLowerCase())) ||
+      product.id.toString().includes(searchText)
   );
 
   const productColumns = [
@@ -302,15 +343,21 @@ const Products = () => {
       key: "name",
       sorter: (a, b) => a.name.localeCompare(b.name),
       ellipsis: { showTitle: false },
-      render: (name) => <Tooltip placement="topLeft" title={name}>{name}</Tooltip>,
+      render: (name) => (
+        <Tooltip placement="topLeft" title={name}>
+          {name}
+        </Tooltip>
+      ),
     },
     {
       title: "Danh mục",
       dataIndex: "category",
       key: "category",
-      render: (category) => (category && category.name ? category.name : "Chưa phân loại"),
+      render: (category) =>
+        category && category.name ? category.name : "Chưa phân loại",
       filters: categories.map((cat) => ({ text: cat.name, value: cat.id })),
-      onFilter: (value, record) => record.category && record.category.id === value,
+      onFilter: (value, record) =>
+        record.category && record.category.id === value,
       width: "15%",
     },
     {
@@ -324,14 +371,33 @@ const Products = () => {
       },
       render: (price, record) => {
         const discountedPrice = price * (1 - (record.discount || 0) / 100);
-    
+
         return (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4 }}>
-            <span style={{ color: "#E52525", fontWeight: "bold", fontSize: '1.1em' }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              gap: 4,
+            }}
+          >
+            <span
+              style={{
+                color: "#E52525",
+                fontWeight: "bold",
+                fontSize: "1.1em",
+              }}
+            >
               {formatVND(discountedPrice)}
             </span>
             {record.discount !== 0 && (
-              <span style={{ textDecoration: "line-through", color: "#999", fontSize: '0.85em' }}>
+              <span
+                style={{
+                  textDecoration: "line-through",
+                  color: "#999",
+                  fontSize: "0.85em",
+                }}
+              >
                 {formatVND(price)}
               </span>
             )}
@@ -339,7 +405,7 @@ const Products = () => {
         );
       },
       width: "10%",
-    }, 
+    },
     {
       title: "Tồn kho",
       dataIndex: "quantity",
@@ -370,7 +436,7 @@ const Products = () => {
       title: "Hành động",
       key: "action",
       render: (_, record) => (
-        <Space size="small">
+        <Space size="small" >
           <Button
             type="default"
             size="small"
@@ -398,6 +464,19 @@ const Products = () => {
             </Button>
           </Popconfirm>
         </Space>
+        // <>
+        //   <div style={{ display: "flex", gap: 8 }}>
+        //     <Button>
+        //       <EyeOutlined />
+        //     </Button>
+        //     <Button onClick={() => showProductModal(record)}>
+        //       <EditOutlined></EditOutlined>
+        //     </Button>
+        //     <Button onClick={() => handleDeleteProduct(record.id)} danger>
+        //       <DeleteOutlined></DeleteOutlined>
+        //     </Button>
+        //   </div>
+        // </>
       ),
     },
   ];
@@ -414,14 +493,22 @@ const Products = () => {
       dataIndex: "name",
       key: "name",
       ellipsis: { showTitle: false },
-      render: (name) => <Tooltip placement="topLeft" title={name}>{name}</Tooltip>,
+      render: (name) => (
+        <Tooltip placement="topLeft" title={name}>
+          {name}
+        </Tooltip>
+      ),
     },
     {
       title: "Mô tả",
       dataIndex: "description",
       key: "description",
       ellipsis: { showTitle: false },
-      render: (description) => <Tooltip placement="topLeft" title={description}>{description}</Tooltip>,
+      render: (description) => (
+        <Tooltip placement="topLeft" title={description}>
+          {description}
+        </Tooltip>
+      ),
     },
     {
       title: "Hành động",
@@ -442,7 +529,12 @@ const Products = () => {
             okText="Có"
             cancelText="Không"
           >
-            <Button type="primary" danger size="small" icon={<DeleteOutlined />}>
+            <Button
+              type="primary"
+              danger
+              size="small"
+              icon={<DeleteOutlined />}
+            >
               Xóa
             </Button>
           </Popconfirm>
@@ -463,7 +555,13 @@ const Products = () => {
     <Layout style={{ marginLeft: 200, minHeight: "100vh" }}>
       <Content style={{ margin: "24px 16px 0", overflow: "initial" }}>
         <div style={{ padding: 24, background: "#fff", minHeight: "100%" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginBottom: 16,
+            }}
+          >
             <Title level={2}>Quản lý sản phẩm</Title>
             <div>
               <Input
@@ -513,7 +611,9 @@ const Products = () => {
               <Form.Item
                 name="name"
                 label="Tên sản phẩm"
-                rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm!" }]}
+                rules={[
+                  { required: true, message: "Vui lòng nhập tên sản phẩm!" },
+                ]}
               >
                 <Input placeholder="Nhập tên sản phẩm" />
               </Form.Item>
@@ -535,7 +635,9 @@ const Products = () => {
               <Form.Item
                 name="price"
                 label="Giá (VND)"
-                rules={[{ required: true, message: "Vui lòng nhập giá sản phẩm!" }]}
+                rules={[
+                  { required: true, message: "Vui lòng nhập giá sản phẩm!" },
+                ]}
               >
                 <InputNumber
                   min={0}
@@ -550,17 +652,35 @@ const Products = () => {
               <Form.Item
                 name="quantity"
                 label="Tồn kho"
-                rules={[{ required: true, message: "Vui lòng nhập số lượng tồn kho!" }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập số lượng tồn kho!",
+                  },
+                ]}
               >
-                <InputNumber min={0} placeholder="0" style={{ width: "100%" }} />
+                <InputNumber
+                  min={0}
+                  placeholder="0"
+                  style={{ width: "100%" }}
+                />
               </Form.Item>
 
               <Form.Item
                 name="discount"
                 label="Giảm giá (%)"
-                rules={[{ required: true, message: "Vui lòng nhập mức giảm giá của sản phẩm!" }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập mức giảm giá của sản phẩm!",
+                  },
+                ]}
               >
-                <InputNumber min={0} placeholder="0" style={{ width: "100%" }} />
+                <InputNumber
+                  min={0}
+                  placeholder="0"
+                  style={{ width: "100%" }}
+                />
               </Form.Item>
 
               <Form.Item name="description" label="Mô tả">
@@ -611,17 +731,32 @@ const Products = () => {
               <div style={{ padding: "0 20px" }}>
                 <div style={{ textAlign: "center", marginBottom: 20 }}>
                   <img
-                    src={viewingProduct.image || `/api/placeholder/200/200?text=${viewingProduct.name}`}
+                    src={
+                      viewingProduct.image ||
+                      `/api/placeholder/200/200?text=${viewingProduct.name}`
+                    }
                     alt={viewingProduct.name}
                     style={{ maxWidth: "200px" }}
                   />
                 </div>
-                <p><strong>ID:</strong> {viewingProduct.id}</p>
-                <p><strong>Tên sản phẩm:</strong> {viewingProduct.name}</p>
-                <p><strong>Danh mục:</strong> {viewingProduct.category?.name || "Chưa phân loại"}</p>
-                <p><strong>Giá:</strong> {formatVND(viewingProduct.price)}</p>
-                <p><strong>Tồn kho:</strong> {viewingProduct.quantity}</p>
-                <p><strong>Trạng thái:</strong>
+                <p>
+                  <strong>ID:</strong> {viewingProduct.id}
+                </p>
+                <p>
+                  <strong>Tên sản phẩm:</strong> {viewingProduct.name}
+                </p>
+                <p>
+                  <strong>Danh mục:</strong>{" "}
+                  {viewingProduct.category?.name || "Chưa phân loại"}
+                </p>
+                <p>
+                  <strong>Giá:</strong> {formatVND(viewingProduct.price)}
+                </p>
+                <p>
+                  <strong>Tồn kho:</strong> {viewingProduct.quantity}
+                </p>
+                <p>
+                  <strong>Trạng thái:</strong>
                   <Tag
                     color={getStockStatus(viewingProduct.quantity).color}
                     style={{ marginLeft: 8 }}
@@ -629,8 +764,12 @@ const Products = () => {
                     {getStockStatus(viewingProduct.quantity).text}
                   </Tag>
                 </p>
-                <p><strong>Hãng sản xuất:</strong> {viewingProduct.factory}</p>
-                <p><strong>Mô tả:</strong> {viewingProduct.description}</p>
+                <p>
+                  <strong>Hãng sản xuất:</strong> {viewingProduct.factory}
+                </p>
+                <p>
+                  <strong>Mô tả:</strong> {viewingProduct.description}
+                </p>
               </div>
             )}
           </Modal>
@@ -663,11 +802,18 @@ const Products = () => {
               rowKey="id"
             />
             {showCategoryForm && (
-              <Form form={categoryForm} layout="vertical" name="category_form" style={{ marginTop: 16 }}>
+              <Form
+                form={categoryForm}
+                layout="vertical"
+                name="category_form"
+                style={{ marginTop: 16 }}
+              >
                 <Form.Item
                   name="name"
                   label="Tên danh mục"
-                  rules={[{ required: true, message: "Vui lòng nhập tên danh mục!" }]}
+                  rules={[
+                    { required: true, message: "Vui lòng nhập tên danh mục!" },
+                  ]}
                 >
                   <Input placeholder="Nhập tên danh mục" />
                 </Form.Item>
