@@ -181,6 +181,10 @@ const DetailPage = () => {
   console.log("selectedItem", selectedItem);
 
   const handleCheckout = async () => {
+    if(localStorage.getItem("accessToken") === null){
+      navigate("/login");
+      return;
+    }
     if (
       !user.phone ||
       user.phone.trim() === "" ||

@@ -150,11 +150,6 @@ const Dashboard = () => {
         );
       },
     },
-    {
-      title: 'Xem',
-      key: 'action',
-      render: () => <Button type="link" icon={<EyeOutlined />} size="small">Chi tiết</Button>,
-    },
   ];
 
   return (

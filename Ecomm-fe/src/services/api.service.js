@@ -235,6 +235,23 @@ const updateOrderStatusAPI = async (orderId, status, message) => {
   }
 }
 
+const updateOrderStatusForAdminAPI = async (orderId, status) => {
+  try {
+    const response = await axios.post(
+      `http://localhost:8085/api/v1/order/updateOrder/${orderId}`,
+      {
+        status: status,
+      }
+    );
+
+    console.log("Cập nhật trạng thái đơn hàng thành công:", response);
+    return response;
+  } catch (error) {
+    console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
+    return null;
+  }
+}
+
 const getProductSoldAPI = async () => {
   try {
     const response = await axios.get(
@@ -267,5 +284,6 @@ export {
   getAllOrdersAPI,
   updateOrderStatusAPI,
   checkProductQuantityAPI,
-  getProductSoldAPI
+  getProductSoldAPI,
+  updateOrderStatusForAdminAPI
 };
