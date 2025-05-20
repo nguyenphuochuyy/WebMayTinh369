@@ -51,9 +51,9 @@ const ContactPage = () => {
       </div>
 
       <div className="contact-content container">
-        <Row gutter={[32, 32]} className="contact-section">
-          <Col xs={24} md={12} lg={24}>
-            <Card bordered={false} className="contact-info-card">
+        <Row gutter={[32, 32]} className="contact-section" style={{display: "flex", justifyContent: "center"}}>
+          <Col xs={12} md={12} lg={12}>
+            <Card bordered={false} className="contact-info-card" style={{ display: "flex", flexDirection: "column" , alignItems: "center" }}>
               <Title level={3}>Cửa hàng 369</Title>
               <Divider />
               
@@ -96,77 +96,6 @@ const ContactPage = () => {
                   </div>
                 </div>
               </Space>
-            </Card>
-          </Col>
-          
-          <Col xs={24} md={12} lg={14}>
-            <Card bordered={false} className="contact-form-card">
-              <Title level={3}>Gửi tin nhắn cho chúng tôi</Title>
-              <Paragraph>
-                Chúng tôi sẽ phản hồi bạn sớm nhất có thể.
-              </Paragraph>
-              
-              <Form
-                form={form}
-                layout="vertical"
-                name="contact_form"
-                onFinish={onFinish}
-              >
-                <Row gutter={16}>
-                  <Col xs={24} sm={12}>
-                    <Form.Item
-                      name="name"
-                      label="Tên"
-                      rules={[{ required: true, message: "Vui lòng nhập tên của bạn" }]}
-                    >
-                      <Input placeholder="Tên của bạn" />
-                    </Form.Item>
-                  </Col>
-                  
-                  <Col xs={24} sm={12}>
-                    <Form.Item
-                      name="email"
-                      label="Email"
-                      rules={[
-                        { required: true, message: "Vui lòng nhập email của bạn" },
-                        { type: "email", message: "Vui lòng nhập email hợp lệ" }
-                      ]}
-                    >
-                      <Input placeholder="Email của bạn" />
-                    </Form.Item>
-                  </Col>
-                </Row>
-                
-                <Form.Item
-                  name="phone"
-                  label="Điện thoại"
-                  rules={[{ required: true, message: "Vui lòng nhập số điện thoại của bạn" }]}
-                >
-                  <Input placeholder="Số điện thoại của bạn" />
-                </Form.Item>
-                
-                <Form.Item
-                  name="subject"
-                  label="Chủ đề"
-                  rules={[{ required: true, message: "Vui lòng nhập chủ đề" }]}
-                >
-                  <Input placeholder="Nội dung liên quan đến gì?" />
-                </Form.Item>
-                
-                <Form.Item
-                  name="message"
-                  label="Tin nhắn"
-                  rules={[{ required: true, message: "Vui lòng nhập tin nhắn của bạn" }]}
-                >
-                  <TextArea rows={5} placeholder="Tin nhắn của bạn" />
-                </Form.Item>
-                
-                <Form.Item>
-                  <Button type="primary" htmlType="submit" icon={<SendOutlined />} size="large">
-                    Gửi tin nhắn
-                  </Button>
-                </Form.Item>
-              </Form>
             </Card>
           </Col>
         </Row>

@@ -428,12 +428,13 @@ const Home = ({ onSearchHandler }) => {
 
           {/* Middle banner */}
           <div>
-            <div style={{ display: "flex", justifyContent: "center" }}>
+            
               <img
-                src="https://t3.ftcdn.net/jpg/04/65/46/52/360_F_465465254_1pN9MGrA831idD6zIBL7q8rnZZpUCQTy.jpg"
+              style={{ width: "100%" , height: '100%' , aspectRatio : "1" , objectFit: "contain"}}
+                src= {banner1}
                 alt=""
               />
-            </div>
+           
           </div>
           {/* Our product */}
           <div style={{ marginTop: "50px" }}>

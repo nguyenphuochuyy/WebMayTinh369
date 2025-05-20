@@ -601,7 +601,7 @@ const Checkout = () => {
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Content style={{ padding: "0 50px", marginTop: 24 }}>
+      <Content style={{ padding: "0 50px", marginTop: "100px" }}>
         <Card>
           <Title level={2} style={{ textAlign: "center", marginBottom: 32 }}>
             Thanh toán đơn hàng

@@ -96,11 +96,17 @@ function LoginForm() {
               </Button>
             </Form.Item>
 
-            <div className="google-login">
-              <Button className="google-btn" block onClick={() => form.submit()}>
-                Đăng nhập bằng Google
-              </Button>
-            </div>
+            <Form.Item>
+                  <div className="forgot-password-link">
+                    <Button 
+                      type="link" 
+                      onClick={() => navigate("/forgotPassword")}
+                      style={{ padding: 0 }}
+                    >
+                      Quên mật khẩu?
+                    </Button>
+                  </div>
+                </Form.Item>
           </Form>
 
           <div className="signup-link">

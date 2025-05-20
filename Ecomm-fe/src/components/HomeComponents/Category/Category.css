@@ -87,7 +87,7 @@
     width: 40px;
     height: 40px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    color: #000;
+    color: #ac4747;
     z-index: 1;
     transition: background-color 0.3s ease;
   }
@@ -123,6 +123,7 @@
     border-block-start-width: 2px;
     border-radius: 1px;
     content: "";
+    position: absolute;
   }
   .ant-carousel .slick-prev:hover:before,
   .ant-carousel .slick-next:hover:before {

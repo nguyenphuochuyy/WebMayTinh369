@@ -32,6 +32,7 @@ import Order from "./pages/adminPage/Order.jsx";
 import OrderSuccessBank from "./pages/OrderSuccessPageBank/index.jsx";
 import PrivateRoute from "./pages/private.route.jsx";
 import AboutPage from "./components/About/Main.jsx";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const [tokenChecked, setTokenChecked] = useState(false);
@@ -117,6 +118,7 @@ const router = createBrowserRouter([
     ],
   },
   { path: "/login", element: <LogIn /> },
+  { path: "/forgotPassword", element: <ForgotPasswordPage /> },
   { path: "/signup", element: <SignUp /> },
   { path: "/unauthorized", element: <Unauthorized /> },
 ]);
