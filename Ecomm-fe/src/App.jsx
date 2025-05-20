@@ -6,7 +6,7 @@ import { AuthContext } from "./components/context/auth.context.jsx";
 import { getAccountAPI, getCartAPI } from "./services/api.service.js";
 import Navbar from "./components/layout/Navbar.jsx";
 import Footer from "./components/layout/Footer.jsx";
-import { Outlet, Route, Routes } from "react-router-dom";
+import { Outlet, Route, Routes, ScrollRestoration } from "react-router-dom";
 import { Layout } from "antd";
 import "../src/styles/Reset_CSS/style.css";
 import DetailPage from "./pages/DetailPage.jsx";
@@ -66,6 +66,7 @@ function App() {
   return (
     <div>
       <Layout>
+      <ScrollRestoration />
         <Navbar onSearch={searchHandler} />
         <Routes>
           <Route path="/" element={<Home onSearchHandler={setSearchHandlerCallback} />} />

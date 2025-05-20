@@ -167,16 +167,6 @@ const Checkout = () => {
     setCoupon(e.target.value);
   };
 
-  const applyCoupon = () => {
-    if (coupon.trim()) {
-      message.info("Đang kiểm tra mã giảm giá...");
-      setTimeout(() => {
-        message.warning("Mã giảm giá không hợp lệ hoặc đã hết hạn");
-      }, 1000);
-    } else {
-      message.error("Vui lòng nhập mã giảm giá");
-    }
-  };
 
   const nextStep = () => setCurrentStep(currentStep + 1);
   const prevStep = () => setCurrentStep(currentStep - 1);
@@ -576,26 +566,6 @@ const Checkout = () => {
       </div>
 
       <Divider style={{ margin: "16px 0" }} />
-
-      {/* Phần mã giảm giá */}
-      <Input.Group compact style={{ marginBottom: 8 }}>
-        <Input
-          style={{ width: "calc(100% - 110px)" }}
-          prefix={<TagOutlined />}
-          placeholder="Nhập mã giảm giá"
-          value={coupon}
-          onChange={handleCouponChange}
-          size="large" // Tăng kích thước input
-        />
-        <Button
-          type="primary"
-          onClick={applyCoupon}
-          size="large" // Tăng kích thước button
-          style={{ width: "110px" }}
-        >
-          Áp dụng
-        </Button>
-      </Input.Group>
     </Card>
   );
 
